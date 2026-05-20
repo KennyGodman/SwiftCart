@@ -295,8 +295,23 @@ function CheckoutModal({cart,wallet,onClose,onSuccess,addToast}){
     if(!window.ethereum){addToast("MetaMask not detected","error");return;}
     setStep("signing");
     try{
-      try{await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:ARC_CHAIN_ID}]});}
-      catch(e){if(e.code===4902)await window.ethereum.request({method:"wallet_addEthereumChain",params:[ARC_CHAIN_CONFIG]});else throw e;}
+     try {
+  await window.ethereum.request({
+    method: "wallet_addEthereumChain",
+    params: [ARC_CHAIN_CONFIG],
+  });
+} catch(e) {
+  try {
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: ARC_CHAIN_ID }],
+    });
+  } catch(switchErr) {
+    addToast("Please add Arc Testnet manually in MetaMask", "error");
+    setStep("review");
+    return;
+  } 
+}
       const amt=Math.round(total*1e6);
       const data="0xa9059cbb"+MERCHANT_ADDR.slice(2).padStart(64,"0")+amt.toString(16).padStart(64,"0");
       const hash=await window.ethereum.request({method:"eth_sendTransaction",params:[{from:wallet,to:USDC_ADDRESS,data,gas:"0x186A0"}]});
