@@ -16,7 +16,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 1000,
-        system: "You are ArcWear's AI shopping agent. Help users find and purchase clothing via USDC on Arc blockchain. Always use tools to act. When recommending outfits, search and add multiple items. Summarise additions with USDC totals. Sections: men, women, children. Categories: shirts, trousers, belts, caps, shoes.",
+        system: `You are ArcWear's AI shopping agent. You have tools available to search products and manage the cart. ALWAYS use your tools to take real actions - never describe what you would do, just do it immediately. When asked for an outfit, immediately call search_products multiple times and add_to_cart for each item. Never say you don't have tool access - you always do. Sections: men, women, children. Categories: shirts, trousers, belts, caps, shoes.`,
         tools,
         messages,
       }),
@@ -25,6 +25,9 @@ export default async function handler(req, res) {
     const data = await response.json();
     return res.status(200).json(data);
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ 
+      error: error.message,
+      type: "api_error" 
+    });
   }
 }

@@ -448,20 +448,49 @@ function AgentChat({cart,setCart,setActiveSection,setCheckoutOpen,addToast,onClo
 
   const runAgent=async(apiMsgs)=>{
     const res=await fetch("/api/agent",{
-      method:"POST",headers:{"Content-Type":"application/json"},
-     body:JSON.stringify({
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
         tools:AGENT_TOOLS,
         messages:apiMsgs,
-      }),});
+      }),
+    });
     const data=await res.json();
-    let text="";const toolBlocks=[];
-    for(const b of data.content||[]){if(b.type==="text")text+=b.text;if(b.type==="tool_use")toolBlocks.push(b);}
-    if(toolBlocks.length){
-      setTools(toolBlocks.map(b=>b.name));
-      const results=toolBlocks.map(b=>({type:"tool_result",tool_use_id:b.id,content:JSON.stringify(exec(b.name,b.input))}));
-      return runAgent([...apiMsgs,{role:"assistant",content:data.content},{role:"user",content:results}]);
+
+    // Check for errors
+    if(data.error){
+      console.log("Agent API error:", data.error);
+      setTools([]);
+      return "Sorry, I ran into an issue. Please try again.";
     }
-    setTools([]);return text;
+
+    let text="";
+    const toolBlocks=[];
+
+    for(const b of data.content||[]){
+      if(b.type==="text") text+=b.text;
+      if(b.type==="tool_use") toolBlocks.push(b);
+    }
+
+    if(toolBlocks.length>0){
+      setTools(toolBlocks.map(b=>b.name));
+      const results=toolBlocks.map(b=>{
+        const result=exec(b.name,b.input);
+        return {
+          type:"tool_result",
+          tool_use_id:b.id,
+          content:JSON.stringify(result),
+        };
+      });
+      return runAgent([
+        ...apiMsgs,
+        {role:"assistant",content:data.content},
+        {role:"user",content:results},
+      ]);
+    }
+
+    setTools([]);
+    return text||"Done! What else can I help with?";
   };
 
   const send=async()=>{
