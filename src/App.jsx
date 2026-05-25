@@ -656,9 +656,9 @@ export default function ArcWear(){
         <div style={{maxWidth:1280,margin:"0 auto",padding:"0 24px",height:64,display:"flex",alignItems:"center",justifyContent:"space-between",gap:16}}>
           {/* Logo */}
           <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
-            <div style={{width:36,height:36,background:"#1c1917",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center"}}>
-              <span style={{fontFamily:"'Playfair Display',serif",fontSize:12,fontWeight:700,color:"#c47d2a",letterSpacing:0.5}}>AW</span>
-            </div>
+            <div style={{width:36,height:36,borderRadius:8,overflow:"hidden"}}>
+  <img src="/ARCWEAR.png" alt="ArcWear" style={{width:"100%",height:"100%",objectFit:"contain"}}/>
+</div>
             <div>
               <p style={{fontFamily:"'Playfair Display',serif",fontSize:16,fontWeight:700,color:"#1c1917",lineHeight:1,letterSpacing:0.5}}>ArcWear</p>
               <p style={{fontSize:7,color:"#c47d2a",fontWeight:600,letterSpacing:2,textTransform:"uppercase",marginTop:1}}>Agentic · Arc Blockchain</p>
