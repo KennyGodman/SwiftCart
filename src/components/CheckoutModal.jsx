@@ -25,6 +25,32 @@ export default function CheckoutModal({ cart, wallet, onClose, onSuccess, addToa
           }
         }
       }
+      // 1. Get ERC20 USDC balance for payment
+      const cleanAddress = wallet.toLowerCase().replace("0x", "");
+      const balanceOfData = "0x70a08231" + cleanAddress.padStart(64, "0");
+      const erc20Hex = await window.ethereum.request({
+        method: "eth_call",
+        params: [{ to: USDC_ADDRESS, data: balanceOfData }, "latest"],
+      });
+      const balance = parseInt(erc20Hex, 16) / 1e6;
+
+      if (balance < total) {
+        addToast(`Insufficient USDC balance. You need ${fmt(total)} but only have ${fmt(balance)}.`, "error");
+        setStep("review");
+        return;
+      }
+
+      // 2. Get native USDC balance for gas check
+      const nativeHex = await window.ethereum.request({
+        method: "eth_getBalance",
+        params: [wallet, "latest"],
+      });
+      const nativeBalance = parseInt(nativeHex, 16) / 1e18;
+      if (nativeBalance < 0.0001) {
+        addToast("Insufficient native balance for gas. Please get some testnet USDC for gas.", "error");
+        setStep("review");
+        return;
+      }
 
       const amt = Math.round(total * 1e6);
       const data = "0xa9059cbb" + MERCHANT_ADDR.slice(2).padStart(64, "0") + amt.toString(16).padStart(64, "0");
@@ -34,6 +60,26 @@ export default function CheckoutModal({ cart, wallet, onClose, onSuccess, addToa
       });
 
       setTxHash(hash);
+      setStep("confirming");
+
+      // 3. Wait for transaction to be mined
+      const waitForTransactionReceipt = async (txHash) => {
+        for (let i = 0; i < 30; i++) {
+          const receipt = await window.ethereum.request({
+            method: "eth_getTransactionReceipt",
+            params: [txHash],
+          });
+          if (receipt) return receipt;
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+        throw new Error("Transaction receipt timeout. Please check ArcScan.");
+      };
+
+      const receipt = await waitForTransactionReceipt(hash);
+      if (receipt.status !== "0x1") {
+        throw new Error("Transaction failed on-chain. Please verify your balance and try again.");
+      }
+
       setStep("success");
       onSuccess();
       addToast("Payment confirmed on Arc!", "success");
@@ -163,6 +209,27 @@ export default function CheckoutModal({ cart, wallet, onClose, onSuccess, addToa
           </div>
         )}
 
+        {/* ── Confirming step ── */}
+        {step === "confirming" && (
+          <div style={{ textAlign: "center", padding: "44px 0" }}>
+            <div style={{ fontSize: 40, marginBottom: 14, animation: "spin 1s linear infinite", display: "inline-block" }}>⏳</div>
+            <h3 style={{ fontSize: 22, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>Confirming Payment</h3>
+            <p style={{ fontSize: 12, color: "#a8a29e" }}>Waiting for block finalization on Arc...</p>
+            {txHash && (
+              <div style={{ marginTop: 12 }}>
+                <a
+                  href={`${ARC_CHAIN_CONFIG.blockExplorerUrls[0]}/tx/${txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontSize: 11, color: "#f97316", textDecoration: "underline" }}
+                >
+                  View on ArcScan ↗
+                </a>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ── Success step ── */}
         {step === "success" && (
           <div style={{ textAlign: "center", padding: "34px 0" }}>
@@ -170,9 +237,29 @@ export default function CheckoutModal({ cart, wallet, onClose, onSuccess, addToa
             <h3 style={{ fontSize: 24, fontWeight: 700, color: "#1c1917", marginBottom: 5 }}>Payment Confirmed</h3>
             <p style={{ fontSize: 12, color: "#a8a29e", marginBottom: 16 }}>Settled on Arc Blockchain</p>
             {txHash && (
-              <p style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "#a8a29e", background: "#faf9f7", borderRadius: 8, padding: "8px 12px", wordBreak: "break-all", marginBottom: 16, border: "1px solid #f0ede8" }}>
-                {txHash}
-              </p>
+              <div style={{ marginBottom: 16 }}>
+                <p style={{ fontSize: 10, color: "#78716c", margin: "0 0 6px" }}>Transaction Hash:</p>
+                <a
+                  href={`${ARC_CHAIN_CONFIG.blockExplorerUrls[0]}/tx/${txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontSize: 10,
+                    fontFamily: "var(--font-mono)",
+                    color: "#f97316",
+                    background: "#faf9f7",
+                    borderRadius: 8,
+                    padding: "8px 12px",
+                    display: "block",
+                    wordBreak: "break-all",
+                    border: "1px solid #f0ede8",
+                    textDecoration: "none",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  {txHash} ↗
+                </a>
+              </div>
             )}
             <button
               onClick={onClose}

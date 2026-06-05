@@ -3,6 +3,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  if (!process.env.BREVO_API_KEY) {
+    return res.status(500).json({ success: false, error: "BREVO_API_KEY is not configured on Vercel. Please add it to your environment variables." });
+  }
+
   const { customerEmail, customerWallet, items, total, txHash } = req.body;
 
   const itemRows = items.map(item => `
@@ -59,7 +63,9 @@ export default async function handler(req, res) {
           </div>
           <div style="display:flex;justify-content:space-between;">
             <span style="font-size:11px;color:#57534e;">Tx Hash</span>
-            <span style="font-size:10px;color:#a8a29e;font-family:monospace;">${txHash ? txHash.slice(0,12)+"…" : "Confirmed"}</span>
+            <span style="font-size:10px;font-family:monospace;">
+              ${txHash ? `<a href="https://testnet.arcscan.app/tx/${txHash}" target="_blank" style="color:#f97316;text-decoration:none;">${txHash.slice(0,12)}… ↗</a>` : "Confirmed"}
+            </span>
           </div>
         </div>
       </div>
@@ -118,6 +124,16 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Brevo API error:", data);
+      return res.status(response.status).json({
+        success: false,
+        error: data.message || "Failed to send email via Brevo",
+        details: data
+      });
+    }
+
     return res.status(200).json({ success: true, data });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });

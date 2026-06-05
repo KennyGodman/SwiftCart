@@ -79,7 +79,9 @@ export default defineConfig(({ mode }) => {
                         </div>
                         <div style="display:flex;justify-content:space-between;">
                           <span style="font-size:11px;color:#57534e;">Tx Hash</span>
-                          <span style="font-size:10px;color:#a8a29e;font-family:monospace;">${txHash ? txHash.slice(0,12)+'…' : 'Confirmed'}</span>
+                          <span style="font-size:10px;font-family:monospace;">
+                            ${txHash ? `<a href="https://testnet.arcscan.app/tx/${txHash}" target="_blank" style="color:#f97316;text-decoration:none;">${txHash.slice(0,12)}… ↗</a>` : 'Confirmed'}
+                          </span>
                         </div>
                       </div>
                     </div>

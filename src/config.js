@@ -6,5 +6,5 @@ export const ARC_CHAIN_CONFIG = {
   rpcUrls: ["https://rpc.testnet.arc.network"],
   blockExplorerUrls: ["https://testnet.arcscan.app"],
 };
-export const USDC_ADDRESS = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
-export const MERCHANT_ADDR = "0xDemoMerchantAddress000000000000000000001";
+export const USDC_ADDRESS = "0x3600000000000000000000000000000000000000";
+export const MERCHANT_ADDR = "0x627148dF4DE3b44Aa624e7592d3A47485777A6Bb";
