@@ -226,10 +226,10 @@ const AGENT_TOOLS = [
       type: "object",
       properties: {
         section: { type: "string", enum: ["men", "women", "children", "all"] },
-        category: { type: "string" },
-        maxPrice: { type: "number" },
-        minPrice: { type: "number" },
-        keywords: { type: "string", description: "Keywords to search in name or description (e.g. 'oxford button-down')" },
+        category: { anyOf: [{ type: "string" }, { type: "null" }] },
+        maxPrice: { anyOf: [{ type: "number" }, { type: "null" }] },
+        minPrice: { anyOf: [{ type: "number" }, { type: "null" }] },
+        keywords: { anyOf: [{ type: "string" }, { type: "null" }], description: "Keywords to search in name or description (e.g. 'oxford button-down')" },
       },
     },
   },
@@ -241,7 +241,7 @@ const AGENT_TOOLS = [
       required: ["productId"],
       properties: {
         productId: { type: "string" },
-        quantity: { type: "number" },
+        quantity: { anyOf: [{ type: "number" }, { type: "null" }] },
       },
     },
   },
@@ -295,7 +295,7 @@ const AGENT_TOOLS = [
       properties: {
         productId: { type: "string" },
         intervalDays: { type: "number", description: "Days between reorders" },
-        maxPrice: { type: "number", description: "Max price guard — agent won't reorder if price exceeds this" },
+        maxPrice: { anyOf: [{ type: "number" }, { type: "null" }], description: "Max price guard — agent won't reorder if price exceeds this" },
       },
     },
   },
