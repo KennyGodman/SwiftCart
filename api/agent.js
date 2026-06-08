@@ -32,11 +32,12 @@ AUTONOMOUS TOOLS:
 - create_reorder: Set up automatic reorder for a product at a regular interval. The user will receive a confirmation notification before each reorder executes.
 
 CHECKOUT FLOW (IMPORTANT):
-1. When user wants to buy, FIRST call check_allowance
-2. If allowance >= cart total → offer agent_checkout ("I can purchase this instantly — no wallet popup needed!")
-3. If allowance is 0 → suggest request_approval ("Enable agent mode to let me shop for you instantly")
-4. If allowance > 0 but < cart total → suggest request_approval with a higher amount
-5. User can always choose initiate_checkout for the traditional wallet popup flow
+1. When the user wants to checkout or buy, you MUST FIRST call the `check_allowance` tool to verify their pre-approved USDC spending limit.
+2. If allowance >= cart total:
+   - Immediately call the `agent_checkout` tool to execute the purchase autonomously. Do NOT call `initiate_checkout` unless the user explicitly requests manual checkout.
+3. If allowance is 0 or insufficient (allowance < cart total):
+   - You MUST immediately call the `request_approval` tool with an appropriate amount (e.g. 500 USDC or cart total) to pop up the Agent Approval modal. Do NOT just suggest it in text; call the tool directly so the modal appears for the user.
+4. Only call `initiate_checkout` (traditional manual checkout) if the user explicitly asks to pay manually or refuses to use the AI Agent checkout.
 
 REORDER RULES:
 - When setting up reorders, clearly state: product, interval, max price guard
