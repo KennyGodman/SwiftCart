@@ -1017,7 +1017,15 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
     if (name === "search_products") {
       let r = [...ALL_PRODUCTS];
       if (inp.section && inp.section !== "all") r = r.filter(p => p.section === inp.section);
-      if (inp.category) r = r.filter(p => p.category === inp.category);
+      if (inp.category) {
+        const catQuery = String(inp.category).toLowerCase().trim();
+        r = r.filter(p => 
+          p.category.toLowerCase().includes(catQuery) || 
+          catQuery.includes(p.category.toLowerCase()) ||
+          p.categoryLabel.toLowerCase().includes(catQuery) ||
+          catQuery.includes(p.categoryLabel.toLowerCase())
+        );
+      }
       if (inp.maxPrice) r = r.filter(p => p.price <= inp.maxPrice);
       if (inp.minPrice) r = r.filter(p => p.price >= inp.minPrice);
       if (inp.keywords) {
@@ -1147,7 +1155,11 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
     return { error: "Unknown tool" };
   };
 
-  const runAgent = async (apiMsgs) => {
+  const runAgent = async (apiMsgs, depth = 0) => {
+    if (depth >= 3) {
+      setTools([]);
+      return "I ran into a loop while executing tools. Is there something else I can help you find?";
+    }
     // Only send tools that the agent can use given current state
     const availableTools = wallet ? AGENT_TOOLS : AGENT_TOOLS.filter(t => !["check_allowance", "request_approval", "agent_checkout"].includes(t.name));
     const res = await fetch("/api/agent", {
@@ -1193,7 +1205,7 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
         return blockingMsg;
       }
 
-      return runAgent([...apiMsgs, { role: "assistant", content: data.content }, { role: "user", content: results }]);
+      return runAgent([...apiMsgs, { role: "assistant", content: data.content }, { role: "user", content: results }], depth + 1);
     }
 
     setTools([]);
