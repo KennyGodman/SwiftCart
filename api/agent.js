@@ -3,7 +3,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { messages, tools } = req.body;
+  const { messages, tools, allowance, wallet } = req.body;
 
   if (!process.env.GROQ_API_KEY) {
     return res.status(500).json({ error: "GROQ_API_KEY not configured" });
@@ -13,10 +13,17 @@ export default async function handler(req, res) {
     // Convert messages from Anthropic format to OpenAI/Groq format
     const groqMessages = [];
 
+    const walletStr = wallet ? wallet : "Not Connected";
+    const allowanceStr = allowance !== undefined && allowance !== null ? `${allowance} USDC` : "0 USDC";
+
     // Add system message first
     groqMessages.push({
       role: "system",
       content: `You are ArcWear's autonomous AI shopping agent on Arc Blockchain (Circle L1).
+
+CURRENT USER STATUS:
+- Connected Wallet: ${walletStr}
+- Pre-approved USDC Allowance: ${allowanceStr}
 
 CORE TOOLS:
 - search_products: Search the catalogue by section (men/women/children), category, price, keywords
@@ -32,7 +39,7 @@ AUTONOMOUS TOOLS:
 - create_reorder: Set up automatic reorder for a product at a regular interval. The user will receive a confirmation notification before each reorder executes.
 
 CHECKOUT FLOW (IMPORTANT):
-1. When the user wants to checkout or buy, you MUST FIRST call the 'check_allowance' tool to verify their pre-approved USDC spending limit.
+1. Look at the pre-approved USDC Allowance provided under CURRENT USER STATUS. If the allowance is 0 or less than the cart total, do NOT call 'check_allowance' or 'agent_checkout'. Instead, immediately call the 'request_approval' tool to request a spending allowance from the user.
 2. If allowance >= cart total:
    - Immediately call the 'agent_checkout' tool to execute the purchase autonomously. Do NOT call 'initiate_checkout' unless the user explicitly requests manual checkout.
 3. If allowance is 0 or insufficient (allowance < cart total):

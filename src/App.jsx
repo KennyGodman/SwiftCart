@@ -1153,7 +1153,7 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
     const res = await fetch("/api/agent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tools: availableTools, messages: apiMsgs }),
+      body: JSON.stringify({ tools: availableTools, messages: apiMsgs, allowance, wallet }),
     });
     const data = await res.json();
     if (data.error) { setTools([]); return "Sorry, I ran into an issue. Please try again."; }
@@ -1168,6 +1168,9 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
     if (toolBlocks.length > 0) {
       setTools(toolBlocks.map(b => b.name));
       const results = [];
+      let isBlocking = false;
+      let blockingMsg = "";
+
       for (const b of toolBlocks) {
         const result = await exec(b.name, b.input);
         results.push({
@@ -1175,7 +1178,21 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
           tool_use_id: b.id,
           content: JSON.stringify(result),
         });
+        if (b.name === "request_approval") {
+          isBlocking = true;
+          blockingMsg = text || `I have popped up the Agent Approval modal for ${b.input.amount || 500} USDC. Please approve the spending limit in your wallet to enable instant agent checkout!`;
+        }
+        if (b.name === "initiate_checkout") {
+          isBlocking = true;
+          blockingMsg = text || "I have opened the checkout flow for you. Please review your details and confirm the transaction in your wallet.";
+        }
       }
+
+      if (isBlocking) {
+        setTools([]);
+        return blockingMsg;
+      }
+
       return runAgent([...apiMsgs, { role: "assistant", content: data.content }, { role: "user", content: results }]);
     }
 
