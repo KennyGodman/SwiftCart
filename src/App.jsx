@@ -1,4 +1,7 @@
 import { useState, useRef, useEffect } from "react";
+import useAllowance from "./hooks/useAllowance";
+import ApprovalModal from "./components/ApprovalModal";
+import ProductDetailPage from "./components/ProductDetailPage";
 
 /* =========================================================
    ARCWEAR — Main Application
@@ -258,8 +261,43 @@ const AGENT_TOOLS = [
   },
   {
     name: "initiate_checkout",
-    description: "Open the USDC checkout flow on Arc.",
+    description: "Open the standard USDC checkout flow on Arc (requires wallet popup).",
     input_schema: { type: "object", properties: {} },
+  },
+  // ── Autonomous Agent Tools ──
+  {
+    name: "check_allowance",
+    description: "Check if user has pre-approved USDC spending for the agent. Returns remaining allowance in USDC. Call this before attempting agent_checkout.",
+    input_schema: { type: "object", properties: {} },
+  },
+  {
+    name: "request_approval",
+    description: "Ask user to approve a USDC spending allowance so the agent can purchase without wallet popups. Use when allowance is 0 or insufficient for the cart total.",
+    input_schema: {
+      type: "object",
+      required: ["amount"],
+      properties: {
+        amount: { type: "number", description: "USDC amount to request approval for (e.g. 500)" },
+      },
+    },
+  },
+  {
+    name: "agent_checkout",
+    description: "Execute checkout using the pre-approved USDC allowance — INSTANT, NO wallet popup needed. Only use when check_allowance shows sufficient allowance.",
+    input_schema: { type: "object", properties: {} },
+  },
+  {
+    name: "create_reorder",
+    description: "Set up automatic reorder for a product at a regular interval. User will get a confirmation notification before each reorder executes.",
+    input_schema: {
+      type: "object",
+      required: ["productId", "intervalDays"],
+      properties: {
+        productId: { type: "string" },
+        intervalDays: { type: "number", description: "Days between reorders" },
+        maxPrice: { type: "number", description: "Max price guard — agent won't reorder if price exceeds this" },
+      },
+    },
   },
 ];
 
@@ -430,7 +468,7 @@ function EditModal({ item, onClose, onSave }) {
 /* =========================================================
    ProductCard
    ========================================================= */
-function ProductCard({ item, onAdd, onEdit, agentPick }) {
+function ProductCard({ item, onAdd, onEdit, onViewDetail, agentPick }) {
   const [imgErr, setImgErr] = useState(false);
   const [wishlist, setWishlist] = useState(false);
   const [added, setAdded] = useState(false);
@@ -466,8 +504,16 @@ function ProductCard({ item, onAdd, onEdit, agentPick }) {
         </div>
       )}
 
-      {/* Image */}
-      <div className="product-img">
+      {/* Image — click opens detail page */}
+      <div
+        className="product-img"
+        style={{ position: "relative", cursor: "pointer" }}
+        onClick={() => onViewDetail(item)}
+        role="button"
+        tabIndex={0}
+        aria-label={`View details for ${item.name}`}
+        onKeyDown={e => e.key === "Enter" && onViewDetail(item)}
+      >
         {!imgErr ? (
           <img
             src={item.img}
@@ -480,11 +526,26 @@ function ProductCard({ item, onAdd, onEdit, agentPick }) {
         ) : (
           <span style={{ fontSize: 52 }}>{item.emoji || "👕"}</span>
         )}
+        {/* Hover overlay — View Details */}
+        <button
+          className="view-detail-btn"
+          onClick={e => { e.stopPropagation(); onViewDetail(item); }}
+          aria-label={`View details for ${item.name}`}
+          tabIndex={-1}
+        >
+          🔍 View Details
+        </button>
       </div>
 
       {/* Info */}
       <div style={{ padding: "10px 12px 12px" }}>
-        <p style={{ fontSize: 13, fontWeight: 500, color: "#1c1917", margin: "0 0 4px", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <p
+          style={{ fontSize: 13, fontWeight: 500, color: "#1c1917", margin: "0 0 4px", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer" }}
+          onClick={() => onViewDetail(item)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => e.key === "Enter" && onViewDetail(item)}
+        >
           {item.name}
         </p>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
@@ -937,10 +998,10 @@ function CheckoutModal({ cart, wallet, onClose, onSuccess, addToast }) {
 /* =========================================================
    AgentChat — AI shopping assistant panel
    ========================================================= */
-function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast, onClose }) {
+function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast, onClose, wallet, allowance, onRequestApproval, onRefreshAllowance }) {
   const [msgs, setMsgs] = useState([{
     role: "assistant",
-    text: "Hi! I'm your ArcWear AI agent 👋\n\nTell me what you're looking for — an outfit, a budget, an occasion — and I'll search, add items to your cart, and handle USDC checkout on Arc.",
+    text: "Hi! I'm your ArcWear AI agent 👋\n\nTell me what you're looking for — an outfit, a budget, an occasion — and I'll search, add items to your cart, and handle USDC checkout on Arc." + (allowance > 0 ? `\n\n🔓 Agent mode active — ${allowance.toFixed(2)} USDC remaining allowance.` : ""),
   }]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -952,7 +1013,7 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, loading]);
 
   // Execute a tool call locally
-  const exec = (name, inp) => {
+  const exec = async (name, inp) => {
     if (name === "search_products") {
       let r = [...ALL_PRODUCTS];
       if (inp.section && inp.section !== "all") r = r.filter(p => p.section === inp.section);
@@ -990,14 +1051,100 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
       setTimeout(() => setCheckoutOpen(true), 600);
       return { success: true };
     }
+    // ── Autonomous tool handlers ──
+    if (name === "check_allowance") {
+      return {
+        allowance: allowance?.toFixed(2) || "0.00",
+        isApproved: (allowance || 0) > 0,
+        agentWallet: "0xb73d...c1e4",
+        message: allowance > 0
+          ? `User has approved ${allowance.toFixed(2)} USDC for agent spending.`
+          : "No allowance set. Use request_approval to ask user to enable agent mode.",
+      };
+    }
+    if (name === "request_approval") {
+      if (onRequestApproval) onRequestApproval(inp.amount || 500);
+      return {
+        success: true,
+        message: `Approval modal shown to user for ${inp.amount || 500} USDC. Wait for user to confirm in their wallet.`,
+      };
+    }
+    if (name === "agent_checkout") {
+      const c = cartRef.current;
+      const total = c.reduce((s, i) => s + i.price * i.qty, 0);
+      if (c.length === 0) return { error: "Cart is empty" };
+      if (!wallet) return { error: "No wallet connected. Ask user to connect wallet first." };
+      if ((allowance || 0) < total) {
+        return {
+          error: "INSUFFICIENT_ALLOWANCE",
+          message: `Need ${total.toFixed(2)} USDC but only ${(allowance || 0).toFixed(2)} approved. Use request_approval to ask for more.`,
+        };
+      }
+      // Call the agent-pay backend
+      try {
+        addToast("🤖 Agent executing purchase...", "agent");
+        const res = await fetch("/api/agent-pay", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userWallet: wallet,
+            items: c.map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
+            total,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          return { error: data.error || data.message || "Agent payment failed" };
+        }
+        // Success — clear cart and refresh allowance
+        setCart([]);
+        if (onRefreshAllowance) setTimeout(onRefreshAllowance, 2000);
+        addToast(`✓ Agent purchased ${c.length} items for ${total.toFixed(2)} USDC!`, "success");
+        return {
+          success: true,
+          txHash: data.txHash,
+          total: total.toFixed(2),
+          message: `Purchase complete! ${c.length} items for ${total.toFixed(2)} USDC. Tx: ${data.txHash}`,
+        };
+      } catch (err) {
+        return { error: "Agent payment request failed: " + (err.message || "Unknown error") };
+      }
+    }
+    if (name === "create_reorder") {
+      const p = ALL_PRODUCTS.find(x => x.id === inp.productId);
+      if (!p) return { error: "Product not found" };
+      // Store reorder in localStorage for MVP
+      const reorders = JSON.parse(localStorage.getItem("arcwear_reorders") || "[]");
+      const newReorder = {
+        id: Date.now().toString(),
+        productId: p.id,
+        productName: p.name,
+        price: p.price,
+        intervalDays: inp.intervalDays,
+        maxPrice: inp.maxPrice || p.price * 1.2,
+        createdAt: new Date().toISOString(),
+        nextOrder: new Date(Date.now() + inp.intervalDays * 86400000).toISOString(),
+        active: true,
+      };
+      reorders.push(newReorder);
+      localStorage.setItem("arcwear_reorders", JSON.stringify(reorders));
+      addToast(`🔁 Auto-reorder set: ${p.name} every ${inp.intervalDays} days`, "agent");
+      return {
+        success: true,
+        reorder: newReorder,
+        message: `Reorder created! ${p.name} will be reordered every ${inp.intervalDays} days. You'll receive a confirmation before each purchase. Next reorder: ${newReorder.nextOrder.split("T")[0]}`,
+      };
+    }
     return { error: "Unknown tool" };
   };
 
   const runAgent = async (apiMsgs) => {
+    // Only send tools that the agent can use given current state
+    const availableTools = wallet ? AGENT_TOOLS : AGENT_TOOLS.filter(t => !["check_allowance", "request_approval", "agent_checkout"].includes(t.name));
     const res = await fetch("/api/agent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tools: AGENT_TOOLS, messages: apiMsgs }),
+      body: JSON.stringify({ tools: availableTools, messages: apiMsgs }),
     });
     const data = await res.json();
     if (data.error) { setTools([]); return "Sorry, I ran into an issue. Please try again."; }
@@ -1011,11 +1158,15 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
 
     if (toolBlocks.length > 0) {
       setTools(toolBlocks.map(b => b.name));
-      const results = toolBlocks.map(b => ({
-        type: "tool_result",
-        tool_use_id: b.id,
-        content: JSON.stringify(exec(b.name, b.input)),
-      }));
+      const results = [];
+      for (const b of toolBlocks) {
+        const result = await exec(b.name, b.input);
+        results.push({
+          type: "tool_result",
+          tool_use_id: b.id,
+          content: JSON.stringify(result),
+        });
+      }
       return runAgent([...apiMsgs, { role: "assistant", content: data.content }, { role: "user", content: results }]);
     }
 
@@ -1184,6 +1335,12 @@ export default function ArcWear() {
   const [toasts, setToasts] = useState([]);
   const [scrolled, setScrolled] = useState(false);
   const [editItem, setEditItem] = useState(null);
+  const [approvalOpen, setApprovalOpen] = useState(false);
+  const [approvalAmount, setApprovalAmount] = useState(500);
+  const [detailItem, setDetailItem] = useState(null);
+
+  // ── Agent Allowance (ERC-20 approve/transferFrom) ─────────
+  const { allowance, isApproved, approveAgent, refresh: refreshAllowance } = useAllowance(wallet);
 
   // Sticky nav shadow on scroll
   useEffect(() => {
@@ -1632,9 +1789,10 @@ export default function ArcWear() {
               {cat.items.map(item => (
                 <ProductCard
                   key={item.id}
-                  item={{ ...item, categoryLabel: cat.label }}
+                  item={{ ...item, categoryLabel: cat.label, sectionLabel: sec.label }}
                   onAdd={addToCart}
                   onEdit={setEditItem}
+                  onViewDetail={(i) => setDetailItem({ ...i, categoryLabel: cat.label, sectionLabel: sec.label })}
                   agentPick={false}
                 />
               ))}
@@ -1715,10 +1873,20 @@ export default function ArcWear() {
       </nav>
 
       {/* ── OVERLAYS & PANELS ── */}
+      {detailItem && (
+        <ProductDetailPage
+          item={detailItem}
+          allProducts={ALL_PRODUCTS}
+          onClose={() => setDetailItem(null)}
+          onAdd={(item, e) => { addToCart(item, e); addToast(`${item.name} added`, "success"); }}
+          onEdit={setEditItem}
+        />
+      )}
       {editItem && <EditModal item={editItem} onClose={() => setEditItem(null)} onSave={addToCartWithOptions} />}
       {cartOpen && <CartDrawer cart={cart} onRemove={id => setCart(p => p.filter(x => x.id !== id))} onCheckout={() => { if (!wallet) { connectWallet(); return; } setCartOpen(false); setCheckout(true); }} onClose={() => setCartOpen(false)} wallet={wallet} />}
       {checkout && <CheckoutModal cart={cart} wallet={wallet} onClose={() => setCheckout(false)} onSuccess={() => { setCart([]); setCheckout(false); }} addToast={addToast} />}
-      {agentOpen && <AgentChat cart={cart} setCart={setCart} setActiveSection={setSection} setCheckoutOpen={setCheckout} addToast={addToast} onClose={() => setAgentOpen(false)} />}
+      {agentOpen && <AgentChat cart={cart} setCart={setCart} setActiveSection={setSection} setCheckoutOpen={setCheckout} addToast={addToast} onClose={() => setAgentOpen(false)} wallet={wallet} allowance={allowance} onRequestApproval={(amt) => { setApprovalAmount(amt); setApprovalOpen(true); }} onRefreshAllowance={refreshAllowance} />}
+      {approvalOpen && <ApprovalModal wallet={wallet} requestedAmount={approvalAmount} onApprove={async (amt) => { const hash = await approveAgent(amt); setApprovalOpen(false); addToast(`✓ Agent mode enabled — ${amt} USDC approved`, "success"); return hash; }} onClose={() => setApprovalOpen(false)} />}
 
       <Toasts list={toasts} />
     </div>

@@ -269,3 +269,58 @@ body {
   .product-img { height: 130px !important; }
   .agent-panel { height: 85vh !important; }
 }
+
+/* =========================================================
+   Product Detail Page (PDP) Overlay
+   ========================================================= */
+
+@keyframes pdpOverlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pdpSlideIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* PDP responsive: stack on mobile */
+@media (max-width: 768px) {
+  .pdp-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .pdp-grid > :first-child {
+    border-radius: 20px 20px 0 0 !important;
+    min-height: 280px !important;
+  }
+}
+
+/* View detail button on product cards */
+.view-detail-btn {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(28, 25, 23, 0.85);
+  color: #fff;
+  border: none;
+  padding: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(100%);
+  transition: all 0.2s ease;
+  font-family: var(--font-sans);
+}
+
+.product-img:hover .view-detail-btn,
+.product-card:hover .view-detail-btn {
+  opacity: 1;
+  transform: translateY(0);
+}

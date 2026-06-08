@@ -5,6 +5,10 @@ import react from '@vitejs/plugin-react'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
 
+  // Inject env vars into process.env so API handlers can access them
+  // (Vite's loadEnv only populates the local `env` variable, not process.env)
+  Object.assign(process.env, env)
+
   return {
     plugins: [
       react(),
@@ -148,6 +152,76 @@ export default defineConfig(({ mode }) => {
                 res.statusCode = 500
                 res.setHeader('Content-Type', 'application/json')
                 res.end(JSON.stringify({ success: false, error: err.message }))
+              }
+            })
+          })
+
+          // ── Agent API (Groq) ──
+          server.middlewares.use('/api/agent', async (req, res) => {
+            if (req.method !== 'POST') {
+              res.statusCode = 405
+              res.end(JSON.stringify({ error: 'Method not allowed' }))
+              return
+            }
+            let body = ''
+            req.on('data', chunk => { body += chunk.toString() })
+            req.on('end', async () => {
+              try {
+                const { default: handler } = await import('./api/agent.js')
+                const parsed = JSON.parse(body)
+                const fakeReq = { method: 'POST', body: parsed }
+                const fakeRes = {
+                  statusCode: 200,
+                  _headers: {},
+                  status(code) { this.statusCode = code; return this },
+                  setHeader(k, v) { this._headers[k] = v },
+                  json(data) {
+                    res.statusCode = this.statusCode
+                    res.setHeader('Content-Type', 'application/json')
+                    res.end(JSON.stringify(data))
+                  },
+                }
+                await handler(fakeReq, fakeRes)
+              } catch (err) {
+                console.error('[api/agent] Dev error:', err)
+                res.statusCode = 500
+                res.setHeader('Content-Type', 'application/json')
+                res.end(JSON.stringify({ error: err.message }))
+              }
+            })
+          })
+
+          // ── Agent Pay API (Circle Autonomous Checkout) ──
+          server.middlewares.use('/api/agent-pay', async (req, res) => {
+            if (req.method !== 'POST') {
+              res.statusCode = 405
+              res.end(JSON.stringify({ error: 'Method not allowed' }))
+              return
+            }
+            let body = ''
+            req.on('data', chunk => { body += chunk.toString() })
+            req.on('end', async () => {
+              try {
+                const { default: handler } = await import('./api/agent-pay.js')
+                const parsed = JSON.parse(body)
+                const fakeReq = { method: 'POST', body: parsed }
+                const fakeRes = {
+                  statusCode: 200,
+                  _headers: {},
+                  status(code) { this.statusCode = code; return this },
+                  setHeader(k, v) { this._headers[k] = v },
+                  json(data) {
+                    res.statusCode = this.statusCode
+                    res.setHeader('Content-Type', 'application/json')
+                    res.end(JSON.stringify(data))
+                  },
+                }
+                await handler(fakeReq, fakeRes)
+              } catch (err) {
+                console.error('[api/agent-pay] Dev error:', err)
+                res.statusCode = 500
+                res.setHeader('Content-Type', 'application/json')
+                res.end(JSON.stringify({ error: err.message }))
               }
             })
           })

@@ -1,0 +1,345 @@
+import { useState } from "react";
+import { fmt, trunc } from "../utils";
+import { AGENT_WALLET, ARC_CHAIN_CONFIG, DEFAULT_AGENT_ALLOWANCE } from "../config";
+
+/**
+ * ApprovalModal — the one-time USDC spending approval gate.
+ *
+ * When the AI agent needs autonomous spending authority, this modal
+ * lets the user approve a capped USDC allowance to the Circle Agent Wallet.
+ * After this single wallet popup, all future agent purchases execute
+ * instantly via transferFrom() — no more popups.
+ */
+export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmount }) {
+  const [amount, setAmount] = useState(requestedAmount || DEFAULT_AGENT_ALLOWANCE);
+  const [step, setStep] = useState("review"); // review | signing | success | error
+  const [txHash, setTxHash] = useState("");
+  const [error, setError] = useState("");
+
+  const handleApprove = async () => {
+    setStep("signing");
+    setError("");
+    try {
+      const hash = await onApprove(amount);
+      setTxHash(hash);
+      setStep("success");
+    } catch (err) {
+      const msg =
+        err.code === 4001 || err.message?.includes("denied")
+          ? "Transaction rejected in wallet"
+          : err.message || "Approval failed";
+      setError(msg);
+      setStep("error");
+    }
+  };
+
+  const presets = [100, 250, 500, 1000];
+
+  return (
+    <div
+      style={{
+        position: "fixed", inset: 0,
+        background: "rgba(0,0,0,0.65)", zIndex: 3500,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 16, backdropFilter: "blur(6px)",
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Approve agent spending"
+        style={{
+          background: "#fff", borderRadius: 18,
+          width: 480, maxWidth: "100%",
+          position: "relative",
+          boxShadow: "0 32px 80px rgba(0,0,0,0.3)",
+          maxHeight: "90vh", overflowY: "auto",
+          animation: "fadeUp .25s ease",
+        }}
+      >
+        {/* ── Review Step ── */}
+        {step === "review" && (
+          <>
+            {/* Header */}
+            <div style={{
+              background: "linear-gradient(135deg, #1c1917 0%, #292524 100%)",
+              padding: "24px 28px 20px",
+              borderRadius: "18px 18px 0 0",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{
+                    width: 42, height: 42,
+                    background: "linear-gradient(135deg, #c47d2a, #f97316)",
+                    borderRadius: 12,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 20, color: "#fff", fontWeight: 800,
+                  }}>
+                    ◎
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 16, fontWeight: 700, color: "#fff", margin: 0 }}>
+                      Enable Agent Mode
+                    </p>
+                    <p style={{
+                      fontSize: 9, color: "#c47d2a",
+                      letterSpacing: 1.5, textTransform: "uppercase", margin: "3px 0 0",
+                    }}>
+                      Autonomous Shopping · Arc Blockchain
+                    </p>
+                  </div>
+                </div>
+                <button
+                  className="btn-icon"
+                  onClick={onClose}
+                  aria-label="Close"
+                  style={{ color: "#666", background: "rgba(255,255,255,0.08)", border: "none" }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: "22px 28px 26px" }}>
+              {/* Explanation */}
+              <div style={{
+                background: "#faf9f7", borderRadius: 12,
+                border: "1px solid #f0ede8", padding: "16px 18px",
+                marginBottom: 20,
+              }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: "#1c1917", margin: "0 0 8px" }}>
+                  How it works
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {[
+                    ["1️⃣", "You approve a USDC spending cap (one wallet popup)"],
+                    ["2️⃣", "Agent can purchase items instantly — no more popups"],
+                    ["3️⃣", "Agent never exceeds your cap, and you can revoke anytime"],
+                  ].map(([icon, text]) => (
+                    <div key={text} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                      <span style={{ fontSize: 14, flexShrink: 0, lineHeight: 1.4 }}>{icon}</span>
+                      <p style={{ fontSize: 12, color: "#57534e", margin: 0, lineHeight: 1.5 }}>{text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Amount selector */}
+              <div style={{ marginBottom: 20 }}>
+                <span className="label">Spending Cap (USDC)</span>
+                <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
+                  {presets.map((p) => (
+                    <button
+                      key={p}
+                      className={`option-btn${amount === p ? " active" : ""}`}
+                      onClick={() => setAmount(p)}
+                      style={{ minWidth: 68 }}
+                    >
+                      {fmt(p)}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 11, color: "#78716c" }}>Custom:</span>
+                  <input
+                    type="number"
+                    className="input"
+                    value={amount}
+                    onChange={(e) => setAmount(Math.max(1, Number(e.target.value)))}
+                    style={{ width: 120, padding: "7px 12px", fontSize: 13, fontFamily: "var(--font-mono)" }}
+                    min="1"
+                    step="10"
+                  />
+                  <span style={{ fontSize: 11, color: "#a8a29e" }}>USDC</span>
+                </div>
+              </div>
+
+              {/* Security details */}
+              <div style={{
+                background: "#1c1917", borderRadius: 12,
+                padding: "14px 16px", marginBottom: 20,
+              }}>
+                {[
+                  ["Agent Wallet", trunc(AGENT_WALLET)],
+                  ["Network", "Arc Testnet"],
+                  ["Spending Cap", fmt(amount)],
+                  ["Type", "ERC-20 Allowance (revocable)"],
+                ].map(([k, v]) => (
+                  <div key={k} style={{
+                    display: "flex", justifyContent: "space-between",
+                    fontSize: 11, marginBottom: 4,
+                  }}>
+                    <span style={{ color: "#57534e" }}>{k}</span>
+                    <span style={{ fontFamily: "var(--font-mono)", color: "#a8a29e" }}>{v}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Trust signals */}
+              <div style={{ display: "flex", gap: 16, marginBottom: 22, flexWrap: "wrap" }}>
+                {[
+                  ["🔐", "Circle MPC", "Non-custodial"],
+                  ["⚡", "Sub-second", "Arc finality"],
+                  ["🛡️", "Revocable", "Anytime"],
+                ].map(([ic, a, b]) => (
+                  <div key={a} style={{
+                    display: "flex", gap: 8, alignItems: "center",
+                    background: "#faf9f7", borderRadius: 8,
+                    padding: "8px 12px", border: "1px solid #f0ede8",
+                    flex: 1, minWidth: 100,
+                  }}>
+                    <span style={{ fontSize: 16 }}>{ic}</span>
+                    <div>
+                      <p style={{ fontSize: 10, fontWeight: 700, color: "#1c1917", margin: 0 }}>{a}</p>
+                      <p style={{ fontSize: 9, color: "#a8a29e", margin: 0 }}>{b}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: "flex", gap: 10 }}>
+                <button
+                  onClick={onClose}
+                  style={{
+                    flex: 1, background: "#f5f3f0", border: "1px solid #e7e4e0",
+                    borderRadius: 10, padding: "13px", fontSize: 11,
+                    cursor: "pointer", color: "#78716c",
+                    letterSpacing: 1.5, textTransform: "uppercase",
+                  }}
+                >
+                  Not Now
+                </button>
+                <button
+                  onClick={handleApprove}
+                  style={{
+                    flex: 2, background: "linear-gradient(135deg, #c47d2a, #f97316)",
+                    color: "#fff", border: "none", borderRadius: 10,
+                    padding: "13px", fontSize: 12, fontWeight: 700,
+                    cursor: "pointer", letterSpacing: 1.5, textTransform: "uppercase",
+                    boxShadow: "0 4px 16px rgba(249,115,22,0.3)",
+                  }}
+                >
+                  Approve {fmt(amount)}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ── Signing Step ── */}
+        {step === "signing" && (
+          <div style={{ textAlign: "center", padding: "60px 28px" }}>
+            <div style={{
+              fontSize: 44, marginBottom: 16,
+              animation: "spin 1s linear infinite", display: "inline-block",
+            }}>
+              🔐
+            </div>
+            <h3 style={{ fontSize: 22, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>
+              Approve in Wallet
+            </h3>
+            <p style={{ fontSize: 12, color: "#a8a29e", marginBottom: 4 }}>
+              Sign the ERC-20 approval to enable agent mode
+            </p>
+            <p style={{
+              fontSize: 10, color: "#c47d2a",
+              letterSpacing: 1.5, textTransform: "uppercase",
+            }}>
+              One-time approval · Revocable anytime
+            </p>
+          </div>
+        )}
+
+        {/* ── Success Step ── */}
+        {step === "success" && (
+          <div style={{ textAlign: "center", padding: "50px 28px" }}>
+            <div style={{
+              width: 60, height: 60, background: "linear-gradient(135deg, #c47d2a, #f97316)",
+              borderRadius: "50%", margin: "0 auto 18px",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 26, color: "#fff",
+            }}>
+              ✓
+            </div>
+            <h3 style={{ fontSize: 24, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>
+              Agent Mode Enabled
+            </h3>
+            <p style={{ fontSize: 12, color: "#a8a29e", marginBottom: 16 }}>
+              Your AI agent can now shop autonomously up to {fmt(amount)}
+            </p>
+            {txHash && (
+              <a
+                href={`${ARC_CHAIN_CONFIG.blockExplorerUrls[0]}/tx/${txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontSize: 10, fontFamily: "var(--font-mono)",
+                  color: "#f97316", textDecoration: "none",
+                  display: "inline-block", marginBottom: 20,
+                }}
+              >
+                View approval on ArcScan ↗
+              </a>
+            )}
+            <br />
+            <button
+              onClick={onClose}
+              style={{
+                background: "#1c1917", color: "#fff", border: "none",
+                borderRadius: 10, padding: "12px 32px", fontSize: 11,
+                fontWeight: 700, cursor: "pointer",
+                letterSpacing: 1.5, textTransform: "uppercase",
+              }}
+            >
+              Start Shopping with Agent
+            </button>
+          </div>
+        )}
+
+        {/* ── Error Step ── */}
+        {step === "error" && (
+          <div style={{ textAlign: "center", padding: "50px 28px" }}>
+            <div style={{
+              width: 60, height: 60, background: "#fef2f2",
+              borderRadius: "50%", margin: "0 auto 18px",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 26,
+            }}>
+              ⚠️
+            </div>
+            <h3 style={{ fontSize: 20, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>
+              Approval Failed
+            </h3>
+            <p style={{ fontSize: 12, color: "#a8a29e", marginBottom: 20 }}>
+              {error}
+            </p>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+              <button
+                onClick={onClose}
+                style={{
+                  background: "#f5f3f0", border: "1px solid #e7e4e0",
+                  borderRadius: 10, padding: "11px 24px", fontSize: 11,
+                  cursor: "pointer", color: "#78716c",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => setStep("review")}
+                style={{
+                  background: "#1c1917", color: "#fff", border: "none",
+                  borderRadius: 10, padding: "11px 24px", fontSize: 11,
+                  fontWeight: 700, cursor: "pointer",
+                }}
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
