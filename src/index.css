@@ -220,6 +220,28 @@ body {
 /* ── Add Button Hover ── */
 .add-btn:hover { background: var(--color-accent-dk) !important; }
 
+/* ── Topbar Scroll Pause Animation ── */
+.topbar-text {
+  display: inline-block;
+  animation: topbarScrollPause 20s linear infinite;
+  will-change: transform;
+}
+
+@keyframes topbarScrollPause {
+  0% {
+    transform: translateX(calc(50vw + 50%));
+  }
+  25% {
+    transform: translateX(0);
+  }
+  75% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-50vw - 50%));
+  }
+}
+
 /* =========================================================
    Responsive — Tablet (641px–1024px)
    ========================================================= */

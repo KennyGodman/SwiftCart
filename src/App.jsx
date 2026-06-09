@@ -1579,8 +1579,8 @@ export default function ArcWear() {
     <div style={{ minHeight: "100vh", background: "#fff", fontFamily: "var(--font-sans)" }}>
 
       {/* ── TOP BAR ── */}
-      <div style={{ background: "#1c1917", padding: "6px 0", textAlign: "center" }}>
-        <p className="topbar-text" style={{ fontSize: 11, color: "#fde68a", letterSpacing: 0.5 }}>
+      <div style={{ background: "#1c1917", padding: "6px 0", textAlign: "center", overflow: "hidden", whiteSpace: "nowrap" }}>
+        <p className="topbar-text" style={{ fontSize: 11, color: "#fde68a", letterSpacing: 0.5, display: "inline-block" }}>
           🎉 Free shipping on orders over 150 USDC · Pay with USDC on Arc Blockchain
         </p>
       </div>
