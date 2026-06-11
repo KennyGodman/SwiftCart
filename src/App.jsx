@@ -395,8 +395,8 @@ function EditModal({ item, onClose, onSave }) {
             />
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 15, fontWeight: 600, color: "#1c1917", margin: 0, lineHeight: 1.3 }}>{item.name}</p>
-            <p style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "#c47d2a", margin: "4px 0 0" }}>{fmt(item.price)}</p>
+            <p style={{ fontSize: 17, fontWeight: 600, color: "#1c1917", margin: 0, lineHeight: 1.3 }}>{item.name}</p>
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: 15, color: "#c47d2a", margin: "4px 0 0" }}>{fmt(item.price)}</p>
           </div>
           <button className="btn-icon" onClick={onClose} aria-label="Close">✕</button>
         </div>
@@ -451,7 +451,7 @@ function EditModal({ item, onClose, onSave }) {
               width: "100%",
               background: added ? "hsl(158, 65%, 38%)" : "#1c1917",
               color: "#fff", border: "none", borderRadius: 10,
-              padding: "13px", fontSize: 12, fontWeight: 700,
+              padding: "13px", fontSize: 14, fontWeight: 700,
               cursor: "pointer", letterSpacing: 1.5, textTransform: "uppercase",
               transition: "all .25s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
               transform: added ? "scale(0.96)" : "scale(1)",
@@ -540,7 +540,7 @@ function ProductCard({ item, onAdd, onEdit, onViewDetail, agentPick }) {
       {/* Info */}
       <div style={{ padding: "10px 12px 12px" }}>
         <p
-          style={{ fontSize: 13, fontWeight: 500, color: "#1c1917", margin: "0 0 4px", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer" }}
+          style={{ fontSize: 15, fontWeight: 500, color: "#1c1917", margin: "0 0 4px", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer" }}
           onClick={() => onViewDetail(item)}
           role="button"
           tabIndex={0}
@@ -549,12 +549,12 @@ function ProductCard({ item, onAdd, onEdit, onViewDetail, agentPick }) {
           {item.name}
         </p>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 700, color: "#c41e3a" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 700, color: "#c41e3a" }}>
             {fmt(item.price)}
           </span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#a8a29e", textDecoration: "line-through" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "#a8a29e", textDecoration: "line-through" }}>
             {fmt(item.oldPrice)}
           </span>
         </div>
@@ -568,7 +568,7 @@ function ProductCard({ item, onAdd, onEdit, onViewDetail, agentPick }) {
               flex: 1,
               background: added ? "hsl(158, 65%, 38%)" : "#f97316",
               color: "#fff", border: "none", borderRadius: 4,
-              padding: "8px 0", fontSize: 11, fontWeight: 700,
+              padding: "8px 0", fontSize: 13, fontWeight: 700,
               cursor: "pointer", textTransform: "uppercase",
               transition: "all .25s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
               transform: added ? "scale(1.05)" : "scale(1)",
@@ -585,7 +585,7 @@ function ProductCard({ item, onAdd, onEdit, onViewDetail, agentPick }) {
               border: "1px solid #e7e4e0", borderRadius: 4,
               cursor: "pointer", display: "flex",
               alignItems: "center", justifyContent: "center",
-              fontSize: 14, flexShrink: 0,
+              fontSize: 16, flexShrink: 0,
             }}
           >
             ✏️
@@ -621,8 +621,8 @@ function CartDrawer({ cart, onRemove, onCheckout, onClose, wallet }) {
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px", borderBottom: "1px solid #f0ede8" }}>
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: "#1c1917", margin: 0 }}>Your Cart</h2>
-            <p style={{ fontSize: 11, color: "#a8a29e", margin: "3px 0 0" }}>
+            <h2 style={{ fontSize: 22, fontWeight: 700, color: "#1c1917", margin: 0 }}>Your Cart</h2>
+            <p style={{ fontSize: 13, color: "#a8a29e", margin: "3px 0 0" }}>
               {cart.reduce((s, i) => s + i.qty, 0)} items
             </p>
           </div>
@@ -633,8 +633,8 @@ function CartDrawer({ cart, onRemove, onCheckout, onClose, wallet }) {
         <div style={{ flex: 1, overflowY: "auto", padding: "14px 20px" }}>
           {cart.length === 0 ? (
             <div style={{ textAlign: "center", paddingTop: 80 }}>
-              <p style={{ fontSize: 44, marginBottom: 10, opacity: 0.2 }}>🛒</p>
-              <p style={{ fontSize: 13, color: "#a8a29e" }}>Your cart is empty</p>
+              <p style={{ fontSize: 48, marginBottom: 10, opacity: 0.2 }}>🛒</p>
+              <p style={{ fontSize: 15, color: "#a8a29e" }}>Your cart is empty</p>
             </div>
           ) : cart.map(item => (
             <div key={item.id + item.size + item.color} className="cart-item">
@@ -646,20 +646,20 @@ function CartDrawer({ cart, onRemove, onCheckout, onClose, wallet }) {
                 />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: "#1c1917", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                <p style={{ fontSize: 15, fontWeight: 600, color: "#1c1917", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                   {item.name}
                 </p>
-                <p style={{ fontSize: 11, color: "#a8a29e", margin: "2px 0 0" }}>
+                <p style={{ fontSize: 13, color: "#a8a29e", margin: "2px 0 0" }}>
                   Qty {item.qty}{item.size ? ` · ${item.size}` : ""}{item.color && item.color !== "Default" ? ` · ${item.color}` : ""}
                 </p>
               </div>
               <div style={{ textAlign: "right", flexShrink: 0 }}>
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 600, color: "#1c1917", margin: 0 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 600, color: "#1c1917", margin: 0 }}>
                   {fmt(item.price * item.qty)}
                 </p>
                 <button
                   onClick={() => onRemove(item.id)}
-                  style={{ background: "none", border: "none", color: "#a8a29e", cursor: "pointer", fontSize: 10, marginTop: 4, padding: 0, textDecoration: "underline" }}
+                  style={{ background: "none", border: "none", color: "#a8a29e", cursor: "pointer", fontSize: 12, marginTop: 4, padding: 0, textDecoration: "underline" }}
                 >
                   remove
                 </button>
@@ -672,22 +672,22 @@ function CartDrawer({ cart, onRemove, onCheckout, onClose, wallet }) {
         {cart.length > 0 && (
           <div style={{ padding: "14px 20px 22px", borderTop: "1px solid #f0ede8" }}>
             {[["Subtotal", fmt(total)], ["Gas (USDC)", "~0.001"]].map(([k, v]) => (
-              <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#a8a29e", marginBottom: 4 }}>
+              <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "#a8a29e", marginBottom: 4 }}>
                 <span>{k}</span>
                 <span style={{ fontFamily: "var(--font-mono)" }}>{v}</span>
               </div>
             ))}
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 17, fontWeight: 700, color: "#1c1917", borderTop: "1px solid #f0ede8", paddingTop: 10, marginTop: 6, marginBottom: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 19, fontWeight: 700, color: "#1c1917", borderTop: "1px solid #f0ede8", paddingTop: 10, marginTop: 6, marginBottom: 14 }}>
               <span>Total</span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 14 }}>{fmt(total)}</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 16 }}>{fmt(total)}</span>
             </div>
 
             {/* Arc info pill */}
             <div className="arc-block" style={{ marginBottom: 12 }}>
               <div className="arc-block__icon">◎</div>
               <div>
-                <p style={{ fontSize: 9, fontWeight: 700, color: "#c47d2a", letterSpacing: 1.5, textTransform: "uppercase", margin: 0 }}>Arc Blockchain · USDC</p>
-                <p style={{ fontSize: 9, color: "#57534e", margin: "2px 0 0" }}>Sub-second finality · Circle L1</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#c47d2a", letterSpacing: 1.5, textTransform: "uppercase", margin: 0 }}>Arc Blockchain · USDC</p>
+                <p style={{ fontSize: 11, color: "#57534e", margin: "2px 0 0" }}>Sub-second finality · Circle L1</p>
               </div>
             </div>
 
@@ -696,7 +696,7 @@ function CartDrawer({ cart, onRemove, onCheckout, onClose, wallet }) {
               style={{
                 width: "100%", background: "#f97316", color: "#fff",
                 border: "none", borderRadius: 10, padding: "13px",
-                fontSize: 12, fontWeight: 700, cursor: "pointer",
+                fontSize: 14, fontWeight: 700, cursor: "pointer",
                 letterSpacing: 1.5, textTransform: "uppercase",
               }}
             >
@@ -856,8 +856,8 @@ function CheckoutModal({ cart, wallet, onClose, onSuccess, addToast }) {
         {/* ── Review step ── */}
         {step === "review" && (
           <>
-            <h2 style={{ fontSize: 22, fontWeight: 700, color: "#1c1917", margin: "0 0 3px" }}>Order Summary</h2>
-            <p style={{ fontSize: 11, color: "#a8a29e", margin: "0 0 14px" }}>Review before paying with USDC on Arc</p>
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: "#1c1917", margin: "0 0 3px" }}>Order Summary</h2>
+            <p style={{ fontSize: 13, color: "#a8a29e", margin: "0 0 14px" }}>Review before paying with USDC on Arc</p>
 
             {/* Email */}
             <div style={{ marginBottom: 14 }}>
@@ -875,9 +875,9 @@ function CheckoutModal({ cart, wallet, onClose, onSuccess, addToast }) {
             {/* Item list */}
             <div style={{ background: "#faf9f7", borderRadius: 10, border: "1px solid #f0ede8", marginBottom: 16, maxHeight: 140, overflowY: "auto" }}>
               {cart.map(i => (
-                <div key={i.id} style={{ display: "flex", justifyContent: "space-between", padding: "6px 14px", borderBottom: "1px solid #f0ede8", fontSize: 13, color: "#1c1917" }}>
+                <div key={i.id} style={{ display: "flex", justifyContent: "space-between", padding: "6px 14px", borderBottom: "1px solid #f0ede8", fontSize: 15, color: "#1c1917" }}>
                   <span>{i.name} <span style={{ color: "#a8a29e" }}>×{i.qty}</span></span>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>{fmt(i.price * i.qty)}</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>{fmt(i.price * i.qty)}</span>
                 </div>
               ))}
             </div>
@@ -885,34 +885,34 @@ function CheckoutModal({ cart, wallet, onClose, onSuccess, addToast }) {
             {/* Payment details */}
             <div style={{ background: "#1c1917", borderRadius: 12, padding: "14px 16px", marginBottom: 18 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                <div style={{ width: 30, height: 30, background: "#c47d2a", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: "#fff", fontWeight: 800, flexShrink: 0 }}>◎</div>
+                <div style={{ width: 30, height: 30, background: "#c47d2a", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, color: "#fff", fontWeight: 800, flexShrink: 0 }}>◎</div>
                 <div>
-                  <p style={{ fontSize: 14, fontWeight: 700, color: "#fff", margin: 0 }}>Arc Blockchain · USDC</p>
-                  <p style={{ fontSize: 9, color: "#57534e", letterSpacing: 1.2, textTransform: "uppercase", margin: "2px 0 0" }}>Circle L1 · Rabby & MetaMask</p>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: "#fff", margin: 0 }}>Arc Blockchain · USDC</p>
+                  <p style={{ fontSize: 11, color: "#57534e", letterSpacing: 1.2, textTransform: "uppercase", margin: "2px 0 0" }}>Circle L1 · Rabby & MetaMask</p>
                 </div>
               </div>
               {[["Wallet", trunc(wallet) || "Not connected"], ["Network", "Arc Testnet (5042002)"], ["Gas", "~0.001 USDC"]].map(([k, v]) => (
-                <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 3 }}>
+                <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 3 }}>
                   <span style={{ color: "#57534e" }}>{k}</span>
                   <span style={{ fontFamily: "var(--font-mono)", color: "#a8a29e" }}>{v}</span>
                 </div>
               ))}
-              <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 16, color: "#fff", borderTop: "1px solid #292524", paddingTop: 8, marginTop: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 18, color: "#fff", borderTop: "1px solid #292524", paddingTop: 8, marginTop: 6 }}>
                 <span>Total</span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "#c47d2a" }}>{fmt(total)}</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 15, color: "#c47d2a" }}>{fmt(total)}</span>
               </div>
             </div>
 
             <div style={{ display: "flex", gap: 10 }}>
               <button
                 onClick={onClose}
-                style={{ flex: 1, background: "#f5f3f0", border: "1px solid #e7e4e0", borderRadius: 10, padding: "11px", fontSize: 11, cursor: "pointer", color: "#78716c", letterSpacing: 1.5, textTransform: "uppercase" }}
+                style={{ flex: 1, background: "#f5f3f0", border: "1px solid #e7e4e0", borderRadius: 10, padding: "11px", fontSize: 13, cursor: "pointer", color: "#78716c", letterSpacing: 1.5, textTransform: "uppercase" }}
               >
                 Cancel
               </button>
               <button
                 onClick={pay}
-                style={{ flex: 2, background: "#f97316", color: "#fff", border: "none", borderRadius: 10, padding: "11px", fontSize: 11, fontWeight: 700, cursor: "pointer", letterSpacing: 1.5, textTransform: "uppercase" }}
+                style={{ flex: 2, background: "#f97316", color: "#fff", border: "none", borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 700, cursor: "pointer", letterSpacing: 1.5, textTransform: "uppercase" }}
               >
                 Pay {fmt(total)}
               </button>
@@ -923,26 +923,26 @@ function CheckoutModal({ cart, wallet, onClose, onSuccess, addToast }) {
         {/* ── Signing step ── */}
         {step === "signing" && (
           <div style={{ textAlign: "center", padding: "44px 0" }}>
-            <div style={{ fontSize: 40, marginBottom: 14, animation: "spin 1s linear infinite", display: "inline-block" }}>⚡</div>
-            <h3 style={{ fontSize: 22, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>Signing Transaction</h3>
-            <p style={{ fontSize: 12, color: "#a8a29e" }}>Approve in your wallet</p>
-            <p style={{ fontSize: 10, color: "#c47d2a", letterSpacing: 1.5, textTransform: "uppercase", marginTop: 6 }}>Arc finality &lt;1 second</p>
+            <div style={{ fontSize: 44, marginBottom: 14, animation: "spin 1s linear infinite", display: "inline-block" }}>⚡</div>
+            <h3 style={{ fontSize: 24, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>Signing Transaction</h3>
+            <p style={{ fontSize: 14, color: "#a8a29e" }}>Approve in your wallet</p>
+            <p style={{ fontSize: 12, color: "#c47d2a", letterSpacing: 1.5, textTransform: "uppercase", marginTop: 6 }}>Arc finality &lt;1 second</p>
           </div>
         )}
 
         {/* ── Confirming step ── */}
         {step === "confirming" && (
           <div style={{ textAlign: "center", padding: "44px 0" }}>
-            <div style={{ fontSize: 40, marginBottom: 14, animation: "spin 1s linear infinite", display: "inline-block" }}>⏳</div>
-            <h3 style={{ fontSize: 22, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>Confirming Payment</h3>
-            <p style={{ fontSize: 12, color: "#a8a29e" }}>Waiting for block finalization on Arc...</p>
+            <div style={{ fontSize: 44, marginBottom: 14, animation: "spin 1s linear infinite", display: "inline-block" }}>⏳</div>
+            <h3 style={{ fontSize: 24, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>Confirming Payment</h3>
+            <p style={{ fontSize: 14, color: "#a8a29e" }}>Waiting for block finalization on Arc...</p>
             {txHash && (
               <div style={{ marginTop: 12 }}>
                 <a
                   href={`${ARC_CHAIN_CONFIG.blockExplorerUrls[0]}/tx/${txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ fontSize: 11, color: "#f97316", textDecoration: "underline" }}
+                  style={{ fontSize: 13, color: "#f97316", textDecoration: "underline" }}
                 >
                   View on ArcScan ↗
                 </a>
@@ -954,18 +954,18 @@ function CheckoutModal({ cart, wallet, onClose, onSuccess, addToast }) {
         {/* ── Success step ── */}
         {step === "success" && (
           <div style={{ textAlign: "center", padding: "34px 0" }}>
-            <div style={{ width: 56, height: 56, background: "#1c1917", borderRadius: "50%", margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "#c47d2a" }}>✓</div>
-            <h3 style={{ fontSize: 24, fontWeight: 700, color: "#1c1917", marginBottom: 5 }}>Payment Confirmed</h3>
-            <p style={{ fontSize: 12, color: "#a8a29e", marginBottom: 16 }}>Settled on Arc Blockchain</p>
+            <div style={{ width: 56, height: 56, background: "#1c1917", borderRadius: "50%", margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, color: "#c47d2a" }}>✓</div>
+            <h3 style={{ fontSize: 26, fontWeight: 700, color: "#1c1917", marginBottom: 5 }}>Payment Confirmed</h3>
+            <p style={{ fontSize: 14, color: "#a8a29e", marginBottom: 16 }}>Settled on Arc Blockchain</p>
             {txHash && (
               <div style={{ marginBottom: 16 }}>
-                <p style={{ fontSize: 10, color: "#78716c", margin: "0 0 6px" }}>Transaction Hash:</p>
+                <p style={{ fontSize: 12, color: "#78716c", margin: "0 0 6px" }}>Transaction Hash:</p>
                 <a
                   href={`${ARC_CHAIN_CONFIG.blockExplorerUrls[0]}/tx/${txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
-                    fontSize: 10,
+                    fontSize: 12,
                     fontFamily: "var(--font-mono)",
                     color: "#f97316",
                     background: "#faf9f7",
@@ -984,7 +984,7 @@ function CheckoutModal({ cart, wallet, onClose, onSuccess, addToast }) {
             )}
             <button
               onClick={onClose}
-              style={{ background: "#1c1917", color: "#fff", border: "none", borderRadius: 10, padding: "11px 28px", fontSize: 11, fontWeight: 700, cursor: "pointer", letterSpacing: 1.5, textTransform: "uppercase" }}
+              style={{ background: "#1c1917", color: "#fff", border: "none", borderRadius: 10, padding: "11px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", letterSpacing: 1.5, textTransform: "uppercase" }}
             >
               Continue Shopping
             </button>
@@ -1263,18 +1263,18 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
         <div style={{ background: "#1c1917", padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ position: "relative" }}>
-              <div style={{ width: 34, height: 34, background: "linear-gradient(135deg,#c47d2a,#e8a849)", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: "#fff" }}>◎</div>
+              <div style={{ width: 34, height: 34, background: "linear-gradient(135deg,#c47d2a,#e8a849)", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, color: "#fff" }}>◎</div>
               <div style={{ position: "absolute", bottom: -1, right: -1, width: 10, height: 10, background: "#22c55e", borderRadius: "50%", border: "2px solid #1c1917" }} aria-hidden="true" />
             </div>
             <div>
-              <p style={{ fontSize: 14, fontWeight: 700, color: "#fff", margin: 0, lineHeight: 1 }}>ArcWear Agent</p>
-              <p style={{ fontSize: 8, color: "#c47d2a", letterSpacing: 1.5, textTransform: "uppercase", margin: "2px 0 0" }}>AI · USDC · Arc Blockchain</p>
+              <p style={{ fontSize: 16, fontWeight: 700, color: "#fff", margin: 0, lineHeight: 1 }}>ArcWear Agent</p>
+              <p style={{ fontSize: 10, color: "#c47d2a", letterSpacing: 1.5, textTransform: "uppercase", margin: "2px 0 0" }}>AI · USDC · Arc Blockchain</p>
             </div>
           </div>
           <button
             onClick={onClose}
             aria-label="Close agent panel"
-            style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 8, color: "#888", width: 26, height: 26, cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center" }}
+            style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 8, color: "#888", width: 26, height: 26, cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}
           >
             ✕
           </button>
@@ -1283,7 +1283,7 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
         {/* Active tools indicator */}
         {tools.length > 0 && (
           <div style={{ background: "#faf9f7", borderBottom: "1px solid #f0ede8", padding: "5px 14px", display: "flex", gap: 6, alignItems: "center", flexShrink: 0 }}>
-            <span style={{ fontSize: 8, color: "#c47d2a", fontWeight: 700, animation: "pulse .8s infinite" }} aria-hidden="true">●</span>
+            <span style={{ fontSize: 10, color: "#c47d2a", fontWeight: 700, animation: "pulse .8s infinite" }} aria-hidden="true">●</span>
             {tools.map((t, i) => (
               <span key={i} className="badge-tool">⚡ {t.replace(/_/g, " ")}</span>
             ))}
@@ -1297,7 +1297,7 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
               {m.role === "assistant" && <div className="agent-avatar" aria-hidden="true">◎</div>}
               <div className={`chat-bubble chat-bubble--${m.role}`}>{m.text}</div>
               {m.role === "user" && (
-                <div style={{ width: 26, height: 26, background: "#e7e4e0", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#78716c", fontWeight: 700, flexShrink: 0 }} aria-hidden="true">
+                <div style={{ width: 26, height: 26, background: "#e7e4e0", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#78716c", fontWeight: 700, flexShrink: 0 }} aria-hidden="true">
                   U
                 </div>
               )}
@@ -1325,7 +1325,7 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
               <button
                 key={i}
                 onClick={() => setInput(c)}
-                style={{ background: "#faf9f7", border: "1px solid #e7e4e0", borderRadius: 20, padding: "4px 11px", fontSize: 10, color: "#78716c", cursor: "pointer" }}
+                style={{ background: "#faf9f7", border: "1px solid #e7e4e0", borderRadius: 20, padding: "4px 11px", fontSize: 12, color: "#78716c", cursor: "pointer" }}
               >
                 {c}
               </button>
@@ -1351,7 +1351,7 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
             style={{
               background: loading || !input.trim() ? "#e7e4e0" : "#1c1917",
               color: "#fff", border: "none", borderRadius: 10,
-              padding: "0 16px", fontSize: 10, fontWeight: 700,
+              padding: "0 16px", fontSize: 12, fontWeight: 700,
               cursor: loading || !input.trim() ? "not-allowed" : "pointer",
               letterSpacing: 1.2, textTransform: "uppercase",
             }}
@@ -1426,6 +1426,19 @@ export default function ArcWear() {
       };
     }
   }, []);
+
+  // Disable body scroll when any modal or drawer is open
+  useEffect(() => {
+    const isAnyModalOpen = agentOpen || cartOpen || checkout || !!editItem || approvalOpen || !!detailItem;
+    if (isAnyModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [agentOpen, cartOpen, checkout, editItem, approvalOpen, detailItem]);
 
   // Close wallet dropdown when clicking outside
   useEffect(() => {
@@ -1580,7 +1593,7 @@ export default function ArcWear() {
 
       {/* ── TOP BAR ── */}
       <div style={{ background: "#1c1917", padding: "6px 0", textAlign: "center", overflow: "hidden", whiteSpace: "nowrap" }}>
-        <p className="topbar-text" style={{ fontSize: 11, color: "#fde68a", letterSpacing: 0.5, display: "inline-block" }}>
+        <p className="topbar-text" style={{ fontSize: 13, color: "#fde68a", letterSpacing: 0.5, display: "inline-block" }}>
           🎉 Free shipping on orders over 150 USDC · Pay with USDC on Arc Blockchain
         </p>
       </div>
@@ -1605,7 +1618,7 @@ export default function ArcWear() {
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
             <LogoImage />
             <div className="desktop-only" style={{ flexDirection: "column" }}>
-              <p style={{ fontSize: 7, color: "#c47d2a", fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", margin: 0 }}>
+              <p style={{ fontSize: 9, color: "#c47d2a", fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", margin: 0 }}>
                 Agentic · Arc Blockchain
               </p>
             </div>
@@ -1962,7 +1975,7 @@ export default function ArcWear() {
               );
             })}
           </div>
-          <p style={{ fontSize: 11, color: "#a8a29e", flexShrink: 0, marginLeft: 12 }}>
+          <p style={{ fontSize: 13, color: "#a8a29e", flexShrink: 0, marginLeft: 12 }}>
             {displayCats.reduce((s, [, c]) => s + c.items.length, 0)} items
           </p>
         </div>
@@ -1973,7 +1986,7 @@ export default function ArcWear() {
         {displayCats.map(([catKey, cat]) => (
           <section key={catKey} style={{ marginBottom: 36 }}>
             <div className="section-header section-header">
-              <span style={{ fontSize: 20 }} aria-hidden="true">{cat.emoji}</span>
+              <span style={{ fontSize: 22 }} aria-hidden="true">{cat.emoji}</span>
               <h2 className="section-header__title">{cat.label}</h2>
               <div className="section-header__divider" aria-hidden="true" />
               <span className="section-header__count">{cat.items.length} products</span>
@@ -1996,19 +2009,19 @@ export default function ArcWear() {
         {/* Arc blockchain banner */}
         <aside aria-label="Powered by Arc Blockchain" style={{ background: "#1c1917", borderRadius: 12, padding: "24px 28px", display: "flex", alignItems: "center", flexWrap: "wrap", gap: 20, marginTop: 8, border: "1px solid #292524" }}>
           <div style={{ flex: 1, minWidth: 200 }}>
-            <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 17, fontWeight: 700, color: "#fff", marginBottom: 5 }}>
+            <h3 style={{ fontFamily: "var(--font-serif)", fontSize: 19, fontWeight: 700, color: "#fff", marginBottom: 5 }}>
               Powered by Arc Blockchain
             </h3>
-            <p style={{ fontSize: 11, color: "#57534e", lineHeight: 1.7, margin: 0 }}>
+            <p style={{ fontSize: 13, color: "#57534e", lineHeight: 1.7, margin: 0 }}>
               AI shopping agent · USDC stablecoin · Circle&apos;s Arc L1 · Sub-second settlement · Non-custodial
             </p>
           </div>
           <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
             {[["◎", "AI Agent", "Autonomous"], ["⚡", "<1s", "Finality"], ["$", "USDC", "Stablecoin"], ["🔒", "Non", "Custodial"]].map(([ic, a, b]) => (
               <div key={b} style={{ textAlign: "center" }}>
-                <p style={{ fontSize: 18, marginBottom: 4 }} aria-hidden="true">{ic}</p>
-                <p style={{ fontSize: 11, fontWeight: 700, color: "#fff" }}>{a}</p>
-                <p style={{ fontSize: 8, color: "#44403c", letterSpacing: 1, textTransform: "uppercase", marginTop: 2 }}>{b}</p>
+                <p style={{ fontSize: 20, marginBottom: 4 }} aria-hidden="true">{ic}</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{a}</p>
+                <p style={{ fontSize: 10, color: "#44403c", letterSpacing: 1, textTransform: "uppercase", marginTop: 2 }}>{b}</p>
               </div>
             ))}
           </div>
@@ -2023,7 +2036,7 @@ export default function ArcWear() {
           className="scroll-top"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           aria-label="Scroll to top"
-          style={{ position: "fixed", bottom: 28, left: 28, background: "#fff", color: "#1c1917", border: "1px solid #e7e4e0", borderRadius: "50%", width: 42, height: 42, fontSize: 16, cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 700, display: "flex", alignItems: "center", justifyContent: "center" }}
+          style={{ position: "fixed", bottom: 28, left: 28, background: "#fff", color: "#1c1917", border: "1px solid #e7e4e0", borderRadius: "50%", width: 42, height: 42, fontSize: 18, cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,0.1)", zIndex: 700, display: "flex", alignItems: "center", justifyContent: "center" }}
         >
           ↑
         </button>
@@ -2035,7 +2048,7 @@ export default function ArcWear() {
           className="fab-agent"
           onClick={() => setAgentOpen(true)}
           aria-label="Open AI shopping agent"
-          style={{ position: "fixed", bottom: 28, right: 28, background: "linear-gradient(135deg,#c47d2a,#f97316)", color: "#fff", border: "none", borderRadius: "50%", width: 52, height: 52, fontSize: 22, cursor: "pointer", boxShadow: "0 6px 20px rgba(249,115,22,0.4)", zIndex: 700, display: "flex", alignItems: "center", justifyContent: "center", animation: "glow 2.5s infinite" }}
+          style={{ position: "fixed", bottom: 28, right: 28, background: "linear-gradient(135deg,#c47d2a,#f97316)", color: "#fff", border: "none", borderRadius: "50%", width: 52, height: 52, fontSize: 24, cursor: "pointer", boxShadow: "0 6px 20px rgba(249,115,22,0.4)", zIndex: 700, display: "flex", alignItems: "center", justifyContent: "center", animation: "glow 2.5s infinite" }}
         >
           ◎
         </button>
@@ -2095,7 +2108,7 @@ export default function ArcWear() {
             style={{ flex: 1, background: "none", border: "none", padding: "10px 4px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}
           >
             <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#78716c", height: 24 }} aria-hidden="true">{icon}</span>
-            <span style={{ fontSize: 9, color: "#78716c", fontWeight: 600, letterSpacing: 0.3 }}>{label}</span>
+            <span style={{ fontSize: 11, color: "#78716c", fontWeight: 600, letterSpacing: 0.3 }}>{label}</span>
           </button>
         ))}
       </nav>

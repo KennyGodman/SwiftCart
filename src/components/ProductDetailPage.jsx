@@ -30,7 +30,7 @@ function StarRating({ rating, count }) {
     const filled = i <= Math.floor(rating);
     const half   = !filled && i - 0.5 <= rating;
     stars.push(
-      <span key={i} style={{ color: filled || half ? "#f59e0b" : "#d4cfc8", fontSize: 14 }}>
+      <span key={i} style={{ color: filled || half ? "#f59e0b" : "#d4cfc8", fontSize: 16 }}>
         {filled ? "★" : half ? "⭑" : "☆"}
       </span>
     );
@@ -38,10 +38,10 @@ function StarRating({ rating, count }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
       <div style={{ display: "flex", gap: 1 }}>{stars}</div>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 700, color: "#1c1917" }}>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: 15, fontWeight: 700, color: "#1c1917" }}>
         {rating}
       </span>
-      <span style={{ fontSize: 11, color: "#a8a29e" }}>({count} reviews)</span>
+      <span style={{ fontSize: 13, color: "#a8a29e" }}>({count} reviews)</span>
     </div>
   );
 }
@@ -140,7 +140,7 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
             borderRadius: "50%",
             cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 16, color: "#78716c",
+            fontSize: 18, color: "#78716c",
             boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
             transition: "all 0.15s",
           }}
@@ -176,7 +176,7 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
               position: "absolute", top: 16, left: 16,
               background: "#c41e3a", color: "#fff",
               borderRadius: 4, padding: "4px 10px",
-              fontSize: 11, fontWeight: 700, letterSpacing: 1,
+              fontSize: 13, fontWeight: 700, letterSpacing: 1,
               zIndex: 2,
             }}>
               -{pct}% OFF
@@ -191,7 +191,7 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
                 background: "rgba(255,255,255,0.9)",
                 border: "none", borderRadius: "50%",
                 width: 38, height: 38,
-                cursor: "pointer", fontSize: 18,
+                cursor: "pointer", fontSize: 20,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
                 transition: "transform 0.2s",
@@ -244,9 +244,9 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
                 <div style={{
                   background: "#c47d2a", color: "#fff",
                   borderRadius: 6, padding: "3px 8px",
-                  fontSize: 9, fontWeight: 700, letterSpacing: 1.5,
+                  fontSize: 11, fontWeight: 700, letterSpacing: 1.5,
                 }}>◎ ARC</div>
-                <span style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", letterSpacing: 1 }}>
+                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", letterSpacing: 1 }}>
                   {item.sectionLabel?.toUpperCase()} · {item.categoryLabel?.toUpperCase()}
                 </span>
               </div>
@@ -260,10 +260,10 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
             <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 14 }}>
               {[item.sectionLabel, item.categoryLabel].filter(Boolean).map((crumb, i, arr) => (
                 <span key={crumb} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                  <span style={{ fontSize: 11, color: i === arr.length - 1 ? "#c47d2a" : "#a8a29e", fontWeight: i === arr.length - 1 ? 600 : 400 }}>
+                  <span style={{ fontSize: 13, color: i === arr.length - 1 ? "#c47d2a" : "#a8a29e", fontWeight: i === arr.length - 1 ? 600 : 400 }}>
                     {crumb}
                   </span>
-                  {i < arr.length - 1 && <span style={{ color: "#d4cfc8", fontSize: 10 }}>›</span>}
+                  {i < arr.length - 1 && <span style={{ color: "#d4cfc8", fontSize: 12 }}>›</span>}
                 </span>
               ))}
             </div>
@@ -271,7 +271,7 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
             {/* Title */}
             <h1 style={{
               fontFamily: "var(--font-serif)",
-              fontSize: 26, fontWeight: 700,
+              fontSize: 28, fontWeight: 700,
               color: "#1c1917", lineHeight: 1.25,
               marginBottom: 10,
             }}>
@@ -287,13 +287,13 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 6 }}>
               <span style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: 28, fontWeight: 700, color: "#f97316",
+                fontSize: 30, fontWeight: 700, color: "#f97316",
               }}>
                 {fmt(item.price)}
               </span>
               <span style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: 15, color: "#a8a29e",
+                fontSize: 17, color: "#a8a29e",
                 textDecoration: "line-through",
               }}>
                 {fmt(item.oldPrice)}
@@ -303,24 +303,24 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
               <span style={{
                 background: "rgba(196,30,58,0.08)", color: "#c41e3a",
                 borderRadius: 4, padding: "3px 10px",
-                fontSize: 11, fontWeight: 700,
+                fontSize: 13, fontWeight: 700,
               }}>
                 You save {savings} USDC ({pct}%)
               </span>
             </div>
 
             {/* Description */}
-            <p style={{ fontSize: 13, color: "#57534e", lineHeight: 1.7, marginBottom: 22 }}>
+            <p style={{ fontSize: 15, color: "#57534e", lineHeight: 1.7, marginBottom: 22 }}>
               {item.desc} — crafted for everyday elegance and lasting comfort. Part of our curated {item.sectionLabel} collection.
             </p>
 
             {/* Size Selector */}
             <div style={{ marginBottom: 18 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: "#78716c", letterSpacing: 1.2, textTransform: "uppercase" }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#78716c", letterSpacing: 1.2, textTransform: "uppercase" }}>
                   Size
                 </span>
-                <span style={{ fontSize: 11, color: "#f97316", cursor: "pointer", fontWeight: 600 }}>
+                <span style={{ fontSize: 13, color: "#f97316", cursor: "pointer", fontWeight: 600 }}>
                   Size guide ↗
                 </span>
               </div>
@@ -335,7 +335,7 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
                       borderRadius: 8,
                       background: selectedSize === s ? "#1c1917" : "#fff",
                       color: selectedSize === s ? "#fff" : "#44403c",
-                      fontSize: 12, fontWeight: 600,
+                      fontSize: 14, fontWeight: 600,
                       cursor: "pointer",
                       transition: "all 0.15s",
                     }}
@@ -348,7 +348,7 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
 
             {/* Color Selector */}
             <div style={{ marginBottom: 20 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#78716c", letterSpacing: 1.2, textTransform: "uppercase", display: "block", marginBottom: 8 }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "#78716c", letterSpacing: 1.2, textTransform: "uppercase", display: "block", marginBottom: 8 }}>
                 Colour — <span style={{ color: "#1c1917", fontWeight: 700, textTransform: "none" }}>{selectedColor}</span>
               </span>
               <div style={{ display: "flex", gap: 8 }}>
@@ -390,7 +390,7 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
                   aria-label="Decrease"
                   style={{ width: 40, height: 48, border: "none", background: "#f9f7f5", fontSize: 18, cursor: "pointer", color: "#44403c" }}
                 >−</button>
-                <span style={{ width: 40, textAlign: "center", fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 700, color: "#1c1917" }}>
+                <span style={{ width: 40, textAlign: "center", fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 700, color: "#1c1917" }}>
                   {qty}
                 </span>
                 <button
@@ -407,7 +407,7 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
                   flex: 1, height: 48,
                   background: added ? "hsl(158,65%,38%)" : "#f97316",
                   color: "#fff", border: "none", borderRadius: 10,
-                  fontSize: 12, fontWeight: 700, cursor: "pointer",
+                  fontSize: 14, fontWeight: 700, cursor: "pointer",
                   letterSpacing: 1.4, textTransform: "uppercase",
                   transition: "all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
                   transform: added ? "scale(0.97)" : "scale(1)",
@@ -425,7 +425,7 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
                 width: "100%", height: 44,
                 background: "#1c1917", color: "#fff",
                 border: "none", borderRadius: 10,
-                fontSize: 11, fontWeight: 700, cursor: "pointer",
+                fontSize: 13, fontWeight: 700, cursor: "pointer",
                 letterSpacing: 1.4, textTransform: "uppercase",
                 marginBottom: 18,
                 transition: "background 0.2s",
@@ -440,9 +440,9 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
             <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
               {[["🚚", "Free shipping", "over 150 USDC"], ["↩️", "30-day", "returns"], ["🔒", "Secure", "USDC payment"]].map(([ic, a, b]) => (
                 <div key={a} style={{ flex: 1, background: "#faf9f7", borderRadius: 8, border: "1px solid #f0ede8", padding: "8px 6px", textAlign: "center" }}>
-                  <div style={{ fontSize: 16, marginBottom: 3 }}>{ic}</div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: "#1c1917" }}>{a}</div>
-                  <div style={{ fontSize: 9, color: "#a8a29e" }}>{b}</div>
+                  <div style={{ fontSize: 18, marginBottom: 3 }}>{ic}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "#1c1917" }}>{a}</div>
+                  <div style={{ fontSize: 11, color: "#a8a29e" }}>{b}</div>
                 </div>
               ))}
             </div>
@@ -457,7 +457,7 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
                     background: "none", border: "none",
                     borderBottom: activeTab === key ? "2px solid #c47d2a" : "2px solid transparent",
                     marginBottom: -1, padding: "8px 14px",
-                    fontSize: 11, fontWeight: 700,
+                    fontSize: 13, fontWeight: 700,
                     color: activeTab === key ? "#c47d2a" : "#a8a29e",
                     cursor: "pointer", letterSpacing: 0.8, textTransform: "uppercase",
                     transition: "all 0.15s",
@@ -472,12 +472,12 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
             {activeTab === "details" && (
               <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 6 }}>
                 {details.map(d => (
-                  <li key={d} style={{ fontSize: 12, color: "#57534e", display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ color: "#c47d2a", fontSize: 10 }}>✦</span> {d}
+                  <li key={d} style={{ fontSize: 14, color: "#57534e", display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ color: "#c47d2a", fontSize: 12 }}>✦</span> {d}
                   </li>
                 ))}
-                <li style={{ fontSize: 12, color: "#57534e", display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ color: "#c47d2a", fontSize: 10 }}>✦</span> SKU: {item.id.toUpperCase()}
+                <li style={{ fontSize: 14, color: "#57534e", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: "#c47d2a", fontSize: 12 }}>✦</span> SKU: {item.id.toUpperCase()}
                 </li>
               </ul>
             )}
@@ -489,12 +489,12 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
                   ["Express Shipping",  "2–3 business days", "12 USDC"],
                   ["Same-Day (Arc)",    "Instant on Arc chain", "2 USDC"],
                 ].map(([method, time, cost]) => (
-                  <div key={method} style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", background: "#faf9f7", borderRadius: 8, border: "1px solid #f0ede8", fontSize: 12 }}>
+                  <div key={method} style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", background: "#faf9f7", borderRadius: 8, border: "1px solid #f0ede8", fontSize: 14 }}>
                     <div>
                       <div style={{ fontWeight: 600, color: "#1c1917", marginBottom: 2 }}>{method}</div>
-                      <div style={{ color: "#a8a29e", fontSize: 11 }}>{time}</div>
+                      <div style={{ color: "#a8a29e", fontSize: 13 }}>{time}</div>
                     </div>
-                    <div style={{ fontFamily: "var(--font-mono)", color: "#c47d2a", fontWeight: 700, fontSize: 11, alignSelf: "center" }}>{cost}</div>
+                    <div style={{ fontFamily: "var(--font-mono)", color: "#c47d2a", fontWeight: 700, fontSize: 13, alignSelf: "center" }}>{cost}</div>
                   </div>
                 ))}
               </div>
@@ -504,7 +504,7 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 14 }}>
                   <div style={{ textAlign: "center" }}>
-                    <div style={{ fontFamily: "var(--font-serif)", fontSize: 40, fontWeight: 700, color: "#1c1917", lineHeight: 1 }}>{rating}</div>
+                    <div style={{ fontFamily: "var(--font-serif)", fontSize: 44, fontWeight: 700, color: "#1c1917", lineHeight: 1 }}>{rating}</div>
                     <StarRating rating={rating} count={reviewCount} />
                   </div>
                   <div style={{ flex: 1 }}>
@@ -513,18 +513,18 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
                       const pct = star === 5 ? 45 + (seed % 30) : star === 4 ? 25 + (seed % 20) : star === 3 ? 10 + (seed % 10) : star === 2 ? 5 : 3;
                       return (
                         <div key={star} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                          <span style={{ fontSize: 10, color: "#a8a29e", width: 8 }}>{star}</span>
-                          <span style={{ color: "#f59e0b", fontSize: 10 }}>★</span>
+                          <span style={{ fontSize: 12, color: "#a8a29e", width: 8 }}>{star}</span>
+                          <span style={{ color: "#f59e0b", fontSize: 12 }}>★</span>
                           <div style={{ flex: 1, height: 5, background: "#f0ede8", borderRadius: 3, overflow: "hidden" }}>
                             <div style={{ width: `${pct}%`, height: "100%", background: "#f59e0b", borderRadius: 3 }} />
                           </div>
-                          <span style={{ fontSize: 10, color: "#a8a29e", width: 26, textAlign: "right" }}>{pct}%</span>
+                          <span style={{ fontSize: 12, color: "#a8a29e", width: 26, textAlign: "right" }}>{pct}%</span>
                         </div>
                       );
                     })}
                   </div>
                 </div>
-                <p style={{ fontSize: 11, color: "#a8a29e", fontStyle: "italic" }}>
+                <p style={{ fontSize: 13, color: "#a8a29e", fontStyle: "italic" }}>
                   Based on {reviewCount} verified purchases · Ratings are aggregated.
                 </p>
               </div>
@@ -537,7 +537,7 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
           <div className="pdp-related-section" style={{ borderTop: "1px solid #f0ede8", padding: "28px 32px 32px" }}>
             <h3 style={{
               fontFamily: "var(--font-serif)",
-              fontSize: 18, fontWeight: 700,
+              fontSize: 20, fontWeight: 700,
               color: "#1c1917", marginBottom: 16,
             }}>
               You may also like
@@ -577,7 +577,7 @@ function RelatedCard({ item, onAdd }) {
     >
       {/* Image */}
       <div style={{ height: 140, background: "#faf9f7", overflow: "hidden", position: "relative" }}>
-        <span style={{ position: "absolute", top: 6, left: 6, background: "#c41e3a", color: "#fff", borderRadius: 3, padding: "2px 6px", fontSize: 9, fontWeight: 700 }}>
+        <span style={{ position: "absolute", top: 6, left: 6, background: "#c41e3a", color: "#fff", borderRadius: 3, padding: "2px 6px", fontSize: 11, fontWeight: 700 }}>
           -{pct}%
         </span>
         {!imgError ? (
@@ -596,11 +596,11 @@ function RelatedCard({ item, onAdd }) {
       </div>
       {/* Info */}
       <div style={{ padding: "10px 10px 12px" }}>
-        <p style={{ fontSize: 11, fontWeight: 600, color: "#1c1917", margin: "0 0 4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <p style={{ fontSize: 13, fontWeight: 600, color: "#1c1917", margin: "0 0 4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {item.name}
         </p>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, color: "#f97316" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 700, color: "#f97316" }}>
             {fmt(item.price)}
           </span>
           <button
@@ -612,7 +612,7 @@ function RelatedCard({ item, onAdd }) {
             style={{
               background: added ? "hsl(158,65%,38%)" : "#1c1917",
               color: "#fff", border: "none", borderRadius: 5,
-              padding: "5px 10px", fontSize: 9, fontWeight: 700,
+              padding: "5px 10px", fontSize: 11, fontWeight: 700,
               cursor: "pointer", letterSpacing: 0.8, textTransform: "uppercase",
               transition: "all 0.2s",
             }}

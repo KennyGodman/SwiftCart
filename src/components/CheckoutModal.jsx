@@ -135,8 +135,8 @@ export default function CheckoutModal({ cart, wallet, onClose, onSuccess, addToa
         {/* ── Review step ── */}
         {step === "review" && (
           <>
-            <h2 style={{ fontSize: 22, fontWeight: 700, color: "#1c1917", margin: "0 0 3px" }}>Order Summary</h2>
-            <p style={{ fontSize: 11, color: "#a8a29e", margin: "0 0 14px" }}>Review before paying with USDC on Arc</p>
+            <h2 style={{ fontSize: 24, fontWeight: 700, color: "#1c1917", margin: "0 0 3px" }}>Order Summary</h2>
+            <p style={{ fontSize: 13, color: "#a8a29e", margin: "0 0 14px" }}>Review before paying with USDC on Arc</p>
 
             {/* Email */}
             <div style={{ marginBottom: 14 }}>
@@ -154,9 +154,9 @@ export default function CheckoutModal({ cart, wallet, onClose, onSuccess, addToa
             {/* Item list */}
             <div style={{ background: "#faf9f7", borderRadius: 10, border: "1px solid #f0ede8", marginBottom: 16, maxHeight: 140, overflowY: "auto" }}>
               {cart.map(i => (
-                <div key={i.id} style={{ display: "flex", justifyContent: "space-between", padding: "6px 14px", borderBottom: "1px solid #f0ede8", fontSize: 13, color: "#1c1917" }}>
+                <div key={i.id} style={{ display: "flex", justifyContent: "space-between", padding: "6px 14px", borderBottom: "1px solid #f0ede8", fontSize: 15, color: "#1c1917" }}>
                   <span>{i.name} <span style={{ color: "#a8a29e" }}>×{i.qty}</span></span>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 11 }}>{fmt(i.price * i.qty)}</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 13 }}>{fmt(i.price * i.qty)}</span>
                 </div>
               ))}
             </div>
@@ -164,34 +164,34 @@ export default function CheckoutModal({ cart, wallet, onClose, onSuccess, addToa
             {/* Payment details */}
             <div style={{ background: "#1c1917", borderRadius: 12, padding: "14px 16px", marginBottom: 18 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                <div style={{ width: 30, height: 30, background: "#c47d2a", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: "#fff", fontWeight: 800, flexShrink: 0 }}>◎</div>
+                <div style={{ width: 30, height: 30, background: "#c47d2a", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, color: "#fff", fontWeight: 800, flexShrink: 0 }}>◎</div>
                 <div>
-                  <p style={{ fontSize: 14, fontWeight: 700, color: "#fff", margin: 0 }}>Arc Blockchain · USDC</p>
-                  <p style={{ fontSize: 9, color: "#57534e", letterSpacing: 1.2, textTransform: "uppercase", margin: "2px 0 0" }}>Circle L1 · Rabby &amp; MetaMask</p>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: "#fff", margin: 0 }}>Arc Blockchain · USDC</p>
+                  <p style={{ fontSize: 11, color: "#57534e", letterSpacing: 1.2, textTransform: "uppercase", margin: "2px 0 0" }}>Circle L1 · Rabby &amp; MetaMask</p>
                 </div>
               </div>
               {[["Wallet", trunc(wallet) || "Not connected"], ["Network", "Arc Testnet (5042002)"], ["Gas", "~0.001 USDC"]].map(([k, v]) => (
-                <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 3 }}>
+                <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 3 }}>
                   <span style={{ color: "#57534e" }}>{k}</span>
                   <span style={{ fontFamily: "var(--font-mono)", color: "#a8a29e" }}>{v}</span>
                 </div>
               ))}
-              <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 16, color: "#fff", borderTop: "1px solid #292524", paddingTop: 8, marginTop: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 18, color: "#fff", borderTop: "1px solid #292524", paddingTop: 8, marginTop: 6 }}>
                 <span>Total</span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "#c47d2a" }}>{fmt(total)}</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 15, color: "#c47d2a" }}>{fmt(total)}</span>
               </div>
             </div>
 
             <div style={{ display: "flex", gap: 10 }}>
               <button
                 onClick={onClose}
-                style={{ flex: 1, background: "#f5f3f0", border: "1px solid #e7e4e0", borderRadius: 10, padding: "11px", fontSize: 11, cursor: "pointer", color: "#78716c", letterSpacing: 1.5, textTransform: "uppercase" }}
+                style={{ flex: 1, background: "#f5f3f0", border: "1px solid #e7e4e0", borderRadius: 10, padding: "11px", fontSize: 13, cursor: "pointer", color: "#78716c", letterSpacing: 1.5, textTransform: "uppercase" }}
               >
                 Cancel
               </button>
               <button
                 onClick={pay}
-                style={{ flex: 2, background: "#f97316", color: "#fff", border: "none", borderRadius: 10, padding: "11px", fontSize: 11, fontWeight: 700, cursor: "pointer", letterSpacing: 1.5, textTransform: "uppercase" }}
+                style={{ flex: 2, background: "#f97316", color: "#fff", border: "none", borderRadius: 10, padding: "11px", fontSize: 13, fontWeight: 700, cursor: "pointer", letterSpacing: 1.5, textTransform: "uppercase" }}
               >
                 Pay {fmt(total)}
               </button>
@@ -202,26 +202,26 @@ export default function CheckoutModal({ cart, wallet, onClose, onSuccess, addToa
         {/* ── Signing step ── */}
         {step === "signing" && (
           <div style={{ textAlign: "center", padding: "44px 0" }}>
-            <div style={{ fontSize: 40, marginBottom: 14, animation: "spin 1s linear infinite", display: "inline-block" }}>⚡</div>
-            <h3 style={{ fontSize: 22, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>Signing Transaction</h3>
-            <p style={{ fontSize: 12, color: "#a8a29e" }}>Approve in your wallet</p>
-            <p style={{ fontSize: 10, color: "#c47d2a", letterSpacing: 1.5, textTransform: "uppercase", marginTop: 6 }}>Arc finality &lt;1 second</p>
+            <div style={{ fontSize: 44, marginBottom: 14, animation: "spin 1s linear infinite", display: "inline-block" }}>⚡</div>
+            <h3 style={{ fontSize: 24, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>Signing Transaction</h3>
+            <p style={{ fontSize: 14, color: "#a8a29e" }}>Approve in your wallet</p>
+            <p style={{ fontSize: 12, color: "#c47d2a", letterSpacing: 1.5, textTransform: "uppercase", marginTop: 6 }}>Arc finality &lt;1 second</p>
           </div>
         )}
 
         {/* ── Confirming step ── */}
         {step === "confirming" && (
           <div style={{ textAlign: "center", padding: "44px 0" }}>
-            <div style={{ fontSize: 40, marginBottom: 14, animation: "spin 1s linear infinite", display: "inline-block" }}>⏳</div>
-            <h3 style={{ fontSize: 22, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>Confirming Payment</h3>
-            <p style={{ fontSize: 12, color: "#a8a29e" }}>Waiting for block finalization on Arc...</p>
+            <div style={{ fontSize: 44, marginBottom: 14, animation: "spin 1s linear infinite", display: "inline-block" }}>⏳</div>
+            <h3 style={{ fontSize: 24, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>Confirming Payment</h3>
+            <p style={{ fontSize: 14, color: "#a8a29e" }}>Waiting for block finalization on Arc...</p>
             {txHash && (
               <div style={{ marginTop: 12 }}>
                 <a
                   href={`${ARC_CHAIN_CONFIG.blockExplorerUrls[0]}/tx/${txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ fontSize: 11, color: "#f97316", textDecoration: "underline" }}
+                  style={{ fontSize: 13, color: "#f97316", textDecoration: "underline" }}
                 >
                   View on ArcScan ↗
                 </a>
@@ -233,18 +233,18 @@ export default function CheckoutModal({ cart, wallet, onClose, onSuccess, addToa
         {/* ── Success step ── */}
         {step === "success" && (
           <div style={{ textAlign: "center", padding: "34px 0" }}>
-            <div style={{ width: 56, height: 56, background: "#1c1917", borderRadius: "50%", margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "#c47d2a" }}>✓</div>
-            <h3 style={{ fontSize: 24, fontWeight: 700, color: "#1c1917", marginBottom: 5 }}>Payment Confirmed</h3>
-            <p style={{ fontSize: 12, color: "#a8a29e", marginBottom: 16 }}>Settled on Arc Blockchain</p>
+            <div style={{ width: 56, height: 56, background: "#1c1917", borderRadius: "50%", margin: "0 auto 16px", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, color: "#c47d2a" }}>✓</div>
+            <h3 style={{ fontSize: 26, fontWeight: 700, color: "#1c1917", marginBottom: 5 }}>Payment Confirmed</h3>
+            <p style={{ fontSize: 14, color: "#a8a29e", marginBottom: 16 }}>Settled on Arc Blockchain</p>
             {txHash && (
               <div style={{ marginBottom: 16 }}>
-                <p style={{ fontSize: 10, color: "#78716c", margin: "0 0 6px" }}>Transaction Hash:</p>
+                <p style={{ fontSize: 12, color: "#78716c", margin: "0 0 6px" }}>Transaction Hash:</p>
                 <a
                   href={`${ARC_CHAIN_CONFIG.blockExplorerUrls[0]}/tx/${txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
-                    fontSize: 10,
+                    fontSize: 12,
                     fontFamily: "var(--font-mono)",
                     color: "#f97316",
                     background: "#faf9f7",
@@ -263,7 +263,7 @@ export default function CheckoutModal({ cart, wallet, onClose, onSuccess, addToa
             )}
             <button
               onClick={onClose}
-              style={{ background: "#1c1917", color: "#fff", border: "none", borderRadius: 10, padding: "11px 28px", fontSize: 11, fontWeight: 700, cursor: "pointer", letterSpacing: 1.5, textTransform: "uppercase" }}
+              style={{ background: "#1c1917", color: "#fff", border: "none", borderRadius: 10, padding: "11px 28px", fontSize: 13, fontWeight: 700, cursor: "pointer", letterSpacing: 1.5, textTransform: "uppercase" }}
             >
               Continue Shopping
             </button>

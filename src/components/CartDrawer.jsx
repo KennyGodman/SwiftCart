@@ -22,8 +22,8 @@ export default function CartDrawer({ cart, onRemove, onCheckout, onClose, wallet
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px", borderBottom: "1px solid #f0ede8" }}>
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: "#1c1917", margin: 0 }}>Your Cart</h2>
-            <p style={{ fontSize: 11, color: "#a8a29e", margin: "3px 0 0" }}>
+            <h2 style={{ fontSize: 22, fontWeight: 700, color: "#1c1917", margin: 0 }}>Your Cart</h2>
+            <p style={{ fontSize: 13, color: "#a8a29e", margin: "3px 0 0" }}>
               {cart.reduce((s, i) => s + i.qty, 0)} items
             </p>
           </div>
@@ -34,8 +34,8 @@ export default function CartDrawer({ cart, onRemove, onCheckout, onClose, wallet
         <div style={{ flex: 1, overflowY: "auto", padding: "14px 20px" }}>
           {cart.length === 0 ? (
             <div style={{ textAlign: "center", paddingTop: 80 }}>
-              <p style={{ fontSize: 44, marginBottom: 10, opacity: 0.2 }}>🛒</p>
-              <p style={{ fontSize: 13, color: "#a8a29e" }}>Your cart is empty</p>
+              <p style={{ fontSize: 48, marginBottom: 10, opacity: 0.2 }}>🛒</p>
+              <p style={{ fontSize: 15, color: "#a8a29e" }}>Your cart is empty</p>
             </div>
           ) : cart.map(item => (
             <div key={item.id + item.size + item.color} className="cart-item">
@@ -47,20 +47,20 @@ export default function CartDrawer({ cart, onRemove, onCheckout, onClose, wallet
                 />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: "#1c1917", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                <p style={{ fontSize: 15, fontWeight: 600, color: "#1c1917", margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                   {item.name}
                 </p>
-                <p style={{ fontSize: 11, color: "#a8a29e", margin: "2px 0 0" }}>
+                <p style={{ fontSize: 13, color: "#a8a29e", margin: "2px 0 0" }}>
                   Qty {item.qty}{item.size ? ` · ${item.size}` : ""}{item.color && item.color !== "Default" ? ` · ${item.color}` : ""}
                 </p>
               </div>
               <div style={{ textAlign: "right", flexShrink: 0 }}>
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 600, color: "#1c1917", margin: 0 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: 14, fontWeight: 600, color: "#1c1917", margin: 0 }}>
                   {fmt(item.price * item.qty)}
                 </p>
                 <button
                   onClick={() => onRemove(item.id)}
-                  style={{ background: "none", border: "none", color: "#a8a29e", cursor: "pointer", fontSize: 10, marginTop: 4, padding: 0, textDecoration: "underline" }}
+                  style={{ background: "none", border: "none", color: "#a8a29e", cursor: "pointer", fontSize: 12, marginTop: 4, padding: 0, textDecoration: "underline" }}
                 >
                   remove
                 </button>
@@ -73,22 +73,22 @@ export default function CartDrawer({ cart, onRemove, onCheckout, onClose, wallet
         {cart.length > 0 && (
           <div style={{ padding: "14px 20px 22px", borderTop: "1px solid #f0ede8" }}>
             {[["Subtotal", fmt(total)], ["Gas (USDC)", "~0.001"]].map(([k, v]) => (
-              <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#a8a29e", marginBottom: 4 }}>
+              <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "#a8a29e", marginBottom: 4 }}>
                 <span>{k}</span>
                 <span style={{ fontFamily: "var(--font-mono)" }}>{v}</span>
               </div>
             ))}
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 17, fontWeight: 700, color: "#1c1917", borderTop: "1px solid #f0ede8", paddingTop: 10, marginTop: 6, marginBottom: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 19, fontWeight: 700, color: "#1c1917", borderTop: "1px solid #f0ede8", paddingTop: 10, marginTop: 6, marginBottom: 14 }}>
               <span>Total</span>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 14 }}>{fmt(total)}</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 16 }}>{fmt(total)}</span>
             </div>
 
             {/* Arc info pill */}
             <div className="arc-block" style={{ marginBottom: 12 }}>
               <div className="arc-block__icon">◎</div>
               <div>
-                <p style={{ fontSize: 9, fontWeight: 700, color: "#c47d2a", letterSpacing: 1.5, textTransform: "uppercase", margin: 0 }}>Arc Blockchain · USDC</p>
-                <p style={{ fontSize: 9, color: "#57534e", margin: "2px 0 0" }}>Sub-second finality · Circle L1</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: "#c47d2a", letterSpacing: 1.5, textTransform: "uppercase", margin: 0 }}>Arc Blockchain · USDC</p>
+                <p style={{ fontSize: 11, color: "#57534e", margin: "2px 0 0" }}>Sub-second finality · Circle L1</p>
               </div>
             </div>
 
@@ -97,7 +97,7 @@ export default function CartDrawer({ cart, onRemove, onCheckout, onClose, wallet
               style={{
                 width: "100%", background: "#f97316", color: "#fff",
                 border: "none", borderRadius: 10, padding: "13px",
-                fontSize: 12, fontWeight: 700, cursor: "pointer",
+                fontSize: 14, fontWeight: 700, cursor: "pointer",
                 letterSpacing: 1.5, textTransform: "uppercase",
               }}
             >

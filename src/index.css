@@ -67,7 +67,7 @@ html {
 
 body {
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
   color: var(--color-ink);
   background: var(--color-bg);
@@ -367,7 +367,7 @@ body {
   color: #fff;
   border: none;
   padding: 8px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1.2px;
   text-transform: uppercase;

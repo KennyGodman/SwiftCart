@@ -73,16 +73,16 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
                     background: "linear-gradient(135deg, #c47d2a, #f97316)",
                     borderRadius: 12,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 20, color: "#fff", fontWeight: 800,
+                    fontSize: 22, color: "#fff", fontWeight: 800,
                   }}>
                     ◎
                   </div>
                   <div>
-                    <p style={{ fontSize: 16, fontWeight: 700, color: "#fff", margin: 0 }}>
+                    <p style={{ fontSize: 18, fontWeight: 700, color: "#fff", margin: 0 }}>
                       Enable Agent Mode
                     </p>
                     <p style={{
-                      fontSize: 9, color: "#c47d2a",
+                      fontSize: 11, color: "#c47d2a",
                       letterSpacing: 1.5, textTransform: "uppercase", margin: "3px 0 0",
                     }}>
                       Autonomous Shopping · Arc Blockchain
@@ -108,7 +108,7 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
                 border: "1px solid #f0ede8", padding: "16px 18px",
                 marginBottom: 20,
               }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: "#1c1917", margin: "0 0 8px" }}>
+                <p style={{ fontSize: 15, fontWeight: 600, color: "#1c1917", margin: "0 0 8px" }}>
                   How it works
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -118,8 +118,8 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
                     ["3️⃣", "Agent never exceeds your cap, and you can revoke anytime"],
                   ].map(([icon, text]) => (
                     <div key={text} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                      <span style={{ fontSize: 14, flexShrink: 0, lineHeight: 1.4 }}>{icon}</span>
-                      <p style={{ fontSize: 12, color: "#57534e", margin: 0, lineHeight: 1.5 }}>{text}</p>
+                      <span style={{ fontSize: 16, flexShrink: 0, lineHeight: 1.4 }}>{icon}</span>
+                      <p style={{ fontSize: 14, color: "#57534e", margin: 0, lineHeight: 1.5 }}>{text}</p>
                     </div>
                   ))}
                 </div>
@@ -141,17 +141,17 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
                   ))}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 11, color: "#78716c" }}>Custom:</span>
+                  <span style={{ fontSize: 13, color: "#78716c" }}>Custom:</span>
                   <input
                     type="number"
                     className="input"
                     value={amount}
                     onChange={(e) => setAmount(Math.max(1, Number(e.target.value)))}
-                    style={{ width: 120, padding: "7px 12px", fontSize: 13, fontFamily: "var(--font-mono)" }}
+                    style={{ width: 120, padding: "7px 12px", fontSize: 15, fontFamily: "var(--font-mono)" }}
                     min="1"
                     step="10"
                   />
-                  <span style={{ fontSize: 11, color: "#a8a29e" }}>USDC</span>
+                  <span style={{ fontSize: 13, color: "#a8a29e" }}>USDC</span>
                 </div>
               </div>
 
@@ -168,7 +168,7 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
                 ].map(([k, v]) => (
                   <div key={k} style={{
                     display: "flex", justifyContent: "space-between",
-                    fontSize: 11, marginBottom: 4,
+                    fontSize: 13, marginBottom: 4,
                   }}>
                     <span style={{ color: "#57534e" }}>{k}</span>
                     <span style={{ fontFamily: "var(--font-mono)", color: "#a8a29e" }}>{v}</span>
@@ -189,10 +189,10 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
                     padding: "8px 12px", border: "1px solid #f0ede8",
                     flex: 1, minWidth: 100,
                   }}>
-                    <span style={{ fontSize: 16 }}>{ic}</span>
+                    <span style={{ fontSize: 18 }}>{ic}</span>
                     <div>
-                      <p style={{ fontSize: 10, fontWeight: 700, color: "#1c1917", margin: 0 }}>{a}</p>
-                      <p style={{ fontSize: 9, color: "#a8a29e", margin: 0 }}>{b}</p>
+                      <p style={{ fontSize: 12, fontWeight: 700, color: "#1c1917", margin: 0 }}>{a}</p>
+                      <p style={{ fontSize: 11, color: "#a8a29e", margin: 0 }}>{b}</p>
                     </div>
                   </div>
                 ))}
@@ -204,7 +204,7 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
                   onClick={onClose}
                   style={{
                     flex: 1, background: "#f5f3f0", border: "1px solid #e7e4e0",
-                    borderRadius: 10, padding: "13px", fontSize: 11,
+                    borderRadius: 10, padding: "13px", fontSize: 13,
                     cursor: "pointer", color: "#78716c",
                     letterSpacing: 1.5, textTransform: "uppercase",
                   }}
@@ -216,7 +216,7 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
                   style={{
                     flex: 2, background: "linear-gradient(135deg, #c47d2a, #f97316)",
                     color: "#fff", border: "none", borderRadius: 10,
-                    padding: "13px", fontSize: 12, fontWeight: 700,
+                    padding: "13px", fontSize: 14, fontWeight: 700,
                     cursor: "pointer", letterSpacing: 1.5, textTransform: "uppercase",
                     boxShadow: "0 4px 16px rgba(249,115,22,0.3)",
                   }}
@@ -232,19 +232,19 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
         {step === "signing" && (
           <div style={{ textAlign: "center", padding: "60px 28px" }}>
             <div style={{
-              fontSize: 44, marginBottom: 16,
+              fontSize: 48, marginBottom: 16,
               animation: "spin 1s linear infinite", display: "inline-block",
             }}>
               🔐
             </div>
-            <h3 style={{ fontSize: 22, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>
+            <h3 style={{ fontSize: 24, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>
               Approve in Wallet
             </h3>
-            <p style={{ fontSize: 12, color: "#a8a29e", marginBottom: 4 }}>
+            <p style={{ fontSize: 14, color: "#a8a29e", marginBottom: 4 }}>
               Sign the ERC-20 approval to enable agent mode
             </p>
             <p style={{
-              fontSize: 10, color: "#c47d2a",
+              fontSize: 12, color: "#c47d2a",
               letterSpacing: 1.5, textTransform: "uppercase",
             }}>
               One-time approval · Revocable anytime
@@ -259,14 +259,14 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
               width: 60, height: 60, background: "linear-gradient(135deg, #c47d2a, #f97316)",
               borderRadius: "50%", margin: "0 auto 18px",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 26, color: "#fff",
+              fontSize: 28, color: "#fff",
             }}>
               ✓
             </div>
-            <h3 style={{ fontSize: 24, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>
+            <h3 style={{ fontSize: 26, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>
               Agent Mode Enabled
             </h3>
-            <p style={{ fontSize: 12, color: "#a8a29e", marginBottom: 16 }}>
+            <p style={{ fontSize: 14, color: "#a8a29e", marginBottom: 16 }}>
               Your AI agent can now shop autonomously up to {fmt(amount)}
             </p>
             {txHash && (
@@ -275,7 +275,7 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  fontSize: 10, fontFamily: "var(--font-mono)",
+                  fontSize: 12, fontFamily: "var(--font-mono)",
                   color: "#f97316", textDecoration: "none",
                   display: "inline-block", marginBottom: 20,
                 }}
@@ -288,7 +288,7 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
               onClick={onClose}
               style={{
                 background: "#1c1917", color: "#fff", border: "none",
-                borderRadius: 10, padding: "12px 32px", fontSize: 11,
+                borderRadius: 10, padding: "12px 32px", fontSize: 13,
                 fontWeight: 700, cursor: "pointer",
                 letterSpacing: 1.5, textTransform: "uppercase",
               }}
@@ -309,10 +309,10 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
             }}>
               ⚠️
             </div>
-            <h3 style={{ fontSize: 20, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>
+            <h3 style={{ fontSize: 22, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>
               Approval Failed
             </h3>
-            <p style={{ fontSize: 12, color: "#a8a29e", marginBottom: 20 }}>
+            <p style={{ fontSize: 14, color: "#a8a29e", marginBottom: 20 }}>
               {error}
             </p>
             <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
@@ -320,7 +320,7 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
                 onClick={onClose}
                 style={{
                   background: "#f5f3f0", border: "1px solid #e7e4e0",
-                  borderRadius: 10, padding: "11px 24px", fontSize: 11,
+                  borderRadius: 10, padding: "11px 24px", fontSize: 13,
                   cursor: "pointer", color: "#78716c",
                 }}
               >
@@ -330,7 +330,7 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
                 onClick={() => setStep("review")}
                 style={{
                   background: "#1c1917", color: "#fff", border: "none",
-                  borderRadius: 10, padding: "11px 24px", fontSize: 11,
+                  borderRadius: 10, padding: "11px 24px", fontSize: 13,
                   fontWeight: 700, cursor: "pointer",
                 }}
               >
