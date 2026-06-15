@@ -2310,7 +2310,7 @@ export default function ArcWear() {
             <input
               type="text"
               className="search-input"
-              placeholder="Search fashion, styles..."
+              placeholder="Search products, categories.."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
