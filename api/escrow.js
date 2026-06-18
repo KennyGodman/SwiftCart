@@ -83,7 +83,7 @@ async function callEscrowContract(fnSignature, params, apiKey, entitySecret, wal
       contractAddress:        escrowAddr,
       abiFunctionSignature:   fnSignature,
       abiParameters:          params,
-      fee: { type: "level", config: { feeLevel: "MEDIUM" } },
+      feeLevel:               "MEDIUM",
     }),
   });
 

@@ -120,7 +120,7 @@ async function submitTransferFrom(userWallet, amount, apiKey, entitySecret, wall
       contractAddress:       USDC_ADDRESS,
       abiFunctionSignature:  "transferFrom(address,address,uint256)",
       abiParameters:         [userWallet, MERCHANT_ADDR, amountRaw],
-      fee: { type: "level", config: { feeLevel: "MEDIUM" } },
+      feeLevel:              "MEDIUM",
     }),
   });
 
