@@ -1607,6 +1607,20 @@ function OrderDrawer({ orders, onClose, onRetryOrder, onCancelOrder, onDeleteOrd
             if (order.status === "failed") { bg = "#fee2e2"; color = "#b91c1c"; }
             if (order.status === "cancelled" || order.status === "canceled") { bg = "#f5f5f4"; color = "#78716c"; }
 
+            // ERC-8183 escrow state overrides display badge
+            const escrowState = order.escrowStatus;
+            let escrowBadge = null;
+            if (order.escrow && order.jobId != null) {
+              const escrowBadges = {
+                funded:    { label: "🔒 Escrowed",   bg: "#eff6ff", color: "#1d4ed8" },
+                submitted: { label: "📦 Processing",  bg: "#f0fdf4", color: "#15803d" },
+                completed: { label: "✅ Settled",     bg: "#dcfce7", color: "#15803d" },
+                rejected:  { label: "↩ Refunded",    bg: "#fee2e2", color: "#b91c1c" },
+                expired:   { label: "⏱ Expired",     bg: "#fef3c7", color: "#d97706" },
+              };
+              escrowBadge = escrowBadges[escrowState] || null;
+            }
+
             const isExpanded = !!expandedOrders[order.id];
             const itemCount = order.items ? order.items.reduce((s, i) => s + i.qty, 0) : 0;
             const isPlaceholderTx = order.status === "pending" && order.txHash && order.txHash.startsWith("pending_");
@@ -1615,11 +1629,11 @@ function OrderDrawer({ orders, onClose, onRetryOrder, onCancelOrder, onDeleteOrd
               <div
                 key={order.id || order.txHash}
                 style={{
-                  border: "1px solid #e7e4e0",
+                  border: order.escrow ? "1px solid #bfdbfe" : "1px solid #e7e4e0",
                   borderRadius: 12,
                   padding: 16,
                   marginBottom: 12,
-                  background: "#fff",
+                  background: order.escrow ? "#fafbff" : "#fff",
                   cursor: "pointer",
                   transition: "all 0.2s ease",
                 }}
@@ -1629,16 +1643,25 @@ function OrderDrawer({ orders, onClose, onRetryOrder, onCancelOrder, onDeleteOrd
                   <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "#a8a29e" }}>
                     {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}
                   </span>
-                  <span className="order-status-badge" style={{ background: bg, color: color, fontSize: 11, padding: "2px 8px", borderRadius: 12, fontWeight: 600 }}>
-                    {order.status === "pending"
-                      ? (isPlaceholderTx ? "⏳ Payment Pending" : "⏳ Confirming")
-                      : (order.status === "success" || order.status === "confirmed")
-                      ? "✓ Confirmed"
-                      : (order.status === "cancelled" || order.status === "canceled")
-                      ? "✕ Cancelled"
-                      : "✕ Failed"}
-                  </span>
+                  <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                    {order.escrow && (
+                      <span style={{ fontSize: 10, padding: "1px 6px", borderRadius: 8, background: "#eff6ff", color: "#1d4ed8", fontWeight: 700, letterSpacing: 0.5 }}>
+                        ERC-8183
+                      </span>
+                    )}
+                    <span className="order-status-badge" style={{ background: escrowBadge ? escrowBadge.bg : bg, color: escrowBadge ? escrowBadge.color : color, fontSize: 11, padding: "2px 8px", borderRadius: 12, fontWeight: 600 }}>
+                      {escrowBadge ? escrowBadge.label
+                        : order.status === "pending"
+                        ? (isPlaceholderTx ? "⏳ Payment Pending" : "⏳ Confirming")
+                        : (order.status === "success" || order.status === "confirmed")
+                        ? "✓ Confirmed"
+                        : (order.status === "cancelled" || order.status === "canceled")
+                        ? "✕ Cancelled"
+                        : "✕ Failed"}
+                    </span>
+                  </div>
                 </div>
+
 
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
@@ -1665,6 +1688,23 @@ function OrderDrawer({ orders, onClose, onRetryOrder, onCancelOrder, onDeleteOrd
                         </div>
                       ))}
                     </div>
+
+                    {/* ERC-8183 escrow job info */}
+                    {order.escrow && order.jobId != null && (
+                      <div style={{
+                        background: "#eff6ff", borderRadius: 8, padding: "10px 12px",
+                        marginBottom: 12, border: "1px solid #bfdbfe",
+                        fontSize: 11, color: "#1e40af",
+                      }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                          <span style={{ fontWeight: 700 }}>🔒 ERC-8183 Escrow</span>
+                          <span style={{ fontFamily: "var(--font-mono)" }}>Job #{order.jobId}</span>
+                        </div>
+                        <div style={{ color: "#3b82f6", fontSize: 10 }}>
+                          USDC held trustlessly on Arc · Released only after delivery confirmed
+                        </div>
+                      </div>
+                    )}
 
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
                       {isPlaceholderTx ? (

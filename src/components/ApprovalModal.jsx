@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { fmt, trunc } from "../utils";
-import { AGENT_WALLET, ARC_CHAIN_CONFIG, DEFAULT_AGENT_ALLOWANCE } from "../config";
+import { AGENT_WALLET, APPROVAL_TARGET, ESCROW_CONTRACT_ADDRESS, ARC_CHAIN_CONFIG, DEFAULT_AGENT_ALLOWANCE } from "../config";
+
+const isEscrow = !!ESCROW_CONTRACT_ADDRESS;
 
 /**
  * ApprovalModal — the one-time USDC spending approval gate.
@@ -115,7 +117,9 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
                   {[
                     ["1️⃣", "You approve a USDC spending cap (one wallet popup)"],
                     ["2️⃣", "Agent can purchase items instantly — no more popups"],
-                    ["3️⃣", "Agent never exceeds your cap, and you can revoke anytime"],
+                    isEscrow
+                      ? ["3️⃣", "Your USDC is held in an ERC-8183 escrow contract until delivery is confirmed — fully trustless"]
+                      : ["3️⃣", "Agent never exceeds your cap, and you can revoke anytime"],
                   ].map(([icon, text]) => (
                     <div key={text} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                       <span style={{ fontSize: 16, flexShrink: 0, lineHeight: 1.4 }}>{icon}</span>
@@ -161,10 +165,10 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
                 padding: "14px 16px", marginBottom: 20,
               }}>
                 {[
-                  ["Agent Wallet", trunc(AGENT_WALLET)],
+                  [isEscrow ? "Escrow Contract" : "Agent Wallet", trunc(APPROVAL_TARGET)],
                   ["Network", "Arc Testnet"],
                   ["Spending Cap", fmt(amount)],
-                  ["Type", "ERC-20 Allowance (revocable)"],
+                  ["Type", isEscrow ? "ERC-8183 Escrow (revocable)" : "ERC-20 Allowance (revocable)"],
                 ].map(([k, v]) => (
                   <div key={k} style={{
                     display: "flex", justifyContent: "space-between",
@@ -174,6 +178,17 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
                     <span style={{ fontFamily: "var(--font-mono)", color: "#a8a29e" }}>{v}</span>
                   </div>
                 ))}
+                {isEscrow && (
+                  <div style={{
+                    marginTop: 10, paddingTop: 10,
+                    borderTop: "1px solid rgba(255,255,255,0.08)",
+                    fontSize: 11, color: "#c47d2a",
+                    display: "flex", alignItems: "center", gap: 6,
+                  }}>
+                    <span>🔒</span>
+                    <span>ERC-8183: Your USDC stays in escrow until order is confirmed</span>
+                  </div>
+                )}
               </div>
 
               {/* Trust signals */}

@@ -42,13 +42,17 @@ async function createOrder(data) {
   const id = crypto.randomUUID();
   const order = {
     id,
-    userWallet: data.userWallet.toLowerCase(),
-    items: data.items,
-    total: Number(data.total),
-    txHash: data.txHash,
+    userWallet:    data.userWallet.toLowerCase(),
+    items:         data.items,
+    total:         Number(data.total),
+    txHash:        data.txHash,
     customerEmail: data.customerEmail || null,
-    status: data.status || "pending",
-    createdAt: new Date().toISOString(),
+    status:        data.status || "pending",
+    // ERC-8183 fields (populated when agent escrow is used)
+    jobId:         data.jobId         ?? null,
+    escrowStatus:  data.escrowStatus  ?? null, // "funded"|"submitted"|"completed"|"rejected"|"expired"
+    escrow:        data.escrow        ?? false, // true when ERC-8183 flow was used
+    createdAt:     new Date().toISOString(),
   };
   await kv.set(`order:${id}`, order);
   await kv.sadd(`wallet-orders:${order.userWallet}`, id);
@@ -83,7 +87,7 @@ export default async function handler(req, res) {
 
     // ── POST /api/orders ──────────────────────────────
     if (req.method === "POST") {
-      const { userWallet, items, total, txHash, customerEmail, status } = req.body;
+      const { userWallet, items, total, txHash, customerEmail, status, jobId, escrowStatus, escrow } = req.body;
       if (!userWallet || !items || !total || !txHash) {
         return res.status(400).json({
           error: "Required fields: userWallet, items, total, txHash",
@@ -91,21 +95,24 @@ export default async function handler(req, res) {
       }
       const order = await createOrder({
         userWallet, items, total, txHash, customerEmail, status,
+        jobId, escrowStatus, escrow,
       });
       return res.status(201).json({ order });
     }
 
     // ── PATCH /api/orders ─────────────────────────────
     if (req.method === "PATCH") {
-      const { id, status, txHash } = req.body;
+      const { id, status, txHash, escrowStatus, jobId } = req.body;
       if (!id) {
         return res.status(400).json({ error: "Required: id" });
       }
       const kv = await getKV();
       const order = await kv.get(`order:${id}`);
       if (!order) return res.status(404).json({ error: "Order not found" });
-      if (status) order.status = status;
-      if (txHash) order.txHash = txHash;
+      if (status)       order.status       = status;
+      if (txHash)       order.txHash       = txHash;
+      if (escrowStatus) order.escrowStatus = escrowStatus;
+      if (jobId != null) order.jobId       = jobId;
       await kv.set(`order:${id}`, order);
       return res.status(200).json({ order });
     }

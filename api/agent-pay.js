@@ -1,29 +1,37 @@
 /**
  * agent-pay.js — Autonomous USDC checkout via Circle Programmable Wallets REST API.
  *
- * Flow:
- *  1. Verify on-chain USDC allowance (user → agent wallet)
- *  2. Encrypt entity secret with Circle's RSA public key
- *  3. Call Circle REST API → POST /developer/transactions/contractExecution
- *     (signs transferFrom(user, merchant, amount) with Circle MPC — no user popup)
- *  4. Poll until tx confirmed on ARC-TESTNET
- *  5. Send Brevo confirmation email
+ * Flow (ERC-8183 Escrow — when ESCROW_CONTRACT_ADDRESS is set):
+ *  1. Verify on-chain USDC allowance (user → ESCROW CONTRACT)
+ *  2. Call /api/escrow which runs: createJob → fundOnBehalf → submit → complete
+ *  3. USDC flows: buyer → escrow → merchant (trustless, on-chain)
+ *  4. Send Brevo confirmation email
+ *
+ * Flow (Legacy Direct — fallback when no escrow contract set):
+ *  1. Verify USDC allowance (user → agent wallet)
+ *  2. Call USDC.transferFrom(user, merchant, amount) via Circle MPC
+ *  3. Send confirmation email
  *
  * Required .env vars:
- *   CIRCLE_API_KEY          — from console.circle.com
- *   CIRCLE_ENTITY_SECRET    — 64-char hex (run `node scripts/circle-setup.mjs` to create)
- *   CIRCLE_WALLET_ID        — UUID of agent wallet (output of circle-setup.mjs)
- *   BREVO_API_KEY           — optional, for confirmation emails
+ *   CIRCLE_API_KEY            — from console.circle.com
+ *   CIRCLE_ENTITY_SECRET      — 64-char hex
+ *   CIRCLE_WALLET_ID          — UUID of agent wallet
+ *   ESCROW_CONTRACT_ADDRESS   — (optional) AgenticCommerce.sol on Arc Testnet
+ *   EVALUATOR_ADDRESS         — (optional) evaluator EOA for escrow jobs
+ *   BREVO_API_KEY             — optional, for confirmation emails
  */
 
 import crypto from "crypto";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const USDC_ADDRESS  = "0x3600000000000000000000000000000000000000";
-const MERCHANT_ADDR = "0x627148dF4DE3b44Aa624e7592d3A47485777A6Bb";
-const AGENT_ADDRESS = process.env.CIRCLE_AGENT_ADDRESS || "0xc83e6b9a6aa46a09b1fb28c5bce7e8e74bacd488";
-const ARC_RPC       = "https://rpc.testnet.arc.network";
-const CIRCLE_BASE   = "https://api.circle.com/v1/w3s";
+const USDC_ADDRESS    = "0x3600000000000000000000000000000000000000";
+const MERCHANT_ADDR   = "0x627148dF4DE3b44Aa624e7592d3A47485777A6Bb";
+const AGENT_ADDRESS   = process.env.CIRCLE_AGENT_ADDRESS || "0xc83e6b9a6aa46a09b1fb28c5bce7e8e74bacd488";
+const ARC_RPC         = "https://rpc.testnet.arc.network";
+const CIRCLE_BASE     = "https://api.circle.com/v1/w3s";
+
+// ERC-8183 escrow — set after deploying AgenticCommerce.sol
+const ESCROW_CONTRACT = () => process.env.ESCROW_CONTRACT_ADDRESS || null;
 
 // ── Circle Helpers ────────────────────────────────────────────────────────────
 
@@ -65,10 +73,14 @@ async function buildCiphertext(apiKey, entitySecret) {
 
 // ── On-chain Helpers ──────────────────────────────────────────────────────────
 
-/** Read USDC.allowance(owner, spender) directly from Arc RPC */
+/**
+ * Read USDC.allowance(owner, spender) directly from Arc RPC.
+ * Checks allowance to the ESCROW CONTRACT if deployed, else to the agent wallet.
+ */
 async function getAllowance(ownerAddr) {
+  const spenderAddr = ESCROW_CONTRACT() || AGENT_ADDRESS;
   const owner   = ownerAddr.toLowerCase().replace("0x", "").padStart(64, "0");
-  const spender = AGENT_ADDRESS.toLowerCase().replace("0x", "").padStart(64, "0");
+  const spender = spenderAddr.toLowerCase().replace("0x", "").padStart(64, "0");
   const data    = "0xdd62ed3e" + owner + spender; // allowance(address,address)
 
   const res = await fetch(ARC_RPC, {
@@ -181,30 +193,59 @@ export default async function handler(req, res) {
   }
 
   try {
-    // ── 1. Verify on-chain allowance ──────────────────────────
-    console.log(`[agent-pay] Checking allowance for ${userWallet}...`);
+    // ── 1. Verify on-chain allowance ──────────────────────────────────────
+    const spenderLabel = ESCROW_CONTRACT() ? "escrow contract" : "agent wallet";
+    console.log(`[agent-pay] Checking USDC allowance for ${userWallet} → ${spenderLabel}...`);
     const allowance = await getAllowance(userWallet);
     console.log(`[agent-pay] Allowance: ${allowance} USDC (need ${total})`);
 
     if (allowance < total) {
       return res.status(400).json({
         error:     "INSUFFICIENT_ALLOWANCE",
-        message:   `Allowance is ${allowance.toFixed(2)} USDC but checkout needs ${total.toFixed(2)} USDC.`,
+        message:   `Allowance is ${allowance.toFixed(2)} USDC but checkout needs ${total.toFixed(2)} USDC. Please approve the ${spenderLabel}.`,
         allowance,
         required:  total,
+        spender:   ESCROW_CONTRACT() || AGENT_ADDRESS,
       });
     }
 
-    // ── 2. Submit transferFrom via Circle REST API ────────────
-    console.log(`[agent-pay] Submitting transferFrom: ${userWallet} → ${MERCHANT_ADDR}, ${total} USDC`);
-    const txId = await submitTransferFrom(userWallet, total, apiKey, entitySecret, walletId);
-    console.log(`[agent-pay] Transaction submitted. ID: ${txId}`);
+    let txHash, jobId;
 
-    // ── 3. Poll for confirmation ──────────────────────────────
-    const { txHash, state } = await pollForHash(txId, apiKey);
-    console.log(`[agent-pay] Confirmed! Tx: ${txHash} (${state})`);
+    if (ESCROW_CONTRACT()) {
+      // ── 2a. ERC-8183 Escrow Flow ───────────────────────────────────────
+      const orderId = crypto.randomUUID();
+      console.log(`[agent-pay] ERC-8183 escrow flow. OrderId: ${orderId}`);
 
-    // ── 4. Send confirmation email (fire-and-forget) ──────────
+      const { default: escrowHandler } = await import("./escrow.js");
+      let escrowResult;
+      await escrowHandler(
+        { method: "POST", query: {}, body: { userWallet, total, orderId } },
+        {
+          status: (code) => ({
+            json: (data) => {
+              if (code !== 200) throw new Error(data.error || `Escrow failed (${code})`);
+              escrowResult = data;
+            },
+          }),
+          setHeader: () => {},
+          end: () => {},
+        }
+      );
+      txHash = escrowResult.txHash;
+      jobId  = escrowResult.jobId;
+      console.log(`[agent-pay] ERC-8183 complete. JobId: ${jobId}, txHash: ${txHash}`);
+
+    } else {
+      // ── 2b. Legacy Direct transferFrom (fallback) ──────────────────────
+      console.log(`[agent-pay] Submitting transferFrom: ${userWallet} → ${MERCHANT_ADDR}, ${total} USDC`);
+      const txId = await submitTransferFrom(userWallet, total, apiKey, entitySecret, walletId);
+      console.log(`[agent-pay] Transaction submitted. ID: ${txId}`);
+      const result = await pollForHash(txId, apiKey);
+      txHash = result.txHash;
+      console.log(`[agent-pay] Confirmed! Tx: ${txHash} (${result.state})`);
+    }
+
+    // ── 3. Send confirmation email (fire-and-forget) ───────────────────
     if (process.env.BREVO_API_KEY && customerEmail) {
       sendConfirmationEmail(
         { customerEmail, userWallet, items, total },
@@ -216,8 +257,10 @@ export default async function handler(req, res) {
     return res.status(200).json({
       success: true,
       txHash,
+      jobId:   jobId ?? null,
+      escrow:  !!ESCROW_CONTRACT(),
       total,
-      message: `Agent purchased ${items?.length || 0} item(s) for ${total.toFixed(2)} USDC`,
+      message: `Agent purchased ${items?.length || 0} item(s) for ${total.toFixed(2)} USDC${jobId ? ` (ERC-8183 job #${jobId})` : ""}`,
     });
   } catch (err) {
     console.error("[agent-pay] Error:", err.message);

@@ -272,6 +272,44 @@ export default defineConfig(({ mode }) => {
               }
             })
           })
+          // ── Escrow API (ERC-8183 AgenticCommerce) ──
+          server.middlewares.use('/api/escrow', async (req, res) => {
+            let body = ''
+            req.on('data', chunk => { body += chunk.toString() })
+            req.on('end', async () => {
+              try {
+                const { default: handler } = await import('./api/escrow.js')
+                const url = new URL(req.url, 'http://localhost')
+                const fakeReq = {
+                  method: req.method,
+                  query: Object.fromEntries(url.searchParams.entries()),
+                  body: body ? JSON.parse(body) : {},
+                }
+                const fakeRes = {
+                  statusCode: 200,
+                  _headers: {},
+                  status(code) { this.statusCode = code; return this },
+                  setHeader(k, v) { this._headers[k] = v },
+                  end(data) {
+                    res.statusCode = this.statusCode
+                    Object.entries(this._headers).forEach(([k, v]) => res.setHeader(k, v))
+                    res.end(data)
+                  },
+                  json(data) {
+                    res.statusCode = this.statusCode
+                    res.setHeader('Content-Type', 'application/json')
+                    res.end(JSON.stringify(data))
+                  },
+                }
+                await handler(fakeReq, fakeRes)
+              } catch (err) {
+                console.error('[api/escrow] Dev error:', err)
+                res.statusCode = 500
+                res.setHeader('Content-Type', 'application/json')
+                res.end(JSON.stringify({ error: err.message }))
+              }
+            })
+          })
         },
       },
     ],
