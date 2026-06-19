@@ -142,7 +142,7 @@ async function getOnChainJobStatus(jobId) {
   if (!escrowAddr) return null;
 
   // getJob(uint256) selector = keccak256("getJob(uint256)")[0..4]
-  const selector  = "1d3f9771";
+  const selector  = "bf22c457";
   const jobIdHex  = BigInt(jobId).toString(16).padStart(64, "0");
   const data      = "0x" + selector + jobIdHex;
 
