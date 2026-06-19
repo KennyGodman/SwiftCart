@@ -246,12 +246,20 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
         {/* ── Signing Step ── */}
         {step === "signing" && (
           <div style={{ textAlign: "center", padding: "60px 28px" }}>
-            <div style={{
-              fontSize: 48, marginBottom: 16,
-              animation: "spin 1s linear infinite", display: "inline-block",
-            }}>
-              🔐
-            </div>
+            <img
+              src="/arc-logo-signing.jpg"
+              alt="Signing Transaction"
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: "50%",
+                marginBottom: 16,
+                animation: "spin 1.5s linear infinite",
+                display: "inline-block",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                border: "2px solid #e7e4e0",
+              }}
+            />
             <h3 style={{ fontSize: 24, fontWeight: 700, color: "#1c1917", marginBottom: 6 }}>
               Approve in Wallet
             </h3>
