@@ -1075,6 +1075,104 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
   const bottomRef = useRef(null);
   const waitingForApproval = useRef(false);
 
+  const [voiceEnabled, setVoiceEnabled] = useState(() => {
+    return localStorage.getItem("arcwear_agent_voice_enabled") === "true";
+  });
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
+
+  // Speak text helper
+  const speakText = (text) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    if (!voiceEnabled || !text) return;
+    
+    let cleanText = text
+      .replace(/```[\s\S]*?```/g, "")
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1")
+      .replace(/0x[a-fA-F0-9]{40}/g, "address")
+      .replace(/0x[a-fA-F0-9]{64}/g, "transaction")
+      .replace(/[\n\r]+/g, " ");
+      
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const voices = window.speechSynthesis.getVoices();
+    const englishVoice = voices.find(v => v.lang.startsWith("en-US") || v.lang.startsWith("en-GB")) || voices[0];
+    if (englishVoice) {
+      utterance.voice = englishVoice;
+    }
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+  };
+
+  const startListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      addToast("Speech recognition is not supported in this browser.", "error");
+      return;
+    }
+    stopSpeaking();
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onstart = () => setIsListening(true);
+    recognition.onerror = (e) => {
+      console.error("Speech recognition error:", e.error);
+      setIsListening(false);
+      if (e.error !== "no-speech") {
+        addToast("Voice recognition failed: " + e.error, "error");
+      }
+    };
+    recognition.onend = () => setIsListening(false);
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      if (transcript) {
+        setInput(prev => {
+          const trimmed = prev.trim();
+          return trimmed ? `${trimmed} ${transcript}` : transcript;
+        });
+      }
+    };
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    setIsListening(false);
+  };
+
+  const toggleListening = () => {
+    if (isListening) stopListening();
+    else startListening();
+  };
+
+  // Read back new assistant messages if voice is enabled
+  useEffect(() => {
+    if (msgs.length > 0) {
+      const lastMsg = msgs[msgs.length - 1];
+      if (lastMsg.role === "assistant") {
+        speakText(lastMsg.text);
+      }
+    }
+  }, [msgs, voiceEnabled]);
+
+  // Cleanup speech on unmount
+  useEffect(() => {
+    return () => {
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      if (recognitionRef.current) recognitionRef.current.stop();
+    };
+  }, []);
+
   useEffect(() => { cartRef.current = cart; }, [cart]);
   useEffect(() => { wishlistRef.current = wishlist; }, [wishlist]);
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs, loading]);
@@ -1425,6 +1523,8 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
   };
 
   const send = async () => {
+    stopSpeaking();
+    stopListening();
     if (!input.trim() || loading) return;
     const txt = input.trim();
     setInput("");
@@ -1479,13 +1579,42 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
               <p style={{ fontSize: 10, color: "#c47d2a", letterSpacing: 1.5, textTransform: "uppercase", margin: "2px 0 0" }}>AI · USDC · Arc Blockchain</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            aria-label="Close agent panel"
-            style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 8, color: "#888", width: 26, height: 26, cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}
-          >
-            ✕
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <button
+              onClick={() => {
+                const newVal = !voiceEnabled;
+                setVoiceEnabled(newVal);
+                localStorage.setItem("arcwear_agent_voice_enabled", String(newVal));
+                if (!newVal && window.speechSynthesis) {
+                  window.speechSynthesis.cancel();
+                }
+              }}
+              aria-label={voiceEnabled ? "Mute agent voice" : "Enable agent voice"}
+              style={{
+                background: voiceEnabled ? "rgba(249,115,22,0.15)" : "rgba(255,255,255,0.08)",
+                border: voiceEnabled ? "1px solid #f97316" : "none",
+                borderRadius: 8,
+                color: voiceEnabled ? "#f97316" : "#888",
+                width: 32,
+                height: 26,
+                cursor: "pointer",
+                fontSize: 13,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.2s ease"
+              }}
+            >
+              {voiceEnabled ? "🔊" : "🔇"}
+            </button>
+            <button
+              onClick={onClose}
+              aria-label="Close agent panel"
+              style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 8, color: "#888", width: 26, height: 26, cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {/* Active tools indicator */}
@@ -1542,25 +1671,51 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
         )}
 
         {/* Input */}
-        <div style={{ padding: "9px 13px 14px", borderTop: "1px solid #f0ede8", display: "flex", gap: 8, flexShrink: 0 }}>
-          <input
-            className="input"
-            style={{ flex: 1, padding: "9px 13px" }}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && send()}
-            placeholder="Ask about outfits, budgets, styles…"
-            aria-label="Chat with AI agent"
-          />
+        <div style={{ padding: "9px 13px 14px", borderTop: "1px solid #f0ede8", display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
+          <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center" }}>
+            <input
+              className="input"
+              style={{ flex: 1, padding: "9px 40px 9px 13px" }}
+              value={input}
+              onChange={e => { setInput(e.target.value); stopSpeaking(); }}
+              onKeyDown={e => e.key === "Enter" && send()}
+              placeholder={isListening ? "Listening... Speak now" : "Ask about outfits, budgets, styles…"}
+              aria-label="Chat with AI agent"
+              disabled={isListening}
+            />
+            <button
+              onClick={toggleListening}
+              aria-label={isListening ? "Stop listening" : "Start voice input"}
+              style={{
+                position: "absolute",
+                right: 8,
+                background: isListening ? "#fee2e2" : "none",
+                border: "none",
+                borderRadius: "50%",
+                color: isListening ? "#ef4444" : "#78716c",
+                width: 28,
+                height: 28,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 14,
+                animation: isListening ? "pulse 1.2s infinite" : "none",
+                transition: "all 0.2s ease"
+              }}
+            >
+              🎤
+            </button>
+          </div>
           <button
             onClick={send}
-            disabled={loading || !input.trim()}
+            disabled={loading || (!input.trim() && !isListening)}
             aria-label="Send message"
             style={{
-              background: loading || !input.trim() ? "#e7e4e0" : "#1c1917",
+              background: loading || (!input.trim() && !isListening) ? "#e7e4e0" : "#1c1917",
               color: "#fff", border: "none", borderRadius: 10,
-              padding: "0 16px", fontSize: 12, fontWeight: 700,
-              cursor: loading || !input.trim() ? "not-allowed" : "pointer",
+              padding: "10px 16px", fontSize: 12, fontWeight: 700,
+              cursor: loading || (!input.trim() && !isListening) ? "not-allowed" : "pointer",
               letterSpacing: 1.2, textTransform: "uppercase",
             }}
           >
