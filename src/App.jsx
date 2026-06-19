@@ -1608,8 +1608,9 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
                 boxShadow: voiceEnabled ? "0 0 14px rgba(249,115,22,0.45)" : "none",
               }}
             >
-              🎧
+              {voiceEnabled ? "🔊" : "🔇"}
             </button>
+
             <button
               onClick={onClose}
               aria-label="Close agent panel"
@@ -1692,10 +1693,12 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
               style={{
                 position: "absolute",
                 right: 8,
-                background: isListening ? "#fee2e2" : "none",
-                border: "none",
+                background: isListening 
+                  ? "linear-gradient(135deg, #c47d2a, #f97316)" 
+                  : "rgba(255,255,255,0.08)",
+                border: isListening ? "1px solid #f97316" : "1px solid #e7e4e0",
                 borderRadius: "50%",
-                color: isListening ? "#ef4444" : "#78716c",
+                color: isListening ? "#fff" : "#78716c",
                 width: 28,
                 height: 28,
                 cursor: "pointer",
@@ -1703,11 +1706,12 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
                 alignItems: "center",
                 justifyContent: "center",
                 fontSize: 14,
+                boxShadow: isListening ? "0 0 10px rgba(249,115,22,0.5)" : "none",
                 animation: isListening ? "pulse 1.2s infinite" : "none",
                 transition: "all 0.2s ease"
               }}
             >
-              🎤
+              🎧
             </button>
           </div>
           <button
