@@ -1082,6 +1082,7 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
   }]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showConfirmClear, setShowConfirmClear] = useState(false);
   const [tools, setTools] = useState([]);
   const cartRef = useRef(cart);
   const wishlistRef = useRef(wishlist);
@@ -1691,29 +1692,9 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             {msgs.length > 1 && (
               <button
-                onClick={async () => {
-                  if (window.confirm("Are you sure you want to clear chat history?")) {
-                    stopSpeaking();
-                    stopListening();
-                    setMsgs([{ role: "assistant", text: welcomeMsgText }]);
-                    
-                    const key = wallet ? `arcwear_chat_history_${wallet.toLowerCase()}` : "arcwear_chat_history";
-                    localStorage.removeItem(key);
-
-                    if (wallet) {
-                      try {
-                        await fetch("/api/history", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ wallet, messages: [] })
-                        });
-                      } catch (e) {
-                        console.error("Failed to clear chat history on API:", e);
-                      }
-                    }
-                    addToast("✓ Chat history cleared", "success");
-                  }
-                }}
+                onClick={() => setShowConfirmClear(true)}
+                className="tooltip tooltip-bottom"
+                data-tooltip="Clear chat history"
                 aria-label="Clear chat history"
                 style={{
                   background: "rgba(255,255,255,0.08)",
@@ -1750,6 +1731,8 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
                   window.speechSynthesis.cancel();
                 }
               }}
+              className="tooltip tooltip-bottom"
+              data-tooltip={voiceEnabled ? "Mute voice" : "Unmute voice"}
               aria-label={voiceEnabled ? "Mute agent voice" : "Enable agent voice"}
               style={{
                 background: voiceEnabled 
@@ -1774,6 +1757,8 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
 
             <button
               onClick={onClose}
+              className="tooltip tooltip-bottom-left"
+              data-tooltip="Close agent"
               aria-label="Close agent panel"
               style={{ background: "rgba(255,255,255,0.08)", border: "none", borderRadius: 8, color: "#888", width: 26, height: 26, cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}
             >
@@ -1850,6 +1835,8 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
             />
             <button
               onClick={toggleListening}
+              className="tooltip tooltip-top"
+              data-tooltip={isListening ? "Stop listening" : "Voice input"}
               aria-label={isListening ? "Stop listening" : "Start voice input"}
               style={{
                 position: "absolute",
@@ -1890,6 +1877,111 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
             {loading ? "…" : "Send"}
           </button>
         </div>
+
+        {/* Custom Confirmation Modal */}
+        {showConfirmClear && (
+          <>
+            <div 
+              style={{
+                position: "absolute",
+                inset: 0,
+                background: "rgba(0, 0, 0, 0.4)",
+                backdropFilter: "blur(2px)",
+                zIndex: 1000,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 16
+              }}
+              onClick={() => setShowConfirmClear(false)}
+            />
+            <div 
+              className="modal-scale-in"
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                width: "calc(100% - 32px)",
+                maxWidth: 320,
+                background: "#fff",
+                borderRadius: 16,
+                border: "1px solid #e7e4e0",
+                boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+                padding: 20,
+                zIndex: 1001,
+                textAlign: "center"
+              }}
+            >
+              <div style={{ fontSize: 32, marginBottom: 12 }} aria-hidden="true">🗑️</div>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1c1917", margin: "0 0 8px" }}>Clear Chat History?</h3>
+              <p style={{ fontSize: 13, color: "#78716c", margin: "0 0 20px", lineHeight: 1.5 }}>
+                This will delete your conversation history forever. You cannot undo this action.
+              </p>
+              <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+                <button
+                  onClick={() => setShowConfirmClear(false)}
+                  style={{
+                    flex: 1,
+                    background: "#faf9f7",
+                    border: "1px solid #e7e4e0",
+                    borderRadius: 10,
+                    padding: "9px 16px",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "#78716c",
+                    cursor: "pointer",
+                    transition: "all 0.2s"
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = "#f0ede8"}
+                  onMouseLeave={e => e.currentTarget.style.background = "#faf9f7"}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    setShowConfirmClear(false);
+                    stopSpeaking();
+                    stopListening();
+                    setMsgs([{ role: "assistant", text: welcomeMsgText }]);
+                    
+                    const key = wallet ? `arcwear_chat_history_${wallet.toLowerCase()}` : "arcwear_chat_history";
+                    localStorage.removeItem(key);
+
+                    if (wallet) {
+                      try {
+                        await fetch("/api/history", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ wallet, messages: [] })
+                        });
+                      } catch (e) {
+                        console.error("Failed to clear chat history on API:", e);
+                      }
+                    }
+                    addToast("✓ Chat history cleared", "success");
+                  }}
+                  style={{
+                    flex: 1,
+                    background: "#ef4444",
+                    border: "none",
+                    borderRadius: 10,
+                    padding: "9px 16px",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "#fff",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    boxShadow: "0 4px 12px rgba(239, 68, 68, 0.2)"
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = "#dc2626"}
+                  onMouseLeave={e => e.currentTarget.style.background = "#ef4444"}
+                >
+                  Clear Chat
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </>
   );

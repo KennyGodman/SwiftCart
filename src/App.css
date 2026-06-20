@@ -425,3 +425,68 @@
 .toast--success { background: var(--color-ink); }
 .toast--agent   { background: var(--color-brand); }
 .toast--error   { background: var(--color-error); }
+
+/* ── Tooltips ── */
+.tooltip {
+  position: relative;
+}
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  background: #1c1917;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #44403c;
+  z-index: 10000;
+}
+.tooltip:hover::after {
+  opacity: 1;
+}
+
+/* Tooltip below element, centered */
+.tooltip-bottom::after {
+  top: 135%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-5px) scale(0.9);
+}
+.tooltip-bottom:hover::after {
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+/* Tooltip below element, aligned to right edge of button */
+.tooltip-bottom-left::after {
+  top: 135%;
+  right: 0;
+  transform: translateY(-5px) scale(0.9);
+}
+.tooltip-bottom-left:hover::after {
+  transform: translateY(0) scale(1);
+}
+
+/* Tooltip above element, centered */
+.tooltip-top::after {
+  bottom: 135%;
+  left: 50%;
+  transform: translateX(-50%) translateY(5px) scale(0.9);
+}
+.tooltip-top:hover::after {
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+@keyframes tooltipScaleIn {
+  from { opacity: 0; transform: translate(-50%, -48%) scale(0.96); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+.modal-scale-in {
+  animation: tooltipScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+
