@@ -1780,28 +1780,51 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
         )}
 
         {/* Email settings banner */}
-        <div style={{ background: "#faf9f7", borderBottom: "1px solid #e7e4e0", padding: "8px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, gap: 10 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, width: "100%" }}>
-            <span style={{ fontSize: 13, userSelect: "none" }}>📧</span>
+        <div style={{ background: "#faf9f7", borderBottom: "1px solid #e7e4e0", padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, width: "100%" }}>
+            <div style={{
+              width: 28,
+              height: 28,
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #c47d2a, #f97316)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              boxShadow: "0 2px 6px rgba(249, 115, 22, 0.2)",
+              userSelect: "none"
+            }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}>
+                <rect width="20" height="16" x="2" y="4" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+            </div>
             <input
               type="email"
               value={customerEmail}
               onChange={e => setCustomerEmail(e.target.value)}
               placeholder="Set email for agent receipts"
               style={{
-                border: "none",
-                background: "transparent",
-                fontSize: 12,
+                border: "1px solid #e7e4e0",
+                background: "#ffffff",
+                borderRadius: "8px",
+                fontSize: "12px",
                 color: "#1c1917",
                 width: "100%",
                 outline: "none",
-                padding: "2px 0",
+                padding: "6px 12px",
                 fontFamily: "var(--font-sans)",
+                boxShadow: "inset 0 1px 2px rgba(0,0,0,0.02)",
+                transition: "border-color 0.2s ease"
               }}
+              onFocus={e => e.target.style.borderColor = "#f97316"}
+              onBlur={e => e.target.style.borderColor = "#e7e4e0"}
             />
           </div>
           {customerEmail && customerEmail.includes("@") && (
-            <span style={{ fontSize: 10, color: "#16a34a", fontWeight: 700, whiteSpace: "nowrap" }}>✓ Active</span>
+            <span style={{ fontSize: 10, color: "#16a34a", fontWeight: 700, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 3 }}>
+              <span>✓</span><span>Active</span>
+            </span>
           )}
         </div>
 
