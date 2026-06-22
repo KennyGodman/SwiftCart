@@ -1,0 +1,211 @@
+<div id="arcwear-dash-root"></div>
+<style>
+  #arcwear-dash-root {
+    --stone-950: #1c1917;
+    --stone-900: #292524;
+    --stone-800: #3a3531;
+    --stone-700: #57534e;
+    --stone-400: #a8a29e;
+    --stone-200: #e7e5e4;
+    --stone-50: #fafaf9;
+    --gold: #f5b82e;
+    --gold-dim: #b45309;
+    --good: #3fb27f;
+    --bad: #e2574c;
+    font-family: "Calibri", "Inter", system-ui, -apple-system, sans-serif;
+    background: var(--stone-950);
+    color: var(--stone-200);
+    padding: 28px 24px 32px;
+    border-radius: 16px;
+    max-width: 920px;
+    margin: 0 auto;
+  }
+  #arcwear-dash-root * { box-sizing: border-box; }
+  .aw-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 10px; }
+  .aw-brand { display: flex; align-items: center; gap: 10px; }
+  .aw-logo { width: 30px; height: 30px; flex-shrink: 0; }
+  .aw-title { font-size: 13px; letter-spacing: 2.5px; font-weight: 700; color: var(--gold); text-transform: uppercase; }
+  .aw-sub { font-size: 20px; font-weight: 700; color: var(--stone-50); margin-top: 2px; font-family: Cambria, Georgia, serif; }
+  .aw-status { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--stone-400); }
+  .aw-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 0 rgba(63,178,127,0.6); animation: aw-pulse 2s infinite; }
+  .aw-dot.bad { background: var(--bad); animation: none; }
+  @keyframes aw-pulse { 0%{box-shadow:0 0 0 0 rgba(63,178,127,0.5);} 70%{box-shadow:0 0 0 6px rgba(63,178,127,0);} 100%{box-shadow:0 0 0 0 rgba(63,178,127,0);} }
+
+  .aw-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 14px; }
+  @media (max-width: 860px) { .aw-grid { grid-template-columns: repeat(2, 1fr); } }
+  .aw-card { background: var(--stone-900); border: 1px solid var(--stone-800); border-radius: 12px; padding: 16px 14px; min-height: 88px; display: flex; flex-direction: column; justify-content: space-between; }
+  .aw-card-label { font-size: 11px; letter-spacing: 0.6px; color: var(--stone-400); text-transform: uppercase; }
+  .aw-card-value { font-size: 26px; font-weight: 700; color: var(--stone-50); font-family: Cambria, Georgia, serif; margin-top: 6px; }
+  .aw-card-value.gold { color: var(--gold); }
+  .aw-card-value .unit { font-size: 13px; color: var(--stone-400); font-weight: 400; font-family: inherit; margin-left: 4px; }
+
+  .aw-panel { background: var(--stone-900); border: 1px solid var(--stone-800); border-radius: 12px; padding: 16px 18px; margin-top: 14px; }
+  .aw-panel-title { font-size: 13px; font-weight: 700; color: var(--stone-50); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .aw-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--stone-800); font-size: 13px; }
+  .aw-row:last-child { border-bottom: none; }
+  .aw-row-label { color: var(--stone-400); }
+  .aw-row-value { color: var(--stone-200); font-family: "SFMono-Regular", Consolas, monospace; font-size: 12.5px; }
+  .aw-link { color: var(--gold); text-decoration: none; }
+  .aw-link:hover { text-decoration: underline; }
+
+  .aw-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; flex-wrap: wrap; gap: 8px; }
+  .aw-refresh { background: var(--gold); color: var(--stone-950); border: none; border-radius: 8px; padding: 9px 16px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .aw-refresh:hover { background: #ffc94d; }
+  .aw-refresh:disabled { opacity: 0.6; cursor: default; }
+  .aw-updated { font-size: 11.5px; color: var(--stone-400); }
+  .aw-note { font-size: 11.5px; color: var(--stone-400); margin-top: 14px; line-height: 1.5; }
+</style>
+<script>
+(function () {
+  const RPC_URL = "https://rpc.testnet.arc.network";
+  const ESCROW_ADDRESS = "0xD70017c05cAbC6651F95b622Bcf723DfF55461C2";
+  const USDC_ADDRESS = "0x3600000000000000000000000000000000000000";
+  const AGENT_WALLET = "0x51894a584A1E186151b31b23ea3aDD16fce5fF56";
+  const EXPLORER = "https://testnet.arcscan.app/address/" + ESCROW_ADDRESS;
+
+  const root = document.getElementById("arcwear-dash-root");
+  root.innerHTML = `
+    <div class="aw-header">
+      <div class="aw-brand">
+        <svg class="aw-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 5 L90 27.5 V72.5 L50 95 L10 72.5 V27.5 Z" stroke="#f5b82e" stroke-width="5" fill="none"/>
+          <path d="M50 5 V50 M50 50 L90 27.5 M50 50 L10 27.5 M50 50 V95" stroke="#f5b82e" stroke-width="4"/>
+        </svg>
+        <div>
+          <div class="aw-title">ArcWear</div>
+          <div class="aw-sub">Live Network Analytics</div>
+        </div>
+      </div>
+      <div class="aw-status"><span class="aw-dot" id="aw-status-dot"></span><span id="aw-status-text">Connecting to Arc Testnet…</span></div>
+    </div>
+
+    <div class="aw-grid">
+      <div class="aw-card"><div class="aw-card-label">Escrow Balance</div><div class="aw-card-value gold" id="aw-balance">—</div></div>
+      <div class="aw-card"><div class="aw-card-label">Escrow Transactions</div><div class="aw-card-value" id="aw-txtotal">—</div></div>
+      <div class="aw-card"><div class="aw-card-label">Escrow Token Transfers</div><div class="aw-card-value" id="aw-txcount">—</div></div>
+      <div class="aw-card"><div class="aw-card-label">Latest Block</div><div class="aw-card-value" id="aw-block">—</div></div>
+      <div class="aw-card"><div class="aw-card-label">Agent Wallet</div><div class="aw-card-value" id="aw-agentbal">—</div></div>
+    </div>
+
+    <div class="aw-panel">
+      <div class="aw-panel-title">Contract Reference</div>
+      <div class="aw-row"><span class="aw-row-label">ERC-8183 Escrow</span><span class="aw-row-value">${ESCROW_ADDRESS}</span></div>
+      <div class="aw-row"><span class="aw-row-label">USDC Token</span><span class="aw-row-value">${USDC_ADDRESS}</span></div>
+      <div class="aw-row"><span class="aw-row-label">Circle Agent Wallet</span><span class="aw-row-value">${AGENT_WALLET}</span></div>
+      <div class="aw-row"><span class="aw-row-label">Network</span><span class="aw-row-value">Arc Testnet · Chain ID 5042002</span></div>
+      <div class="aw-row"><span class="aw-row-label">Explorer</span><span class="aw-row-value"><a class="aw-link" href="${EXPLORER}" target="_blank" rel="noopener">View on Arcscan ↗</a></span></div>
+    </div>
+
+    <div class="aw-footer">
+      <button class="aw-refresh" id="aw-refresh-btn">Refresh data</button>
+      <span class="aw-updated" id="aw-updated">Not yet loaded</span>
+    </div>
+    <div class="aw-note">Balances and block height are fetched live from the Arc Testnet public RPC (rpc.testnet.arc.network). Transaction and transfer counts are pulled directly from Arcscan's public API, so they match what you see on the explorer exactly.</div>
+  `;
+
+  const elBalance = document.getElementById("aw-balance");
+  const elTxCount = document.getElementById("aw-txcount");
+  const elTxTotal = document.getElementById("aw-txtotal");
+  const elBlock = document.getElementById("aw-block");
+  const elAgentBal = document.getElementById("aw-agentbal");
+  const elUpdated = document.getElementById("aw-updated");
+  const elStatusDot = document.getElementById("aw-status-dot");
+  const elStatusText = document.getElementById("aw-status-text");
+  const btn = document.getElementById("aw-refresh-btn");
+
+  let reqId = 1;
+  async function rpc(method, params) {
+    const res = await fetch(RPC_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: reqId++, method, params }),
+    });
+    const json = await res.json();
+    if (json.error) throw new Error(json.error.message || "RPC error");
+    return json.result;
+  }
+
+  function padAddress(addr) {
+    return addr.toLowerCase().replace("0x", "").padStart(64, "0");
+  }
+
+  async function getArcscanCounters(address) {
+    const res = await fetch(`https://testnet.arcscan.app/api/v2/addresses/${address}/counters`);
+    if (!res.ok) throw new Error("Arcscan API error " + res.status);
+    return res.json();
+  }
+
+  async function erc20BalanceOf(tokenAddress, holderAddress) {
+    const data = "0x70a08231" + padAddress(holderAddress);
+    const result = await rpc("eth_call", [{ to: tokenAddress, data }, "latest"]);
+    const raw = BigInt(result || "0x0");
+    return raw; // USDC has 6 decimals
+  }
+
+  function formatUsdc(raw) {
+    const whole = raw / 1000000n;
+    const frac = raw % 1000000n;
+    const fracStr = frac.toString().padStart(6, "0").slice(0, 2);
+    return whole.toString() + "." + fracStr;
+  }
+
+  async function loadData() {
+    btn.disabled = true;
+    btn.textContent = "Refreshing…";
+    elStatusText.textContent = "Connecting…";
+    elStatusDot.classList.remove("bad");
+
+    let anyError = false;
+
+    try {
+      const blockHex = await rpc("eth_blockNumber", []);
+      elBlock.textContent = parseInt(blockHex, 16).toLocaleString();
+    } catch (e) {
+      elBlock.textContent = "—";
+      anyError = true;
+    }
+
+    try {
+      const counters = await getArcscanCounters(ESCROW_ADDRESS);
+      elTxTotal.textContent = Number(counters.transactions_count || 0).toLocaleString();
+      elTxCount.textContent = Number(counters.token_transfers_count || 0).toLocaleString();
+    } catch (e) {
+      elTxTotal.textContent = "—";
+      elTxCount.textContent = "—";
+      anyError = true;
+    }
+
+    try {
+      const escrowBalRaw = await erc20BalanceOf(USDC_ADDRESS, ESCROW_ADDRESS);
+      elBalance.innerHTML = formatUsdc(escrowBalRaw) + '<span class="unit">USDC</span>';
+    } catch (e) {
+      elBalance.textContent = "—";
+      anyError = true;
+    }
+
+    try {
+      const agentBalRaw = await erc20BalanceOf(USDC_ADDRESS, AGENT_WALLET);
+      elAgentBal.innerHTML = formatUsdc(agentBalRaw) + '<span class="unit">USDC</span>';
+    } catch (e) {
+      elAgentBal.textContent = "—";
+      anyError = true;
+    }
+
+    if (anyError) {
+      elStatusDot.classList.add("bad");
+      elStatusText.textContent = "Partial data — some calls failed";
+      elUpdated.textContent = "Last attempt " + new Date().toLocaleTimeString();
+    } else {
+      elStatusText.textContent = "Connected · Arc Testnet";
+      elUpdated.textContent = "Last updated " + new Date().toLocaleTimeString();
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Refresh data";
+  }
+
+  btn.addEventListener("click", loadData);
+  loadData();
+  setInterval(loadData, 30000);
+})();
+</script>
