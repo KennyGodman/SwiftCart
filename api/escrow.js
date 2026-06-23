@@ -26,6 +26,34 @@ const USDC_ADDRESS    = "0x3600000000000000000000000000000000000000";
 const MERCHANT_ADDR   = "0x627148dF4DE3b44Aa624e7592d3A47485777A6Bb";
 const ARC_RPC         = "https://rpc.testnet.arc.network";
 const CIRCLE_BASE     = "https://api.circle.com/v1/w3s";
+const MEMO_ADDRESS    = "0x5294E9927c3306DcBaDb03fe70b92e01cCede505";
+
+// ── ABI / Hex Encoding Helpers for Memos ──────────────────────────────────────
+function padAddress(addr) {
+  return addr.toLowerCase().replace("0x", "").padStart(64, "0");
+}
+
+function padUint256(val) {
+  return BigInt(val).toString(16).padStart(64, "0");
+}
+
+function encodeFundOnBehalf(jobId, client, expectedBudget) {
+  return "0xd01f291c" + padUint256(jobId) + padAddress(client) + padUint256(expectedBudget);
+}
+
+function encodeMemoId(uuid) {
+  const clean = uuid.replace(/-/g, "").toLowerCase();
+  return "0x" + clean.padEnd(64, "0");
+}
+
+function encodeMemoData(text) {
+  let hex = "";
+  for (let i = 0; i < text.length; i++) {
+    hex += text.charCodeAt(i).toString(16);
+  }
+  return "0x" + hex;
+}
+
 
 // Loaded from env at runtime (set after contract deployment)
 const ESCROW_CONTRACT = () => process.env.ESCROW_CONTRACT_ADDRESS;
@@ -97,6 +125,49 @@ async function callEscrowContract(fnSignature, params, apiKey, entitySecret, wal
   if (!txId) throw new Error("Circle returned no transaction ID");
   return txId;
 }
+
+/**
+ * Specifically call fundOnBehalf on the AgenticCommerce escrow contract wrapped
+ * in the Memo contract call so the memo appears on Arcscan.
+ */
+async function callFundOnBehalfWithMemo(jobId, client, expectedBudget, orderId, apiKey, entitySecret, walletId) {
+  const escrowAddr = ESCROW_CONTRACT();
+  if (!escrowAddr) throw new Error("ESCROW_CONTRACT_ADDRESS not set in env");
+
+  const ciphertext = await buildCiphertext(apiKey, entitySecret);
+
+  const innerData = encodeFundOnBehalf(jobId, client, expectedBudget);
+  const memoId = encodeMemoId(orderId);
+  const memoData = encodeMemoData("ArcWear Order");
+
+  const res = await fetch(`${CIRCLE_BASE}/developer/transactions/contractExecution`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      idempotencyKey:         crypto.randomUUID(),
+      entitySecretCiphertext: ciphertext,
+      walletId,
+      contractAddress:        MEMO_ADDRESS,
+      abiFunctionSignature:   "memo(address,bytes,bytes32,bytes)",
+      abiParameters:          [escrowAddr, innerData, memoId, memoData],
+      feeLevel:               "MEDIUM",
+    }),
+  });
+
+  const body = await res.json();
+  if (!res.ok) {
+    const msg = body.message || body.errors?.[0]?.message || `Circle API ${res.status}`;
+    throw new Error(msg);
+  }
+
+  const txId = body.data?.id;
+  if (!txId) throw new Error("Circle returned no transaction ID");
+  return txId;
+}
+
 
 /**
  * Poll Circle until the transaction has a txHash or fails.
@@ -213,10 +284,9 @@ async function executeEscrowFlow(userWallet, total, orderId, apiKey, entitySecre
   // ── Step 2: fundOnBehalf ──────────────────────────────────────────────────
   // NOTE: Buyer must have approved this escrow contract for USDC before this call.
   // The ApprovalModal now sets allowance on ESCROW_CONTRACT_ADDRESS.
-  console.log(`[escrow] Step 2: fundOnBehalf(jobId=${jobId}, client=${userWallet}, budget=${budgetRaw})`);
-  const fundTxId = await callEscrowContract(
-    "fundOnBehalf(uint256,address,uint256)",
-    [jobId.toString(), userWallet, budgetRaw],
+  console.log(`[escrow] Step 2: fundOnBehalf(jobId=${jobId}, client=${userWallet}, budget=${budgetRaw}) with memo`);
+  const fundTxId = await callFundOnBehalfWithMemo(
+    jobId, userWallet, budgetRaw, orderId,
     apiKey, entitySecret, walletId
   );
   const { txHash: fundTxHash } = await pollForHash(fundTxId, apiKey);
