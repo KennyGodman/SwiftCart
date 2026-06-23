@@ -278,13 +278,18 @@ export default async function handler(req, res) {
       console.log(`[agent-pay] Confirmed! Tx: ${txHash} (${result.state})`);
     }
 
-    // ── 3. Send confirmation email (fire-and-forget) ───────────────────
+    // ── 3. Send confirmation email ───────────────────────────────────────
     if (process.env.BREVO_API_KEY && customerEmail) {
-      sendConfirmationEmail(
-        { customerEmail, userWallet, items, total },
-        txHash,
-        process.env.BREVO_API_KEY
-      ).catch((e) => console.error("[agent-pay] Email error:", e));
+      try {
+        await sendConfirmationEmail(
+          { customerEmail, userWallet, items, total },
+          txHash,
+          process.env.BREVO_API_KEY
+        );
+        console.log("[agent-pay] Confirmation email sent successfully");
+      } catch (e) {
+        console.error("[agent-pay] Email error:", e.message);
+      }
     }
 
     return res.status(200).json({
@@ -357,7 +362,7 @@ async function sendConfirmationEmail({ customerEmail, userWallet, items = [], to
     </div>
   `;
 
-  await fetch("https://api.brevo.com/v3/smtp/email", {
+  const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -370,4 +375,8 @@ async function sendConfirmationEmail({ customerEmail, userWallet, items = [], to
       htmlContent: html,
     }),
   });
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(`Brevo status ${res.status}: ${JSON.stringify(errBody)}`);
+  }
 }
