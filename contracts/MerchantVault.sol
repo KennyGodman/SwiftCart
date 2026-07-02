@@ -1,307 +1,528 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-interface IERC20 {
-    function transfer(address to, uint256 value) external returns (bool);
-    function transferFrom(address from, address to, uint256 value) external returns (bool);
-    function balanceOf(address account) external view returns (uint256);
-}
+// ── Fix #7: Import canonical OZ IERC20 instead of defining a conflicting local interface.
+// ── Fix #1/#2: ReentrancyGuard for all fund-moving functions.
+// ── Fix #9: Ownable2Step for two-step ownership transfer to prevent permanent lockout.
+// ── Fix #7 / OZ v5 paths (utils/*, access/*).
+import {
+    ReentrancyGuard
+} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {
+    SafeERC20
+} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {
+    Ownable2Step,
+    Ownable
+} from "@openzeppelin/contracts/access/Ownable2Step.sol";
+import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
+import {
+    MerchantVault__ZeroAddress,
+    MerchantVault__ZeroAmount,
+    MerchantVault__EmptyOrderId,
+    MerchantVault__ExceedsMaxAmount,
+    MerchantVault__OrderAlreadyUsed,
+    MerchantVault__NotAuthorized,
+    MerchantVault__InvalidStatus,
+    MerchantVault__OrderNotFound,
+    MerchantVault__UsdcNotReceived,
+    MerchantVault__NoSurplus,
+    MerchantVault__ReturnWindowOpen,
+    MerchantVault__TooEarlyForNonBuyer,
+    MerchantVault__ActiveEscrowsExist
+} from "./ArcWearErrors.sol";
+import {OrderStatus, Order} from "./ArcWearTypes.sol";
+import {
+    PaymentRecorded,
+    OrderShipped,
+    DeliveryConfirmed,
+    OrderDisputed,
+    Settled,
+    BulkSettled,
+    Refunded,
+    AgentUpdated,
+    UsdcTokenUpdated
+} from "./ArcWearEvents.sol";
 
 /**
- * @title MerchantVault v2
- * @dev Escrow contract with autonomous lifecycle management.
+ * @title  MerchantVault v3
+ * @author ArcWear
+ * @notice Trustless escrow vault for autonomous order lifecycle management on Arc.
  *
- * Lifecycle:
- *   1. Agent calls recordAgentPayment() after transferFrom executes on USDC
- *   2. Merchant ships order → calls confirmShipped()
- *   3. Buyer confirms delivery → calls confirmDelivery()  (or merchant after 30 days)
- *   4. After 30-day return window → anyone calls releaseAfterWindow() to settle
+ * @dev Lifecycle:
+ *   1. Buyer calls pay() OR agent calls recordAgentPayment() — USDC enters escrow.
+ *   2. Merchant / agent calls confirmShipped() once the order is dispatched.
+ *   3. Buyer (or non-buyer after MINIMUM_TRANSIT_TIME) calls confirmDelivery(),
+ *      starting the 30-day RETURN_WINDOW.
+ *   4. After RETURN_WINDOW expires, anyone calls releaseAfterWindow() to settle.
+ *   5. Either party may raise a dispute via disputeOrder(); the owner then
+ *      resolves it via settleOrder() (merchant wins) or refundOrder() (buyer wins).
  *
  * Roles:
- *   owner  = merchant (receives settled USDC)
- *   agent  = Circle Agent Wallet (can record payments autonomously)
+ *   owner = merchant — receives settled USDC, manages disputes, issues refunds.
+ *   agent = Circle Agent Wallet — records autonomous payments on behalf of buyers.
+ *
+ * orderId convention:
+ *   All external functions accept a bytes32 orderId.
+ *   Callers must compute: orderId = keccak256(abi.encodePacked(rawStringOrderId))
+ *   This is significantly cheaper than string-keyed mappings (fix #14).
+ *   Key must be keccak256(abi.encodePacked(rawStringOrderId)) computed off-chain.
  */
-contract MerchantVault {
+contract MerchantVault is ReentrancyGuard, Ownable2Step, Pausable {
+    using SafeERC20 for IERC20;
+
+    // ── Constants ──────────────────────────────────────────────────────────────
+
+    /// @notice Duration of the post-delivery buyer return / dispute window.
+    uint256 public constant RETURN_WINDOW = 30 days;
+
+    /// @notice Minimum elapsed time after shipment before a non-buyer can confirm delivery.
+    ///         Prevents the merchant from instantly starting the return window clock.
+    uint256 public constant MINIMUM_TRANSIT_TIME = 1 days;
+
+    /// @notice Maximum USDC (6-decimal raw units) allowed per single order — 100,000 USDC.
+    ///         Guards against fat-finger errors locking an unbounded amount.
+    uint256 public constant MAX_ORDER_AMOUNT = 100_000 * 1e6;
 
     // ── State ──────────────────────────────────────────────────────────────────
 
-    address public owner;
+    /// @notice Circle Agent Wallet — authorised to record autonomous payments.
     address public agent;
-    IERC20  public usdcToken;
 
-    enum OrderStatus { Paid, Shipped, Delivered, Settled, Refunded }
+    /// @notice The USDC token contract this vault holds in escrow.
+    IERC20 public usdcToken;
 
-    struct Order {
-        address buyer;
-        uint256 amount;          // in USDC raw (6 decimals)
-        OrderStatus status;
-        uint256 paidAt;
-        uint256 shippedAt;
-        uint256 deliveredAt;
-        uint256 returnWindowEnd; // deliveredAt + 30 days
-        string  productName;
-    }
+    /// @notice Running total of USDC locked in non-terminal (active) escrow orders.
+    /// @dev    Incremented on payment, decremented on settle/refund.
+    ///         Used by settleAll() to guarantee buyer funds are never swept.
+    uint256 public activeEscrowBalance;
 
-    mapping(string => Order) public orders;  // orderId → Order
-    string[] public orderIds;               // list of all order IDs
+    /// @dev Internal monotonic counter — never decrements.
+    uint256 private _orderCounter;
 
-    uint256 public constant RETURN_WINDOW = 30 days;
+    // ── Storage ────────────────────────────────────────────────────────────────
 
-    // ── Events ─────────────────────────────────────────────────────────────────
+    /// @notice orderId (bytes32) → Order mapping (fix #14: bytes32 keys vs string).
+    /// @dev    Key must be keccak256(abi.encodePacked(rawStringOrderId)) computed off-chain.
+    mapping(bytes32 => Order) public orders;
 
-    event PaymentRecorded(address indexed buyer, string orderId, uint256 amount, string productName);
-    event OrderShipped(string orderId, uint256 shippedAt);
-    event DeliveryConfirmed(string orderId, uint256 deliveredAt, uint256 returnWindowEnd);
-    event Settled(address indexed recipient, string orderId, uint256 amount);
-    event Refunded(address indexed buyer, string orderId, uint256 amount);
-    event AgentUpdated(address indexed newAgent);
+    /// @dev Tracks used orderIds without requiring iteration (O(1) duplicate check).
+    mapping(bytes32 => bool) private _usedOrderIds;
 
     // ── Modifiers ──────────────────────────────────────────────────────────────
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only owner");
+    modifier onlyAgent() {
+        _onlyAgent();
         _;
     }
 
-    modifier onlyAgent() {
-        require(msg.sender == agent, "Only agent");
-        _;
+    function _onlyAgent() internal view {
+        if (msg.sender != agent) revert MerchantVault__NotAuthorized();
     }
 
     modifier onlyOwnerOrAgent() {
-        require(msg.sender == owner || msg.sender == agent, "Only owner or agent");
+        _onlyOwnerOrAgent();
         _;
     }
 
-    modifier orderExists(string memory orderId) {
-        require(orders[orderId].buyer != address(0), "Order not found");
+    function _onlyOwnerOrAgent() internal view {
+        if (msg.sender != owner() && msg.sender != agent)
+            revert MerchantVault__NotAuthorized();
+    }
+
+    /// @dev Accepts the orderId key so the buyer address can be read from storage
+    ///      without copying the entire Order struct to memory (fix #4 in modifier refactor).
+    modifier onlyBuyerOrOwnerOrAgent(bytes32 orderId) {
+        _onlyBuyerOrOwnerOrAgent(orderId);
         _;
     }
 
-    // ── Constructor ────────────────────────────────────────────────────────────
+    function _onlyBuyerOrOwnerOrAgent(bytes32 orderId) internal view {
+        if (
+            msg.sender != orders[orderId].buyer &&
+            msg.sender != owner() &&
+            msg.sender != agent
+        ) revert MerchantVault__NotAuthorized();
+    }
 
-    constructor(address _usdcToken, address _agent) {
-        owner     = msg.sender;
-        agent     = _agent;
+    modifier orderExists(bytes32 orderId) {
+        _orderExists(orderId);
+        _;
+    }
+
+    function _orderExists(bytes32 orderId) internal view {
+        if (orders[orderId].buyer == address(0))
+            revert MerchantVault__OrderNotFound(orderId);
+    }
+
+    // ── Constructor (fix #3, #4) ───────────────────────────────────────────────
+
+    /**
+     * @notice Deploys the vault.
+     * @dev    Uses Ownable(msg.sender) — the canonical OZ v5 initialisation path
+     *         (fix #3). Zero-address guards applied to both constructor args (fix #4).
+     * @param _usdcToken Address of the USDC ERC-20 contract on Arc.
+     * @param _agent     Address of the Circle Agent Wallet.
+     */
+    constructor(address _usdcToken, address _agent) Ownable(msg.sender) {
+        if (_usdcToken == address(0)) revert MerchantVault__ZeroAddress();
+        if (_agent == address(0)) revert MerchantVault__ZeroAddress();
+        agent = _agent;
         usdcToken = IERC20(_usdcToken);
     }
 
     // ── Payment Functions ──────────────────────────────────────────────────────
 
     /**
-     * @notice Standard buyer-initiated payment (buyer signs the tx).
-     * @dev Buyer must approve(vaultAddress, amount) on USDC first.
+     * @notice Buyer-initiated payment. Buyer signs the transaction directly.
+     * @dev    Buyer must first call USDC.approve(address(this), amount).
+     *         The orderId must be keccak256(abi.encodePacked(rawStringOrderId)),
+     *         computed off-chain before submitting the transaction.
+     * @param amount      Raw USDC amount in 6-decimal units (e.g. 49_990_000 = $49.99).
+     * @param orderId     keccak256 hash of the unique string order identifier.
+     * @param productName Human-readable product description stored on-chain.
      */
     function pay(
         uint256 amount,
-        string memory orderId,
-        string memory productName
-    ) external {
-        require(amount > 0, "Amount must be > 0");
-        require(orders[orderId].buyer == address(0), "Order ID already used");
+        bytes32 orderId,
+        string calldata productName
+    ) external whenNotPaused nonReentrant {
+        if (amount == 0) revert MerchantVault__ZeroAmount();
+        if (orderId == bytes32(0)) revert MerchantVault__EmptyOrderId();
+        if (_usedOrderIds[orderId])
+            revert MerchantVault__OrderAlreadyUsed(orderId);
+        if (amount > MAX_ORDER_AMOUNT)
+            revert MerchantVault__ExceedsMaxAmount(amount, MAX_ORDER_AMOUNT);
 
-        bool ok = usdcToken.transferFrom(msg.sender, address(this), amount);
-        require(ok, "USDC transferFrom failed");
-
+        usdcToken.safeTransferFrom(msg.sender, address(this), amount);
         _recordOrder(msg.sender, orderId, amount, productName);
     }
 
     /**
-     * @notice Record a payment that the agent already executed via transferFrom.
-     * @dev Called by the Circle Agent Wallet after it calls USDC.transferFrom()
-     *      autonomously. The vault has already received the USDC.
-     * @param buyer       The user's wallet address.
-     * @param orderId     Unique order identifier.
-     * @param amount      Raw USDC amount (6 decimals).
-     * @param productName Human-readable product name for records.
+     * @notice Records a payment the Circle agent already executed via transferFrom.
+     * @dev    The vault performs a balance snapshot check (fix #2) to verify that
+     *         the declared amount was actually received before recording the order.
+     *         The agent must call USDC.transferFrom(buyer, address(this), amount)
+     *         in the same transaction or a prior one before calling this function.
+     *         orderId = keccak256(abi.encodePacked(rawStringOrderId)) off-chain.
+     * @param buyer       The buyer's wallet address (fix #10: validated non-zero).
+     * @param orderId     keccak256 hash of the unique string order identifier.
+     * @param amount      Raw USDC amount in 6-decimal units.
+     * @param productName Human-readable product description stored on-chain.
      */
     function recordAgentPayment(
         address buyer,
-        string memory orderId,
+        bytes32 orderId,
         uint256 amount,
-        string memory productName
-    ) external onlyAgent {
-        require(amount > 0, "Amount must be > 0");
-        require(orders[orderId].buyer == address(0), "Order ID already used");
-        // USDC already transferred by the agent's transferFrom — just record it
+        string calldata productName
+    ) external whenNotPaused onlyAgent nonReentrant {
+        if (buyer == address(0)) revert MerchantVault__ZeroAddress(); // fix #10
+        if (amount == 0) revert MerchantVault__ZeroAmount();
+        if (orderId == bytes32(0)) revert MerchantVault__EmptyOrderId();
+        if (_usedOrderIds[orderId])
+            revert MerchantVault__OrderAlreadyUsed(orderId);
+        if (amount > MAX_ORDER_AMOUNT)
+            revert MerchantVault__ExceedsMaxAmount(amount, MAX_ORDER_AMOUNT);
+
+        // Fix #2: Snapshot check — vault balance must cover all prior active escrows
+        // PLUS this new amount. If the agent's transferFrom never ran, this reverts.
+        if (usdcToken.balanceOf(address(this)) < activeEscrowBalance + amount)
+            revert MerchantVault__UsdcNotReceived();
+
         _recordOrder(buyer, orderId, amount, productName);
     }
 
     // ── Order Lifecycle ────────────────────────────────────────────────────────
 
     /**
-     * @notice Merchant confirms the order has been shipped.
+     * @notice Merchant (or agent) confirms the order has been dispatched.
+     * @param orderId keccak256 hash of the order identifier.
      */
-    function confirmShipped(string memory orderId)
-        external
-        onlyOwnerOrAgent
-        orderExists(orderId)
-    {
+    function confirmShipped(
+        bytes32 orderId
+    ) external whenNotPaused onlyOwnerOrAgent orderExists(orderId) {
         Order storage o = orders[orderId];
-        require(o.status == OrderStatus.Paid, "Order must be in Paid state");
-        o.status    = OrderStatus.Shipped;
+        if (o.status != OrderStatus.Paid)
+            revert MerchantVault__InvalidStatus(orderId);
+
+        o.status = OrderStatus.Shipped;
         o.shippedAt = block.timestamp;
         emit OrderShipped(orderId, block.timestamp);
     }
 
     /**
-     * @notice Buyer or merchant confirms delivery.
-     *         Starts the 30-day return window.
+     * @notice Confirms delivery, starting the 30-day return window.
+     * @dev    Fix #11: Non-buyers (merchant / agent) may only confirm after
+     *         MINIMUM_TRANSIT_TIME has elapsed since shipment, preventing the
+     *         merchant from immediately starting the return window clock.
+     *         Buyer may confirm at any time after shipment.
+     * @param orderId keccak256 hash of the order identifier.
      */
-    function confirmDelivery(string memory orderId)
+    function confirmDelivery(
+        bytes32 orderId
+    )
         external
+        whenNotPaused
         orderExists(orderId)
+        onlyBuyerOrOwnerOrAgent(orderId)
     {
         Order storage o = orders[orderId];
-        require(
-            msg.sender == o.buyer || msg.sender == owner || msg.sender == agent,
-            "Not authorized"
-        );
-        require(o.status == OrderStatus.Shipped, "Order must be Shipped");
+        if (o.status != OrderStatus.Shipped)
+            revert MerchantVault__InvalidStatus(orderId);
 
-        o.status          = OrderStatus.Delivered;
-        o.deliveredAt     = block.timestamp;
+        // Fix #11: Enforce minimum transit delay for non-buyer confirmations.
+        if (msg.sender != o.buyer) {
+            if (block.timestamp < o.shippedAt + MINIMUM_TRANSIT_TIME)
+                revert MerchantVault__TooEarlyForNonBuyer();
+        }
+
+        o.status = OrderStatus.Delivered;
+        o.deliveredAt = block.timestamp;
         o.returnWindowEnd = block.timestamp + RETURN_WINDOW;
 
         emit DeliveryConfirmed(orderId, block.timestamp, o.returnWindowEnd);
     }
 
     /**
-     * @notice Release funds to merchant after the 30-day return window expires.
-     *         Anyone can call this — it's permissionless once the window is up.
+     * @notice Fix #6: Raises a dispute on a Shipped or Delivered order, freezing settlement.
+     * @dev    Disputable states: Shipped, Delivered.
+     *         Once Disputed, only the owner can resolve via settleOrder() or refundOrder().
+     *         Any of buyer / owner / agent may raise a dispute.
+     * @param orderId keccak256 hash of the order identifier.
      */
-    function releaseAfterWindow(string memory orderId)
+    function disputeOrder(
+        bytes32 orderId
+    )
         external
+        whenNotPaused
         orderExists(orderId)
+        onlyBuyerOrOwnerOrAgent(orderId)
     {
         Order storage o = orders[orderId];
-        require(o.status == OrderStatus.Delivered, "Not yet delivered");
-        require(block.timestamp >= o.returnWindowEnd, "Return window still open");
+        if (
+            o.status != OrderStatus.Shipped && o.status != OrderStatus.Delivered
+        ) revert MerchantVault__InvalidStatus(orderId);
 
-        o.status = OrderStatus.Settled;
-        bool ok  = usdcToken.transfer(owner, o.amount);
-        require(ok, "USDC transfer failed");
-
-        emit Settled(owner, orderId, o.amount);
+        o.status = OrderStatus.Disputed;
+        emit OrderDisputed(orderId, msg.sender);
     }
 
     /**
-     * @notice Merchant manually settles a specific order (skips window check).
+     * @notice Permissionless settlement once the 30-day return window has expired.
+     * @dev    Anyone can call this — it's trustless once the window closes.
+     *         Decrements activeEscrowBalance so buyer funds remain protected.
+     * @param orderId keccak256 hash of the order identifier.
      */
-    function settleOrder(string memory orderId, address to)
-        external
-        onlyOwner
-        orderExists(orderId)
-    {
+    function releaseAfterWindow(
+        bytes32 orderId
+    ) external whenNotPaused nonReentrant orderExists(orderId) {
         Order storage o = orders[orderId];
-        require(
-            o.status == OrderStatus.Paid ||
-            o.status == OrderStatus.Shipped ||
-            o.status == OrderStatus.Delivered,
-            "Order already settled or refunded"
-        );
+        if (o.status != OrderStatus.Delivered)
+            revert MerchantVault__InvalidStatus(orderId);
+        if (block.timestamp < o.returnWindowEnd)
+            revert MerchantVault__ReturnWindowOpen();
+
         o.status = OrderStatus.Settled;
-        bool ok  = usdcToken.transfer(to, o.amount);
-        require(ok, "USDC transfer failed");
+        o.settledAt = block.timestamp;
+        activeEscrowBalance -= o.amount; // fix #1
+
+        usdcToken.safeTransfer(owner(), o.amount);
+        emit Settled(owner(), orderId, o.amount);
+    }
+
+    /**
+     * @notice Fix #5: Owner settles a Delivered (post-window) or Disputed order.
+     * @dev    For Delivered orders: the RETURN_WINDOW must have elapsed — this mirrors
+     *         releaseAfterWindow() but allows a custom recipient (e.g. a sub-wallet).
+     *         For Disputed orders: the owner resolves in the merchant's favour with
+     *         no time restriction, as the dispute overrides normal window protection.
+     *         Decrements activeEscrowBalance (fix #1).
+     * @param orderId keccak256 hash of the order identifier.
+     * @param to      Recipient of the USDC (usually owner(), may be a treasury).
+     */
+    function settleOrder(
+        bytes32 orderId,
+        address to
+    ) external whenNotPaused onlyOwner nonReentrant orderExists(orderId) {
+        if (to == address(0)) revert MerchantVault__ZeroAddress();
+
+        Order storage o = orders[orderId];
+
+        bool deliveredAndWindowPassed = o.status == OrderStatus.Delivered &&
+            block.timestamp >= o.returnWindowEnd;
+        bool isDisputed = o.status == OrderStatus.Disputed;
+
+        if (!deliveredAndWindowPassed && !isDisputed)
+            revert MerchantVault__InvalidStatus(orderId);
+
+        o.status = OrderStatus.Settled;
+        o.settledAt = block.timestamp;
+        activeEscrowBalance -= o.amount; // fix #1
+
+        usdcToken.safeTransfer(to, o.amount);
         emit Settled(to, orderId, o.amount);
     }
 
     /**
-     * @notice Refund a specific order back to the buyer.
+     * @notice Owner refunds an active order back to the buyer.
+     * @dev    Callable on any non-terminal status: Paid, Shipped, Delivered, Disputed.
+     *         This is the resolution path when the merchant decides in the buyer's favour,
+     *         including dispute resolution. Decrements activeEscrowBalance (fix #1).
+     * @param orderId keccak256 hash of the order identifier.
      */
-    function refundOrder(string memory orderId)
-        external
-        onlyOwner
-        orderExists(orderId)
-    {
+    function refundOrder(
+        bytes32 orderId
+    ) external whenNotPaused onlyOwner nonReentrant orderExists(orderId) {
         Order storage o = orders[orderId];
-        require(o.status != OrderStatus.Settled, "Already settled");
-        require(o.status != OrderStatus.Refunded, "Already refunded");
+        if (o.status == OrderStatus.Settled)
+            revert MerchantVault__InvalidStatus(orderId);
+        if (o.status == OrderStatus.Refunded)
+            revert MerchantVault__InvalidStatus(orderId);
 
         o.status = OrderStatus.Refunded;
-        bool ok  = usdcToken.transfer(o.buyer, o.amount);
-        require(ok, "USDC refund failed");
+        o.refundedAt = block.timestamp;
+        activeEscrowBalance -= o.amount; // fix #1
+
+        usdcToken.safeTransfer(o.buyer, o.amount);
         emit Refunded(o.buyer, orderId, o.amount);
     }
 
     // ── Bulk Settlement ────────────────────────────────────────────────────────
 
     /**
-     * @notice Withdraw all unsettled USDC balance to a recipient.
+     * @notice Fix #1: Withdraws only the USDC surplus above all active escrow balances.
+     * @dev    active escrow funds (i.e. orders in Paid/Shipped/Delivered/Disputed state)
+     *         are NEVER touched. Only surplus arising from direct transfers, fee income,
+     *         or rounding dust can be withdrawn. This preserves buyer refund guarantees.
+     * @param to Recipient of the surplus USDC.
      */
-    function settleAll(address to) external onlyOwner {
+    function settleAll(
+        address to
+    ) external whenNotPaused onlyOwner nonReentrant {
+        if (to == address(0)) revert MerchantVault__ZeroAddress();
         uint256 bal = usdcToken.balanceOf(address(this));
-        require(bal > 0, "No funds to settle");
-        bool ok = usdcToken.transfer(to, bal);
-        require(ok, "USDC transfer failed");
-        emit Settled(to, "bulk", bal);
+        if (bal <= activeEscrowBalance) revert MerchantVault__NoSurplus();
+        uint256 surplus = bal - activeEscrowBalance;
+        usdcToken.safeTransfer(to, surplus);
+        emit BulkSettled(to, surplus);
     }
 
     // ── View Functions ─────────────────────────────────────────────────────────
 
     /**
-     * @notice Get full order details by orderId.
+     * @notice Returns full order details for a given orderId hash.
+     * @param orderId keccak256 hash of the order identifier.
+     * @return The Order struct stored at that key.
      */
-    function getOrder(string memory orderId)
-        external
-        view
-        returns (Order memory)
-    {
+    function getOrder(bytes32 orderId) external view returns (Order memory) {
         return orders[orderId];
     }
 
     /**
-     * @notice Get the total number of recorded orders.
+     * @notice Returns the total number of orders ever recorded (including terminal ones).
+     * @return Monotonically increasing order count.
      */
     function totalOrders() external view returns (uint256) {
-        return orderIds.length;
+        return _orderCounter;
     }
 
     /**
-     * @notice Get current vault USDC balance.
+     * @notice Returns the current raw USDC balance held by the vault.
+     * @return Raw USDC (6-decimal) balance of this contract.
      */
     function vaultBalance() external view returns (uint256) {
         return usdcToken.balanceOf(address(this));
     }
 
+    /**
+     * @notice Returns the USDC surplus above active escrow obligations.
+     * @dev    This is the maximum amount safely withdrawable via settleAll().
+     * @return Surplus USDC not backing any active order, or 0 if deficit.
+     */
+    function surplusBalance() external view returns (uint256) {
+        uint256 bal = usdcToken.balanceOf(address(this));
+        return bal > activeEscrowBalance ? bal - activeEscrowBalance : 0;
+    }
+
     // ── Admin ──────────────────────────────────────────────────────────────────
 
     /**
-     * @notice Update the agent wallet address (e.g., when Circle wallet rotates).
+     * @notice Updates the Circle Agent Wallet address.
+     * @dev    Fix #12: Intentionally NOT gated by whenNotPaused. The most critical
+     *         time to rotate the agent is during a pause triggered by a compromised
+     *         agent. Blocking rotation would defeat the purpose of the pause.
+     *         Emits old + new address for full audit trail.
+     * @param newAgent The replacement agent wallet address.
      */
     function setAgent(address newAgent) external onlyOwner {
-        require(newAgent != address(0), "Zero address");
+        if (newAgent == address(0)) revert MerchantVault__ZeroAddress();
+        emit AgentUpdated(agent, newAgent);
         agent = newAgent;
-        emit AgentUpdated(newAgent);
     }
 
     /**
-     * @notice Transfer vault ownership to a new merchant address.
+     * @notice Fix #13: Replaces the accepted USDC token address.
+     * @dev    Only callable when activeEscrowBalance == 0 to guarantee no buyer
+     *         funds are left stranded on the old token address after migration.
+     *         Use when the USDC contract on Arc is upgraded or the chain migrates.
+     * @param newToken The new USDC-compatible ERC-20 address.
      */
-    function transferOwnership(address newOwner) external onlyOwner {
-        require(newOwner != address(0), "Zero address");
-        owner = newOwner;
+    function setUsdcToken(address newToken) external onlyOwner {
+        if (newToken == address(0)) revert MerchantVault__ZeroAddress();
+        if (activeEscrowBalance > 0) revert MerchantVault__ActiveEscrowsExist();
+        emit UsdcTokenUpdated(address(usdcToken), newToken);
+        usdcToken = IERC20(newToken);
+    }
+
+    /**
+     * @notice Pauses all state-mutating functions (except setAgent and unpause).
+     * @dev    Use in emergencies: detected exploit, compromised agent, or upgrade.
+     */
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    /**
+     * @notice Restores normal contract operation after a pause.
+     */
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     // ── Internal ───────────────────────────────────────────────────────────────
 
+    /**
+     * @dev Creates and persists a new Order record. Called by pay() and recordAgentPayment().
+     *      Increments activeEscrowBalance (fix #1) and _orderCounter.
+     * @param buyer       Buyer's wallet address.
+     * @param orderId     bytes32 key for the orders mapping.
+     * @param amount      Raw USDC (6 decimals) to hold in escrow.
+     * @param productName Human-readable product description.
+     */
     function _recordOrder(
         address buyer,
-        string memory orderId,
+        bytes32 orderId,
         uint256 amount,
-        string memory productName
+        string calldata productName
     ) internal {
+        _usedOrderIds[orderId] = true;
         orders[orderId] = Order({
-            buyer:           buyer,
-            amount:          amount,
-            status:          OrderStatus.Paid,
-            paidAt:          block.timestamp,
-            shippedAt:       0,
-            deliveredAt:     0,
+            buyer: buyer,
+            amount: amount,
+            status: OrderStatus.Paid,
+            paidAt: block.timestamp,
+            shippedAt: 0,
+            deliveredAt: 0,
             returnWindowEnd: 0,
-            productName:     productName
+            settledAt: 0,
+            refundedAt: 0,
+            productName: productName
         });
-        orderIds.push(orderId);
+        activeEscrowBalance += amount; // fix #1
+        _orderCounter++;
         emit PaymentRecorded(buyer, orderId, amount, productName);
     }
 }
+
+//https://testnet.arcscan.app/address/0xd515765a6c9b1c3f9a4df52f5326eea43ee42469

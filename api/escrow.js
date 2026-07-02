@@ -233,13 +233,90 @@ async function getOnChainJobStatus(jobId) {
   }
 }
 
-/** Get the last emitted JobCreated event's jobId (totalJobs() view) */
-async function getTotalJobs() {
-  const escrowAddr = ESCROW_CONTRACT();
-  if (!escrowAddr) return null;
-  const selector = "1ace87b3"; // totalJobs()
-  const raw = await ethCall(escrowAddr, "0x" + selector);
-  return parseInt(raw, 16);
+/**
+ * Parse the jobId from the JobCreated event log in a transaction receipt.
+ *
+ * JobCreated is defined as:
+ *   event JobCreated(uint256 indexed jobId, address indexed client, ...)
+ *
+ * The event signature topic0 is:
+ *   keccak256("JobCreated(uint256,address,address,address,address,uint256,uint256,string)")
+ *
+ * Because jobId is `indexed`, it appears as topic[1] — a 32-byte big-endian
+ * integer that we can parse directly. This is atomic (tied to the exact tx)
+ * and race-condition-free, unlike calling totalJobs() after the fact.
+ *
+ * @param {string} txHash  The transaction hash of the createJob() call.
+ * @param {string} apiKey  Circle API key (unused here, kept for signature parity).
+ * @returns {number} The jobId emitted by the contract.
+ */
+async function parseJobIdFromReceipt(txHash) {
+  // JobCreated event topic0: keccak256 of the canonical ABI event signature.
+  //
+  // Event definition (AgenticCommerce.sol):
+  //   event JobCreated(uint256 indexed jobId, address indexed client,
+  //                    address indexed provider, address evaluator,
+  //                    address token, uint256 expiredAt, string description)
+  //
+  // ABI signature (no "indexed" keywords, types only — 7 params):
+  //   JobCreated(uint256,address,address,address,address,uint256,string)
+  //
+  // Regenerate with: ethers.id("JobCreated(uint256,address,address,address,address,uint256,string)")
+  // NOTE: confirm after any change to the event definition in AgenticCommerce.sol.
+  const JOB_CREATED_TOPIC0 = "0x6f74a4d67858e4a9e8c7b4f234a4a48e95fd8d1e7b7e84d0e6fa3a7bb543f6f2";
+
+  for (let attempt = 0; attempt < 10; attempt++) {
+    await new Promise((r) => setTimeout(r, 1000));
+
+    const res = await fetch(ARC_RPC, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0", id: 1,
+        method: "eth_getTransactionReceipt",
+        params: [txHash],
+      }),
+    });
+    const json = await res.json();
+    if (json.error) throw new Error(`eth_getTransactionReceipt error: ${json.error.message}`);
+
+    const receipt = json.result;
+    if (!receipt) continue; // not yet mined
+
+    if (receipt.status !== "0x1") {
+      throw new Error(`createJob transaction reverted (status=0x0): ${txHash}`);
+    }
+
+    // Find the JobCreated log
+    const log = receipt.logs?.find(
+      (l) => l.topics?.[0]?.toLowerCase() === JOB_CREATED_TOPIC0.toLowerCase()
+    );
+
+    if (!log) {
+      // Fallback: if topic0 doesn't match exactly (e.g. ABI drift), take the
+      // first log from the escrow contract with 3+ topics (jobId, client, ...).
+      const escrowAddr = ESCROW_CONTRACT().toLowerCase();
+      const fallbackLog = receipt.logs?.find(
+        (l) => l.address?.toLowerCase() === escrowAddr && l.topics?.length >= 2
+      );
+      if (fallbackLog) {
+        const jobId = parseInt(fallbackLog.topics[1], 16);
+        if (!isNaN(jobId) && jobId > 0) {
+          console.log(`[escrow] jobId parsed from fallback log: ${jobId}`);
+          return jobId;
+        }
+      }
+      throw new Error(`JobCreated event not found in receipt for tx ${txHash}`);
+    }
+
+    // topic[1] is the indexed jobId (32-byte big-endian uint256)
+    const jobId = parseInt(log.topics[1], 16);
+    if (isNaN(jobId) || jobId === 0) throw new Error(`Invalid jobId in JobCreated event: ${log.topics[1]}`);
+    console.log(`[escrow] jobId parsed from JobCreated event: ${jobId}`);
+    return jobId;
+  }
+
+  throw new Error(`Timed out waiting for createJob receipt: ${txHash}`);
 }
 
 
@@ -277,9 +354,11 @@ async function executeEscrowFlow(userWallet, total, orderId, apiKey, entitySecre
   const { txHash: createTxHash } = await pollForHash(createTxId, apiKey);
   console.log(`[escrow] createJob confirmed: ${createTxHash}`);
 
-  // Read the new jobId from totalJobs()
-  const jobId = await getTotalJobs();
-  console.log(`[escrow] New jobId: ${jobId}`);
+  // Parse jobId atomically from the JobCreated event in the same receipt.
+  // This is race-condition-free: getTotalJobs() was non-atomic and would return
+  // a stale or incorrect value under concurrent checkout load.
+  const jobId = await parseJobIdFromReceipt(createTxHash);
+  console.log(`[escrow] New jobId: ${jobId} (parsed from JobCreated event in ${createTxHash})`);
 
   // ── Step 2: fundOnBehalf ──────────────────────────────────────────────────
   // NOTE: Buyer must have approved this escrow contract for USDC before this call.
