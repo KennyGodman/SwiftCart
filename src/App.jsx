@@ -2556,7 +2556,15 @@ export default function ArcWear() {
       if (res.ok) {
         const data = await res.json();
         if (data.orders) {
-          setOrders(data.orders);
+          setOrders(prev => {
+            const merged = [...data.orders];
+            for (const localOrder of prev) {
+              if (!merged.some(o => o.txHash === localOrder.txHash)) {
+                merged.push(localOrder);
+              }
+            }
+            return merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          });
         }
       }
     } catch (e) {

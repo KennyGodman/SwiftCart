@@ -1,4 +1,4 @@
-function getSafeMessagesSlice(messages, limit = 10) {
+function getSafeMessagesSlice(messages, limit = 6) {
   if (!Array.isArray(messages) || messages.length <= limit) return messages;
   
   let startIndex = messages.length - limit;
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   }
 
   const { messages, tools, allowance, wallet, wishlist, cart, customerEmail } = req.body;
-  const slicedMessages = getSafeMessagesSlice(messages, 10);
+  const slicedMessages = getSafeMessagesSlice(messages, 6);
 
   if (!process.env.GROQ_API_KEY) {
     return res.status(500).json({ error: "GROQ_API_KEY not configured" });
@@ -82,6 +82,7 @@ CHECKOUT FLOW (IMPORTANT):
 3. If allowance is 0 or insufficient (allowance < cart total):
    - You MUST immediately call the 'request_approval' tool with an appropriate amount (e.g. 500 USDC or cart total) to pop up the Agent Approval modal. Do NOT just suggest it in text; call the tool directly so the modal appears for the user.
 4. Only call 'initiate_checkout' (traditional manual checkout) if the user explicitly asks to pay manually or refuses to use the AI Agent checkout.
+5. When the 'agent_checkout' tool completes successfully, you MUST report the transaction hash (txHash) and Escrow Job ID (jobId) back to the user in your final text response. Example: "✓ Purchase complete! Transaction Hash: 0x... Escrow Job: #1. Your order is placed and ready for delivery confirmation."
 
 REORDER RULES:
 - When setting up reorders, clearly state: product, interval, max price guard
@@ -101,19 +102,40 @@ TOOL CALLING RULES (CRITICAL):
 TONE: Helpful, concise, confident. Always show USDC prices. After adding items, summarise with prices.`,
     });
 
-    // Convert message history
-    for (const msg of slicedMessages) {
+    // Convert message history with token pruning for older tool results
+    const totalMsgs = slicedMessages.length;
+    for (let idx = 0; idx < totalMsgs; idx++) {
+      const msg = slicedMessages[idx];
+      const isOld = idx < totalMsgs - 2;
+
       if (msg.role === "user") {
         // Handle tool results in user messages (Anthropic format)
         if (Array.isArray(msg.content)) {
           for (const block of msg.content) {
             if (block.type === "tool_result") {
+              let contentStr = typeof block.content === "string"
+                ? block.content
+                : JSON.stringify(block.content);
+
+              // Token pruning: if it's an old search tool result, prune to save token limits
+              if (isOld && contentStr.includes("products")) {
+                try {
+                  const parsed = JSON.parse(contentStr);
+                  if (parsed.products) {
+                    contentStr = JSON.stringify({
+                      found: parsed.found,
+                      message: "Search completed (details pruned to save token limits)"
+                    });
+                  }
+                } catch {
+                  // Ignore parse failures
+                }
+              }
+
               groqMessages.push({
                 role: "tool",
                 tool_call_id: block.tool_use_id,
-                content: typeof block.content === "string"
-                  ? block.content
-                  : JSON.stringify(block.content),
+                content: contentStr,
               });
             }
           }
@@ -195,16 +217,8 @@ TONE: Helpful, concise, confident. Always show USDC prices. After adding items, 
           data = await response.json();
 
           if (response.status === 429) {
-            const retryAfterMs = (() => {
-              const header = response.headers.get("retry-after");
-              if (header) return parseFloat(header) * 1000;
-              const match = data.error?.message?.match(/(\d+(?:\.\d+)?)\s*s/);
-              if (match) return parseFloat(match[1]) * 1000;
-              return (attempt + 1) * 1500;
-            })();
-            console.warn(`[agent] Model ${model} rate limited (429). Retrying in ${retryAfterMs}ms (attempt ${attempt + 1}/${MAX_RETRIES})`);
-            await new Promise(r => setTimeout(r, Math.min(retryAfterMs + 200, 15000)));
-            continue;
+            console.warn(`[agent] Model ${model} rate limited (429). Falling back to next model immediately.`);
+            break; // Break retry loop to try next model immediately
           }
 
           if (!response.ok) {
