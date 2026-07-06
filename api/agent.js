@@ -1,4 +1,4 @@
-function getSafeMessagesSlice(messages, limit = 6) {
+function getSafeMessagesSlice(messages, limit = 4) {
   if (!Array.isArray(messages) || messages.length <= limit) return messages;
   
   let startIndex = messages.length - limit;
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   }
 
   const { messages, tools, allowance, wallet, wishlist, cart, customerEmail } = req.body;
-  const slicedMessages = getSafeMessagesSlice(messages, 6);
+  const slicedMessages = getSafeMessagesSlice(messages, 4);
 
   if (!process.env.GROQ_API_KEY) {
     return res.status(500).json({ error: "GROQ_API_KEY not configured" });
@@ -183,7 +183,8 @@ TONE: Helpful, concise, confident. Always show USDC prices. After adding items, 
     // Call Groq API with fallback and retry logic
     const candidateModels = [
       "llama-3.3-70b-versatile",
-      "llama-3.1-8b-instant"
+      "llama-3.1-8b-instant",
+      "qwen/qwen3.6-27b"
     ];
 
     let lastError = null;
@@ -217,7 +218,7 @@ TONE: Helpful, concise, confident. Always show USDC prices. After adding items, 
           data = await response.json();
 
           if (response.status === 429) {
-            console.warn(`[agent] Model ${model} rate limited (429). Falling back to next model immediately.`);
+            console.warn(`[agent] Model ${model} rate limited (429). Details: ${JSON.stringify(data.error || data)}. Falling back to next model immediately.`);
             break; // Break retry loop to try next model immediately
           }
 
