@@ -33,3 +33,4 @@ scratch/
 # Foundry artifacts
 out/
 cache/
+.env*

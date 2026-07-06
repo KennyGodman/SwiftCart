@@ -10,18 +10,13 @@ import { CATALOGUE, ALL_PRODUCTS } from "./catalogue";
    Arc Blockchain · USDC Payments · AI Agent
    ========================================================= */
 
-// ── Blockchain Config ──────────────────────────────────────
-const ARC_CHAIN_ID = "0x4cef52";
-const ARC_CHAIN_CONFIG = {
-  chainId: ARC_CHAIN_ID,
-  chainName: "Arc Testnet",
-  nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 6 },
-  rpcUrls: ["https://rpc.testnet.arc.network"],
-  blockExplorerUrls: ["https://testnet.arcscan.app"],
-};
-const USDC_ADDRESS = "0x3600000000000000000000000000000000000000";
-const MERCHANT_ADDR = "0xd515765a6c9b1c3f9a4df52f5326eea43ee42469";
-const MEMO_ADDRESS = "0x5294E9927c3306DcBaDb03fe70b92e01cCede505";
+import {
+  ARC_CHAIN_ID,
+  ARC_CHAIN_CONFIG,
+  USDC_ADDRESS,
+  MERCHANT_ADDR,
+  MEMO_ADDRESS
+} from "./config";
 
 // ── Helpers ───────────────────────────────────────────────
 const fmt = (n) => `${Number(n).toFixed(2)} USDC`;
