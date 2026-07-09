@@ -685,7 +685,7 @@ function CheckoutModal({
       }
 
       setStep("success");
-      onSuccess();
+      onSuccess(hash, cart, total);
       addToast("Payment confirmed on Arc!", "success");
 
       if (customerEmail) {
@@ -993,7 +993,8 @@ function AgentChat({
   deliveryCity, setDeliveryCity,
   deliveryState, setDeliveryState,
   deliveryNotes, setDeliveryNotes,
-  deliveryFee
+  deliveryFee,
+  onRegisterCheckoutNotify
 }) {
   const [msgs, setMsgs] = useState([{
     role: "assistant",
@@ -1001,6 +1002,17 @@ function AgentChat({
   }]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Register a notify fn so the parent (CheckoutModal) can post success back to this chat
+  useEffect(() => {
+    if (onRegisterCheckoutNotify) {
+      onRegisterCheckoutNotify((txHash, items, total) => {
+        const successMsg = `✓ Purchase confirmed! I've autonomously executed the transaction via the escrow contract.\n\nOrdered: ${items.map(i => `${i.name} (x${i.qty})`).join(", ")}\nTotal: ${total.toFixed(2)} USDC\nTransaction Hash: ${txHash}`;
+        setMsgs(p => [...p, { role: "assistant", text: successMsg }]);
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onRegisterCheckoutNotify]);
   const [showConfirmClear, setShowConfirmClear] = useState(false);
   const [isDeliveryFormOpen, setIsDeliveryFormOpen] = useState(false);
   const [tools, setTools] = useState([]);
@@ -2987,6 +2999,8 @@ export default function ArcWear() {
   const [cartOpen, setCartOpen] = useState(false);
   const [checkout, setCheckout] = useState(false);
   const [agentOpen, setAgentOpen] = useState(false);
+  // Ref that AgentChat registers a callback into so CheckoutModal can post success back to chat
+  const agentNotifyRef = useRef(null);
   const [wallet, setWallet] = useState(null);
   const [walletDropdownOpen, setWalletDropdownOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
@@ -4361,9 +4375,13 @@ export default function ArcWear() {
             return saved;
           }}
           onTxHashUpdated={updateOrderTxHash}
-          onSuccess={() => {
+          onSuccess={(txHash, items, total) => {
             setCheckout(false);
             setOrdersOpen(true);
+            // Notify agent chat panel about the completed checkout
+            if (agentNotifyRef.current) {
+              agentNotifyRef.current(txHash, items, total);
+            }
           }}
           addToast={addToast}
           customerEmail={customerEmail}
@@ -4397,6 +4415,7 @@ export default function ArcWear() {
           setCheckoutOpen={setCheckout}
           addToast={addToast}
           onClose={() => setAgentOpen(false)}
+          onRegisterCheckoutNotify={(fn) => { agentNotifyRef.current = fn; }}
           wallet={wallet}
           allowance={allowance}
           onRequestApproval={(amt) => { setApprovalAmount(amt); setApprovalOpen(true); }}
