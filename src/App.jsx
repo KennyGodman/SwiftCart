@@ -81,7 +81,7 @@ const AGENT_TOOLS = [
   },
   {
     name: "initiate_checkout",
-    description: "Open the standard USDC checkout flow on Arc (requires wallet popup).",
+    description: "DISABLED — do not use. All checkouts must go through agent_checkout.",
     input_schema: { type: "object", properties: {} },
   },
   // ── Autonomous Agent Tools ──
@@ -1619,12 +1619,14 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
   };
 
   const runAgent = async (apiMsgs, depth = 0) => {
-    if (depth >= 3) {
+    if (depth >= 8) {
       setTools([]);
-      return "I ran into a loop while executing tools. Is there something else I can help you find?";
+      return "I reached the maximum number of steps. Please try again or break your request into smaller steps.";
     }
-    // Only send tools that the agent can use given current state
-    const availableTools = wallet ? AGENT_TOOLS : AGENT_TOOLS.filter(t => !["check_allowance", "request_approval", "agent_checkout"].includes(t.name));
+    // Only send tools that the agent can use given current state (initiate_checkout excluded — agent path only)
+    const availableTools = wallet
+      ? AGENT_TOOLS.filter(t => t.name !== "initiate_checkout")
+      : AGENT_TOOLS.filter(t => !["initiate_checkout", "check_allowance", "request_approval", "agent_checkout"].includes(t.name));
     const res = await fetch("/api/agent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
