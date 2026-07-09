@@ -23,7 +23,12 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { messages, tools, allowance, wallet, wishlist, cart, customerEmail } = req.body;
+  const {
+    messages, tools, allowance, wallet, wishlist, cart, customerEmail,
+    fulfillmentMethod, deliveryAddress, pickupLocation,
+    deliveryFullName, deliveryPhone, deliveryAddressLine,
+    deliveryCity, deliveryState, deliveryNotes, deliveryFee
+  } = req.body;
   const slicedMessages = getSafeMessagesSlice(messages, 4);
 
   if (!process.env.GROQ_API_KEY) {
@@ -58,6 +63,16 @@ CURRENT USER STATUS:
 - Customer Email: ${emailStr}
 - Current Cart: ${cartStr}
 - User's Wishlist: ${wishlistStr}
+- Fulfillment Method: ${fulfillmentMethod ? fulfillmentMethod.toUpperCase() : "DELIVERY"}
+- Store Pickup Location: ${pickupLocation ? pickupLocation : "Not Set"}
+- Shipping/Delivery Details:
+  - Full Name: ${deliveryFullName || "Not Set"}
+  - Phone: ${deliveryPhone || "Not Set"}
+  - Street Address: ${deliveryAddressLine || "Not Set"}
+  - City: ${deliveryCity || "Not Set"}
+  - State/Zone: ${deliveryState || "Not Set"}
+  - Notes: ${deliveryNotes || "None"}
+  - Delivery Fee: ${deliveryFee ? `${deliveryFee} USDC` : "0.00 USDC"}
 
 CORE TOOLS:
 - search_products: Search the catalogue by section (fashion/appliances/gaming/electronics/phones_gadgets/health_beauty/home_office), category, price, keywords
@@ -74,6 +89,7 @@ AUTONOMOUS TOOLS:
 - add_to_wishlist: Add a product to the user's wishlist by ID.
 - remove_from_wishlist: Remove a product from the user's wishlist by ID.
 - view_wishlist: View the user's wishlist contents.
+- set_fulfillment_details: Update the user's fulfillment preferences (method: "delivery" or "pickup", and corresponding structured fields).
 
 CHECKOUT FLOW (IMPORTANT):
 1. Look at the pre-approved USDC Allowance provided under CURRENT USER STATUS. If the allowance is 0 or less than the cart total, do NOT call 'check_allowance' or 'agent_checkout'. Instead, immediately call the 'request_approval' tool to request a spending allowance from the user.
@@ -83,6 +99,20 @@ CHECKOUT FLOW (IMPORTANT):
    - You MUST immediately call the 'request_approval' tool with an appropriate amount (e.g. 500 USDC or cart total) to pop up the Agent Approval modal. Do NOT just suggest it in text; call the tool directly so the modal appears for the user.
 4. Only call 'initiate_checkout' (traditional manual checkout) if the user explicitly asks to pay manually or refuses to use the AI Agent checkout.
 5. When the 'agent_checkout' tool completes successfully, you MUST report the transaction hash (txHash) and Escrow Job ID (jobId) back to the user in your final text response. Example: "✓ Purchase complete! Transaction Hash: 0x... Escrow Job: #1. Your order is placed and ready for delivery confirmation."
+
+SIZE REQUEST RULES:
+- For fashion/clothing products (e.g. shirts, tops, trousers, coats, items in the 'fashion' section), you MUST ask the user for their preferred size (XS, S, M, L, XL, XXL) before adding the item to the cart or checking out.
+- Do NOT assume a size unless the user has explicitly stated it in their request. If they haven't, politely ask: "What size would you like for the [Product Name]?"
+- Pass the selected size to the 'add_to_cart' tool's 'size' property.
+
+FULFILLMENT RULES:
+- Before executing 'agent_checkout', you MUST ensure that a fulfillment method is configured.
+- If the fulfillment method is 'delivery', the user MUST have their Shipping/Delivery Details configured (Full Name, Phone, Street Address, City, and State).
+- If any of these fields are "Not Set", you MUST ask the user for the missing fields (or ask them to provide their complete shipping info). Once provided, call the 'set_fulfillment_details' tool to save all of these attributes.
+- Inform the user that the delivery fee is calculated dynamically based on their State/Zone: Lagos is 5.00 USDC, Abuja is 8.00 USDC, Rivers is 10.00 USDC, and any other state is 6.00 USDC.
+- If the fulfillment method is 'pickup', the user MUST have a Store Pickup Location set. If it is "Not Set", you MUST ask the user to choose their preferred store location. Once chosen, call the 'set_fulfillment_details' tool.
+- If the user has not specified a preference, default to 'delivery' but ask them to confirm their address details.
+- You can call 'set_fulfillment_details' to update the user's fulfillment preferences anytime they request to change it.
 
 REORDER RULES:
 - When setting up reorders, clearly state: product, interval, max price guard
@@ -95,7 +125,7 @@ WISHLIST RULES:
 - If the user asks to add or remove items from the wishlist, you MUST call 'add_to_wishlist' or 'remove_from_wishlist' tool respectively. Do not just say you are doing it in text.
 
 TOOL CALLING RULES (CRITICAL):
-1. Whenever you want to search products, add items to the cart, view the cart, remove items from the cart, checkout, or request allowance approvals, or manage the wishlist, you MUST call the corresponding tool. Do NOT just write in text that you are doing it. You must generate the tool call block so the system actually performs the action.
+1. Whenever you want to search products, add items to the cart, view the cart, remove items from the cart, checkout, or request allowance approvals, or manage the wishlist, or update fulfillment details, you MUST call the corresponding tool. Do NOT just write in text that you are doing it. You must generate the tool call block so the system actually performs the action.
 2. If you state "Adding X to cart" or "I'll add X to your cart", you MUST emit the 'add_to_cart' tool call for that item. Do not pretend to add items without calling the tool.
 3. If search_products returns 0 results (no products found), do NOT keep calling search_products in a loop. Instead, immediately respond to the user in plain text explaining that the item is not in our catalog, and suggest other products or ask for clarification.
 

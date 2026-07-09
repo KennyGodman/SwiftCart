@@ -201,7 +201,12 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { userWallet, items, total, customerEmail, orderId: reqOrderId } = req.body;
+  const {
+    userWallet, items, total, customerEmail, orderId: reqOrderId,
+    fulfillmentMethod, deliveryAddress, pickupLocation,
+    deliveryFullName, deliveryPhone, deliveryAddressLine,
+    deliveryCity, deliveryState, deliveryNotes, deliveryFee
+  } = req.body;
   const orderId = reqOrderId || crypto.randomUUID();
 
   if (!userWallet || !total || total <= 0) {
@@ -282,7 +287,10 @@ export default async function handler(req, res) {
     if (process.env.BREVO_API_KEY && customerEmail) {
       try {
         await sendConfirmationEmail(
-          { customerEmail, userWallet, items, total },
+          {
+            customerEmail, userWallet, items, total, fulfillmentMethod, deliveryAddress, pickupLocation,
+            deliveryFullName, deliveryPhone, deliveryAddressLine, deliveryCity, deliveryState, deliveryNotes, deliveryFee
+          },
           txHash,
           process.env.BREVO_API_KEY
         );
@@ -309,13 +317,20 @@ export default async function handler(req, res) {
 
 // ── Email Notification ────────────────────────────────────────────────────────
 
-async function sendConfirmationEmail({ customerEmail, userWallet, items = [], total }, txHash, brevoKey) {
+async function sendConfirmationEmail(
+  {
+    customerEmail, userWallet, items = [], total, fulfillmentMethod, deliveryAddress, pickupLocation,
+    deliveryFullName, deliveryPhone, deliveryAddressLine, deliveryCity, deliveryState, deliveryNotes, deliveryFee
+  },
+  txHash,
+  brevoKey
+) {
   const itemRows = items
     .map(
       (item) => `
     <tr>
       <td style="padding:8px 12px;border-bottom:1px solid #f0ede8;font-size:13px;color:#1c1917;">
-        ${item.name} × ${item.qty}
+        ${item.name} × ${item.qty} ${item.size ? `(${item.size})` : ""}
       </td>
       <td style="padding:8px 12px;border-bottom:1px solid #f0ede8;font-family:monospace;font-size:13px;color:#1c1917;text-align:right;">
         ${(item.price * item.qty).toFixed(2)} USDC
@@ -325,6 +340,35 @@ async function sendConfirmationEmail({ customerEmail, userWallet, items = [], to
     .join("");
 
   const scanUrl = `https://testnet.arcscan.app/tx/${txHash}`;
+
+  const fMethod = fulfillmentMethod || "delivery";
+  let fDetail = "";
+  if (fMethod === "pickup") {
+    fDetail = `Store: ${pickupLocation || "ArcWear Flagship - Downtown"}`;
+  } else {
+    fDetail = `
+      <strong>Recipient:</strong> ${deliveryFullName || "Not specified"}<br/>
+      <strong>Phone:</strong> ${deliveryPhone || "Not specified"}<br/>
+      <strong>Address:</strong> ${deliveryAddressLine || "Not specified"}<br/>
+      <strong>City/State:</strong> ${deliveryCity || "Not specified"}, ${deliveryState || "Not specified"}<br/>
+      ${deliveryNotes ? `<strong>Notes:</strong> ${deliveryNotes}<br/>` : ""}
+      <strong>Delivery Fee:</strong> ${(deliveryFee || 0).toFixed(2)} USDC
+    `;
+  }
+
+  const fulfillmentRow = `
+    <tr>
+      <td style="padding:12px;font-weight:700;font-size:14px;border-top:1px solid #f0ede8;color:#1c1917;">Fulfillment</td>
+      <td style="padding:12px;font-size:13px;text-align:right;border-top:1px solid #f0ede8;color:#57534e;">
+        ${fMethod === "pickup" ? "🏪 Store Pickup" : "🚚 Delivery"}
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" style="padding:12px;font-size:12px;color:#57534e;text-align:left;line-height:1.6;border-bottom:2px solid #f0ede8;background:#faf9f7;">
+        ${fDetail}
+      </td>
+    </tr>
+  `;
 
   const html = `
     <div style="font-family:sans-serif;max-width:520px;margin:0 auto;border-radius:12px;overflow:hidden;border:1px solid #f0ede8;">
@@ -340,6 +384,7 @@ async function sendConfirmationEmail({ customerEmail, userWallet, items = [], to
       <div style="background:#fff;padding:20px 28px;">
         <table style="width:100%;border-collapse:collapse;">
           ${itemRows}
+          ${fulfillmentRow}
           <tr>
             <td style="padding:12px;font-weight:700;font-size:15px;border-top:2px solid #f0ede8;">Total</td>
             <td style="padding:12px;font-weight:700;font-size:15px;text-align:right;font-family:monospace;border-top:2px solid #f0ede8;">

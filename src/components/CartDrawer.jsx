@@ -59,7 +59,7 @@ export default function CartDrawer({ cart, onRemove, onCheckout, onClose, wallet
                   {fmt(item.price * item.qty)}
                 </p>
                 <button
-                  onClick={() => onRemove(item.id)}
+                  onClick={() => onRemove(item.id, item.size, item.color)}
                   style={{ background: "none", border: "none", color: "#a8a29e", cursor: "pointer", fontSize: 12, marginTop: 4, padding: 0, textDecoration: "underline" }}
                 >
                   remove

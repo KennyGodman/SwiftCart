@@ -53,6 +53,16 @@ async function createOrder(data) {
     escrowStatus:  data.escrowStatus  ?? null, // "funded"|"submitted"|"completed"|"rejected"|"expired"
     escrow:        data.escrow        ?? false, // true when ERC-8183 flow was used
     createdAt:     new Date().toISOString(),
+    fulfillmentMethod: data.fulfillmentMethod || "delivery",
+    deliveryAddress: data.deliveryAddress || null,
+    pickupLocation: data.pickupLocation || null,
+    deliveryFullName: data.deliveryFullName || null,
+    deliveryPhone: data.deliveryPhone || null,
+    deliveryAddressLine: data.deliveryAddressLine || null,
+    deliveryCity: data.deliveryCity || null,
+    deliveryState: data.deliveryState || null,
+    deliveryNotes: data.deliveryNotes || null,
+    deliveryFee: data.deliveryFee !== undefined ? Number(data.deliveryFee) : 0,
   };
   await kv.set(`order:${id}`, order);
   await kv.sadd(`wallet-orders:${order.userWallet}`, id);
@@ -87,7 +97,11 @@ export default async function handler(req, res) {
 
     // ── POST /api/orders ──────────────────────────────
     if (req.method === "POST") {
-      const { userWallet, items, total, txHash, customerEmail, status, jobId, escrowStatus, escrow } = req.body;
+      const {
+        userWallet, items, total, txHash, customerEmail, status, jobId, escrowStatus, escrow,
+        fulfillmentMethod, deliveryAddress, pickupLocation,
+        deliveryFullName, deliveryPhone, deliveryAddressLine, deliveryCity, deliveryState, deliveryNotes, deliveryFee
+      } = req.body;
       if (!userWallet || !items || !total || !txHash) {
         return res.status(400).json({
           error: "Required fields: userWallet, items, total, txHash",
@@ -95,7 +109,8 @@ export default async function handler(req, res) {
       }
       const order = await createOrder({
         userWallet, items, total, txHash, customerEmail, status,
-        jobId, escrowStatus, escrow,
+        jobId, escrowStatus, escrow, fulfillmentMethod, deliveryAddress, pickupLocation,
+        deliveryFullName, deliveryPhone, deliveryAddressLine, deliveryCity, deliveryState, deliveryNotes, deliveryFee
       });
       return res.status(201).json({ order });
     }

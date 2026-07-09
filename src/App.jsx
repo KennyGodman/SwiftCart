@@ -50,13 +50,14 @@ const AGENT_TOOLS = [
   },
   {
     name: "add_to_cart",
-    description: "Add product to cart by ID.",
+    description: "Add product to cart by ID. For fashion/clothing items, you should specify the size (XS, S, M, L, XL, XXL) if the user requested it or if you asked them for it.",
     input_schema: {
       type: "object",
       required: ["productId"],
       properties: {
         productId: { type: "string" },
         quantity: { anyOf: [{ type: "number" }, { type: "null" }] },
+        size: { type: "string", enum: ["XS", "S", "M", "L", "XL", "XXL"], description: "Size of the item (mainly for fashion category)." },
       },
     },
   },
@@ -67,11 +68,15 @@ const AGENT_TOOLS = [
   },
   {
     name: "remove_from_cart",
-    description: "Remove a product from the cart.",
+    description: "Remove a product from the cart. You can optionally specify the size and color to only remove that specific version.",
     input_schema: {
       type: "object",
       required: ["productId"],
-      properties: { productId: { type: "string" } },
+      properties: {
+        productId: { type: "string" },
+        size: { type: "string", description: "Size of the item to remove." },
+        color: { type: "string", description: "Color of the item to remove." },
+      },
     },
   },
   {
@@ -140,6 +145,24 @@ const AGENT_TOOLS = [
     name: "view_wishlist",
     description: "View the user's wishlist contents.",
     input_schema: { type: "object", properties: {} },
+  },
+  {
+    name: "set_fulfillment_details",
+    description: "Update the user's fulfillment preferences (delivery details or pickup location).",
+    input_schema: {
+      type: "object",
+      required: ["method"],
+      properties: {
+        method: { type: "string", enum: ["delivery", "pickup"], description: "Whether the user wants 'delivery' to an address or 'pickup' at a store." },
+        fullName: { type: "string", description: "The customer's full name (required for delivery)." },
+        phone: { type: "string", description: "The customer's phone number (required for delivery)." },
+        addressLine: { type: "string", description: "The street address line (required for delivery)." },
+        city: { type: "string", description: "The city name (required for delivery)." },
+        state: { type: "string", enum: ["Lagos", "Abuja", "Rivers", "Other"], description: "The delivery zone/state (required for delivery)." },
+        deliveryNotes: { type: "string", description: "Any landmark, gate code or instructions (optional)." },
+        pickupLocation: { type: "string", enum: ["ArcWear Flagship - Downtown", "ArcWear L1 Hub - Uptown", "Circle Locker - East Side"], description: "The pickup location (required if method is 'pickup')." },
+      },
+    },
   },
 ];
 
@@ -556,7 +579,13 @@ const generateTempTxHash = () => "pending_" + Date.now() + "_" + Math.random().t
 /* =========================================================
    CheckoutModal
    ========================================================= */
-function CheckoutModal({ cart, wallet, onClose, onSuccess, onTxSent, onTxHashUpdated, addToast, customerEmail, setCustomerEmail }) {
+function CheckoutModal({
+  cart, wallet, onClose, onSuccess, onTxSent, onTxHashUpdated, addToast,
+  customerEmail, setCustomerEmail,
+  fulfillmentMethod, setFulfillmentMethod,
+  deliveryAddress, setDeliveryAddress,
+  pickupLocation, setPickupLocation
+}) {
   const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const [step, setStep] = useState("review");
   const [txHash, setTxHash] = useState("");
@@ -735,6 +764,70 @@ function CheckoutModal({ cart, wallet, onClose, onSuccess, onTxSent, onTxHashUpd
               />
             </div>
 
+            {/* Fulfillment Toggle */}
+            <div style={{ marginBottom: 14 }}>
+              <span className="label" style={{ display: "block", marginBottom: 6 }}>📦 Fulfillment Method</span>
+              <div style={{ display: "flex", gap: 6 }}>
+                <button
+                  type="button"
+                  onClick={() => setFulfillmentMethod("delivery")}
+                  style={{
+                    flex: 1, padding: "8px", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                    border: fulfillmentMethod === "delivery" ? "1px solid #f97316" : "1px solid #e7e4e0",
+                    background: fulfillmentMethod === "delivery" ? "#fff7ed" : "#fff",
+                    color: fulfillmentMethod === "delivery" ? "#f97316" : "#78716c",
+                    transition: "all 0.2s"
+                  }}
+                >
+                  🚚 Delivery
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFulfillmentMethod("pickup")}
+                  style={{
+                    flex: 1, padding: "8px", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                    border: fulfillmentMethod === "pickup" ? "1px solid #f97316" : "1px solid #e7e4e0",
+                    background: fulfillmentMethod === "pickup" ? "#fff7ed" : "#fff",
+                    color: fulfillmentMethod === "pickup" ? "#f97316" : "#78716c",
+                    transition: "all 0.2s"
+                  }}
+                >
+                  🏪 Store Pickup
+                </button>
+              </div>
+            </div>
+
+            {/* Fulfillment Input */}
+            {fulfillmentMethod === "delivery" ? (
+              <div style={{ marginBottom: 14 }}>
+                <label htmlFor="checkout-address" className="label">📍 Shipping Address</label>
+                <input
+                  id="checkout-address"
+                  type="text"
+                  className="input"
+                  value={deliveryAddress}
+                  onChange={e => setDeliveryAddress(e.target.value)}
+                  placeholder="123 Blockchain Ave, City, Country"
+                  required
+                />
+              </div>
+            ) : (
+              <div style={{ marginBottom: 14 }}>
+                <label htmlFor="checkout-pickup" className="label">🏪 Select Pickup Store</label>
+                <select
+                  id="checkout-pickup"
+                  className="input"
+                  value={pickupLocation}
+                  onChange={e => setPickupLocation(e.target.value)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <option value="ArcWear Flagship - Downtown">ArcWear Flagship - Downtown</option>
+                  <option value="ArcWear L1 Hub - Uptown">ArcWear L1 Hub - Uptown</option>
+                  <option value="Circle Locker - East Side">Circle Locker - East Side</option>
+                </select>
+              </div>
+            )}
+
             {/* Item list */}
             <div style={{ background: "#faf9f7", borderRadius: 10, border: "1px solid #f0ede8", marginBottom: 16, maxHeight: 140, overflowY: "auto" }}>
               {cart.map(i => (
@@ -887,7 +980,21 @@ function CheckoutModal({ cart, wallet, onClose, onSuccess, onTxSent, onTxHashUpd
 /* =========================================================
    AgentChat — AI shopping assistant panel
    ========================================================= */
-function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast, onClose, wallet, allowance, onRequestApproval, onRefreshAllowance, onSaveOrder, wishlist, onToggleWishlist, customerEmail, setCustomerEmail }) {
+function AgentChat({
+  cart, setCart, setActiveSection, setCheckoutOpen, addToast, onClose,
+  wallet, allowance, onRequestApproval, onRefreshAllowance, onSaveOrder,
+  wishlist, onToggleWishlist, customerEmail, setCustomerEmail,
+  fulfillmentMethod, setFulfillmentMethod,
+  deliveryAddress, setDeliveryAddress,
+  pickupLocation, setPickupLocation,
+  deliveryFullName, setDeliveryFullName,
+  deliveryPhone, setDeliveryPhone,
+  deliveryAddressLine, setDeliveryAddressLine,
+  deliveryCity, setDeliveryCity,
+  deliveryState, setDeliveryState,
+  deliveryNotes, setDeliveryNotes,
+  deliveryFee
+}) {
   const [msgs, setMsgs] = useState([{
     role: "assistant",
     text: "Hi! I'm your ArcWear AI agent 👋\n\nTell me what you're looking for — an outfit, a budget, an occasion — and I'll search, add items to your cart, and handle USDC checkout on Arc." + (allowance > 0 ? `\n\n🔓 Agent mode active — ${allowance.toFixed(2)} USDC remaining allowance.` : ""),
@@ -895,6 +1002,7 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [showConfirmClear, setShowConfirmClear] = useState(false);
+  const [isDeliveryFormOpen, setIsDeliveryFormOpen] = useState(false);
   const [tools, setTools] = useState([]);
   const cartRef = useRef(cart);
   const wishlistRef = useRef(wishlist);
@@ -1121,6 +1229,9 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
               items: c.map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
               total: totalAmount,
               customerEmail,
+              fulfillmentMethod,
+              deliveryAddress: fulfillmentMethod === "delivery" ? deliveryAddress : null,
+              pickupLocation: fulfillmentMethod === "pickup" ? pickupLocation : null,
             }),
           });
           const data = await res.json();
@@ -1136,7 +1247,10 @@ function AgentChat({ cart, setCart, setActiveSection, setCheckoutOpen, addToast,
               onSaveOrder(data.txHash, totalAmount, c, {
                 jobId: data.jobId,
                 escrowStatus: data.escrowStatus || "completed",
-                escrow: data.escrow
+                escrow: data.escrow,
+                fulfillmentMethod,
+                deliveryAddress: fulfillmentMethod === "delivery" ? deliveryAddress : null,
+                pickupLocation: fulfillmentMethod === "pickup" ? pickupLocation : null
               });
             }
             setCart([]);
@@ -1208,18 +1322,20 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
       }
       if (!p) return { error: "Product not found" };
       const qty = inp.quantity || 1;
+      const size = inp.size || "M";
+      const color = inp.color || "Default";
       let newCart;
-      const ex = cartRef.current.find(x => x.id === p.id);
+      const ex = cartRef.current.find(x => x.id === p.id && x.size === size && x.color === color);
       if (ex) {
-        newCart = cartRef.current.map(x => x.id === p.id ? { ...x, qty: x.qty + qty } : x);
+        newCart = cartRef.current.map(x => x.id === p.id && x.size === size && x.color === color ? { ...x, qty: x.qty + qty } : x);
       } else {
-        newCart = [...cartRef.current, { ...p, qty }];
+        newCart = [...cartRef.current, { ...p, qty, size, color }];
       }
       cartRef.current = newCart;
       setCart(newCart);
       setActiveSection(p.section);
-      addToast(`✓ Agent added ${p.name}`, "agent");
-      return { success: true, added: p.name };
+      addToast(`✓ Agent added ${p.name} (Size: ${size})`, "agent");
+      return { success: true, added: `${p.name} (Size: ${size})` };
     }
     if (name === "remove_from_cart") {
       let p = ALL_PRODUCTS.find(x => x.id === inp.productId);
@@ -1227,7 +1343,19 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
         p = ALL_PRODUCTS.find(x => x.name.toLowerCase() === inp.productId.toLowerCase());
       }
       const pId = p ? p.id : inp.productId;
-      const newCart = cartRef.current.filter(x => x.id !== pId);
+      const size = inp.size;
+      const color = inp.color;
+      let newCart;
+      if (size || color) {
+        newCart = cartRef.current.filter(x => {
+          const matchId = x.id === pId;
+          const matchSize = size ? x.size === size : true;
+          const matchColor = color ? x.color === color : true;
+          return !(matchId && matchSize && matchColor);
+        });
+      } else {
+        newCart = cartRef.current.filter(x => x.id !== pId);
+      }
       cartRef.current = newCart;
       setCart(newCart);
       return { success: true };
@@ -1264,13 +1392,14 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
     }
     if (name === "agent_checkout") {
       const c = cartRef.current;
-      const total = c.reduce((s, i) => s + i.price * i.qty, 0);
+      const itemsTotal = c.reduce((s, i) => s + i.price * i.qty, 0);
+      const total = itemsTotal + (fulfillmentMethod === "delivery" ? deliveryFee : 0);
       if (c.length === 0) return { error: "Cart is empty" };
       if (!wallet) return { error: "No wallet connected. Ask user to connect wallet first." };
       if ((allowance || 0) < total) {
         return {
           error: "INSUFFICIENT_ALLOWANCE",
-          message: `Need ${total.toFixed(2)} USDC but only ${(allowance || 0).toFixed(2)} approved. Use request_approval to ask for more.`,
+          message: `Need ${total.toFixed(2)} USDC (including delivery fee) but only ${(allowance || 0).toFixed(2)} approved. Use request_approval to ask for more.`,
         };
       }
       // Call the agent-pay backend
@@ -1281,9 +1410,19 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             userWallet: wallet,
-            items: c.map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })),
+            items: c.map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price, size: i.size, color: i.color })),
             total,
             customerEmail,
+            fulfillmentMethod,
+            deliveryAddress,
+            pickupLocation,
+            deliveryFullName,
+            deliveryPhone,
+            deliveryAddressLine,
+            deliveryCity,
+            deliveryState,
+            deliveryNotes,
+            deliveryFee
           }),
         });
         const data = await res.json();
@@ -1291,7 +1430,16 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
           return { error: data.error || data.message || "Agent payment failed" };
         }
         // Success — clear cart and refresh allowance
-        if (onSaveOrder) onSaveOrder(data.txHash, total, c, { jobId: data.jobId, escrowStatus: data.escrowStatus || "completed", escrow: data.escrow });
+        if (onSaveOrder) {
+          onSaveOrder(data.txHash, total, c, {
+            jobId: data.jobId,
+            escrowStatus: data.escrowStatus || "completed",
+            escrow: data.escrow,
+            fulfillmentMethod,
+            deliveryAddress: fulfillmentMethod === "delivery" ? deliveryAddress : null,
+            pickupLocation: fulfillmentMethod === "pickup" ? pickupLocation : null
+          });
+        }
         setCart([]);
         if (onRefreshAllowance) setTimeout(onRefreshAllowance, 2000);
         addToast(`✓ Agent purchased ${c.length} items for ${total.toFixed(2)} USDC!`, "success");
@@ -1360,6 +1508,27 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
         items: wishlistedProducts.map(p => ({ id: p.id, name: p.name, price: p.price })),
         count: wishlistedProducts.length
       };
+    }
+    if (name === "set_fulfillment_details") {
+      if (inp.method === "delivery") {
+        changeFulfillmentMethod("delivery");
+        if (inp.fullName) changeDeliveryFullName(inp.fullName);
+        if (inp.phone) changeDeliveryPhone(inp.phone);
+        if (inp.addressLine) changeDeliveryAddressLine(inp.addressLine);
+        else if (inp.address) changeDeliveryAddressLine(inp.address); // fallback
+        if (inp.city) changeDeliveryCity(inp.city);
+        if (inp.state) changeDeliveryState(inp.state);
+        if (inp.deliveryNotes) changeDeliveryNotes(inp.deliveryNotes);
+        addToast(`✓ Agent updated delivery details`, "agent");
+        return { success: true, message: "Fulfillment details updated successfully" };
+      } else if (inp.method === "pickup") {
+        if (!inp.pickupLocation) return { error: "Pickup location is required for pickup fulfillment method" };
+        changeFulfillmentMethod("pickup");
+        changePickupLocation(inp.pickupLocation);
+        addToast(`✓ Agent updated pickup location`, "agent");
+        return { success: true, message: `Fulfillment set to Pickup: ${inp.pickupLocation}` };
+      }
+      return { error: "Invalid fulfillment method" };
     }
     return { error: "Unknown tool" };
   };
@@ -1592,53 +1761,87 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
           </div>
         )}
 
-        {/* Email settings banner */}
-        <div style={{ background: "#faf9f7", borderBottom: "1px solid #e7e4e0", padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, gap: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, width: "100%" }}>
-            <div style={{
-              width: 28,
-              height: 28,
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #c47d2a, #f97316)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              boxShadow: "0 2px 6px rgba(249, 115, 22, 0.2)",
-              userSelect: "none"
-            }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}>
-                <rect width="20" height="16" x="2" y="4" rx="2"/>
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-              </svg>
+        {/* Settings banner (Receipt & Fulfillment) */}
+        <div style={{ background: "#faf9f7", borderBottom: "1px solid #e7e4e0", padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10, flexShrink: 0 }}>
+          {/* Email Row */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, width: "100%" }}>
+              <div style={{
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #c47d2a, #f97316)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                boxShadow: "0 2px 6px rgba(249, 115, 22, 0.2)",
+                userSelect: "none"
+              }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}>
+                  <rect width="20" height="16" x="2" y="4" rx="2"/>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                </svg>
+              </div>
+              <input
+                type="email"
+                value={customerEmail}
+                onChange={e => setCustomerEmail(e.target.value)}
+                placeholder="Set email for agent receipts"
+                style={{
+                  border: "1px solid #e7e4e0",
+                  background: "#ffffff",
+                  borderRadius: "8px",
+                  fontSize: "12px",
+                  color: "#1c1917",
+                  width: "100%",
+                  outline: "none",
+                  padding: "6px 12px",
+                  fontFamily: "var(--font-sans)",
+                  boxShadow: "inset 0 1px 2px rgba(0,0,0,0.02)",
+                  transition: "border-color 0.2s ease"
+                }}
+                onFocus={e => e.target.style.borderColor = "#f97316"}
+                onBlur={e => e.target.style.borderColor = "#e7e4e0"}
+              />
             </div>
-            <input
-              type="email"
-              value={customerEmail}
-              onChange={e => setCustomerEmail(e.target.value)}
-              placeholder="Set email for agent receipts"
+            {customerEmail && customerEmail.includes("@") && (
+              <span style={{ fontSize: 10, color: "#16a34a", fontWeight: 700, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 3 }}>
+                <span>✓</span><span>Active</span>
+              </span>
+            )}
+          </div>
+
+          {/* Fulfillment details row (Delivery only) */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <button
+              type="button"
+              onClick={() => setIsDeliveryFormOpen(true)}
               style={{
-                border: "1px solid #e7e4e0",
-                background: "#ffffff",
+                width: "100%",
+                padding: "8px 12px",
                 borderRadius: "8px",
                 fontSize: "12px",
+                fontWeight: 600,
+                cursor: "pointer",
+                border: "1px solid #e7e4e0",
+                background: "#fff",
                 color: "#1c1917",
-                width: "100%",
-                outline: "none",
-                padding: "6px 12px",
-                fontFamily: "var(--font-sans)",
-                boxShadow: "inset 0 1px 2px rgba(0,0,0,0.02)",
-                transition: "border-color 0.2s ease"
+                textAlign: "left",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                transition: "all 0.2s"
               }}
-              onFocus={e => e.target.style.borderColor = "#f97316"}
-              onBlur={e => e.target.style.borderColor = "#e7e4e0"}
-            />
+              onMouseEnter={e => e.currentTarget.style.borderColor = "#f97316"}
+              onMouseLeave={e => e.currentTarget.style.borderColor = "#e7e4e0"}
+            >
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                📍 {deliveryFullName ? `${deliveryFullName} (${deliveryState})` : "Add Delivery Details"}
+              </span>
+              <span style={{ fontSize: "10px", color: "#f97316", fontWeight: "700" }}>Edit ➔</span>
+            </button>
           </div>
-          {customerEmail && customerEmail.includes("@") && (
-            <span style={{ fontSize: 10, color: "#16a34a", fontWeight: 700, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 3 }}>
-              <span>✓</span><span>Active</span>
-            </span>
-          )}
         </div>
 
         {/* Messages */}
@@ -1845,6 +2048,214 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
               </div>
             </div>
           </>
+        )}
+        {/* Delivery Form Popup Modal */}
+        {isDeliveryFormOpen && (
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            background: "rgba(12, 10, 9, 0.85)",
+            backdropFilter: "blur(4px)",
+            zIndex: 1050,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            padding: "20px"
+          }}>
+            <div className="agent-modal-scale-in" style={{
+              background: "#1c1917",
+              border: "1px solid #292524",
+              borderRadius: "16px",
+              padding: "20px",
+              color: "#fff",
+              display: "flex",
+              flexDirection: "column",
+              gap: "14px",
+              maxHeight: "90%",
+              overflowY: "auto",
+              boxShadow: "0 20px 25px -5px rgba(0,0,0,0.5), 0 10px 10px -5px rgba(0,0,0,0.5)"
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #292524", paddingBottom: "10px" }}>
+                <h4 style={{ margin: 0, fontSize: "14px", fontWeight: "700", color: "#fb923c", textTransform: "uppercase", letterSpacing: "0.5px" }}>🚚 Delivery details</h4>
+                <button
+                  type="button"
+                  onClick={() => setIsDeliveryFormOpen(false)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: "#a8a29e",
+                    fontSize: "16px",
+                    cursor: "pointer",
+                    padding: "0"
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Row 1: Full name & Phone */}
+              <div style={{ display: "flex", gap: "10px" }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", fontSize: "10px", color: "#a8a29e", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Full name</label>
+                  <input
+                    type="text"
+                    value={deliveryFullName}
+                    onChange={e => setDeliveryFullName(e.target.value)}
+                    placeholder="Kehinde Odubunmi"
+                    style={{
+                      width: "100%",
+                      background: "#292524",
+                      border: "1px solid #44403c",
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      color: "#fff",
+                      fontSize: "12px",
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", fontSize: "10px", color: "#a8a29e", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Phone</label>
+                  <input
+                    type="text"
+                    value={deliveryPhone}
+                    onChange={e => setDeliveryPhone(e.target.value)}
+                    placeholder="+234 800 000 0000"
+                    style={{
+                      width: "100%",
+                      background: "#292524",
+                      border: "1px solid #44403c",
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      color: "#fff",
+                      fontSize: "12px",
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: Street address */}
+              <div>
+                <label style={{ display: "block", fontSize: "10px", color: "#a8a29e", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Street address</label>
+                <input
+                  type="text"
+                  value={deliveryAddressLine}
+                  onChange={e => setDeliveryAddressLine(e.target.value)}
+                  placeholder="12 Admiralty Way, Lekki Phase 1"
+                  style={{
+                    width: "100%",
+                    background: "#292524",
+                    border: "1px solid #44403c",
+                    borderRadius: "8px",
+                    padding: "8px 12px",
+                    color: "#fff",
+                    fontSize: "12px",
+                    outline: "none",
+                    boxSizing: "border-box"
+                  }}
+                />
+              </div>
+
+              {/* Row 3: City & State */}
+              <div style={{ display: "flex", gap: "10px" }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", fontSize: "10px", color: "#a8a29e", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>City</label>
+                  <input
+                    type="text"
+                    value={deliveryCity}
+                    onChange={e => setDeliveryCity(e.target.value)}
+                    placeholder="Lagos"
+                    style={{
+                      width: "100%",
+                      background: "#292524",
+                      border: "1px solid #44403c",
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      color: "#fff",
+                      fontSize: "12px",
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", fontSize: "10px", color: "#a8a29e", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>State</label>
+                  <select
+                    value={deliveryState}
+                    onChange={e => setDeliveryState(e.target.value)}
+                    style={{
+                      width: "100%",
+                      background: "#292524",
+                      border: "1px solid #44403c",
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      color: "#fff",
+                      fontSize: "12px",
+                      outline: "none",
+                      cursor: "pointer",
+                      boxSizing: "border-box"
+                    }}
+                  >
+                    <option value="Lagos">Lagos</option>
+                    <option value="Abuja">Abuja</option>
+                    <option value="Rivers">Rivers</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Row 4: Delivery notes */}
+              <div>
+                <label style={{ display: "block", fontSize: "10px", color: "#a8a29e", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Delivery notes (optional)</label>
+                <input
+                  type="text"
+                  value={deliveryNotes}
+                  onChange={e => setDeliveryNotes(e.target.value)}
+                  placeholder="Landmark, gate code, preferred time"
+                  style={{
+                    width: "100%",
+                    background: "#292524",
+                    border: "1px solid #44403c",
+                    borderRadius: "8px",
+                    padding: "8px 12px",
+                    color: "#fff",
+                    fontSize: "12px",
+                    outline: "none",
+                    boxSizing: "border-box"
+                  }}
+                />
+              </div>
+
+              {/* Row 5: Delivery fee */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #292524", paddingTop: "10px", marginTop: "4px" }}>
+                <span style={{ fontSize: "11px", color: "#a8a29e" }}>Delivery fee</span>
+                <span style={{ fontSize: "13px", fontWeight: "700", color: "#fb923c" }}>{deliveryFee.toFixed(2)} USDC</span>
+              </div>
+
+              {/* Save button */}
+              <button
+                type="button"
+                onClick={() => setIsDeliveryFormOpen(false)}
+                style={{
+                  background: "linear-gradient(135deg, #c47d2a, #f97316)",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  color: "#fff",
+                  fontSize: "13px",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  textAlign: "center",
+                  boxShadow: "0 4px 12px rgba(249, 115, 22, 0.25)"
+                }}
+              >
+                Save Details
+              </button>
+            </div>
+          </div>
         )}
       </div>
     </>
@@ -2057,10 +2468,38 @@ function OrderDrawer({ orders, onClose, onRetryOrder, onCancelOrder, onDeleteOrd
                     <div style={{ marginBottom: 12 }}>
                       {order.items && order.items.map((item, idx) => (
                         <div key={idx} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "#1c1917", margin: "4px 0" }}>
-                          <span>{item.name} <span style={{ color: "#a8a29e" }}>×{item.qty}</span></span>
+                          <span>
+                            {item.name} <span style={{ color: "#a8a29e" }}>×{item.qty}</span>
+                            {(item.size || (item.color && item.color !== "Default")) && (
+                              <span style={{ fontSize: 11, color: "#a8a29e", marginLeft: 6 }}>
+                                ({[item.size, item.color !== "Default" ? item.color : null].filter(Boolean).join(" · ")})
+                              </span>
+                            )}
+                          </span>
                           <span style={{ fontFamily: "var(--font-mono)", color: "#78716c" }}>{fmt(item.price * item.qty)}</span>
                         </div>
                       ))}
+                    </div>
+
+                    {/* Fulfillment Details */}
+                    <div style={{
+                      background: "#faf9f7",
+                      borderRadius: 8,
+                      padding: "8px 12px",
+                      marginBottom: 12,
+                      border: "1px solid #f0ede8",
+                      fontSize: 12,
+                      color: "#57534e"
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 600, color: "#1c1917", marginBottom: 2 }}>
+                        <span>Fulfillment:</span>
+                        <span>{order.fulfillmentMethod === "pickup" ? "🏪 Store Pickup" : "🚚 Delivery"}</span>
+                      </div>
+                      <div style={{ fontSize: 11, wordBreak: "break-all" }}>
+                        {order.fulfillmentMethod === "pickup" 
+                          ? `Store: ${order.pickupLocation || "ArcWear Flagship - Downtown"}`
+                          : `Address: ${order.deliveryAddress || "Not specified"}`}
+                      </div>
                     </div>
 
                     {/* ERC-8183 escrow job info */}
@@ -2500,6 +2939,83 @@ export default function ArcWear() {
     localStorage.setItem("arcwear_customer_email", val);
   };
 
+  const [fulfillmentMethod, setFulfillmentMethod] = useState(() => {
+    return localStorage.getItem("arcwear_fulfillment_method") || "delivery";
+  });
+  const [deliveryFullName, setDeliveryFullName] = useState(() => {
+    return localStorage.getItem("arcwear_delivery_fullname") || "";
+  });
+  const [deliveryPhone, setDeliveryPhone] = useState(() => {
+    return localStorage.getItem("arcwear_delivery_phone") || "";
+  });
+  const [deliveryAddressLine, setDeliveryAddressLine] = useState(() => {
+    return localStorage.getItem("arcwear_delivery_address_line") || "";
+  });
+  const [deliveryCity, setDeliveryCity] = useState(() => {
+    return localStorage.getItem("arcwear_delivery_city") || "";
+  });
+  const [deliveryState, setDeliveryState] = useState(() => {
+    return localStorage.getItem("arcwear_delivery_state") || "Lagos";
+  });
+  const [deliveryNotes, setDeliveryNotes] = useState(() => {
+    return localStorage.getItem("arcwear_delivery_notes") || "";
+  });
+  const [pickupLocation, setPickupLocation] = useState(() => {
+    return localStorage.getItem("arcwear_pickup_location") || "ArcWear Flagship - Downtown";
+  });
+
+  const changeFulfillmentMethod = (val) => {
+    setFulfillmentMethod(val);
+    localStorage.setItem("arcwear_fulfillment_method", val);
+  };
+  const changeDeliveryFullName = (val) => {
+    setDeliveryFullName(val);
+    localStorage.setItem("arcwear_delivery_fullname", val);
+  };
+  const changeDeliveryPhone = (val) => {
+    setDeliveryPhone(val);
+    localStorage.setItem("arcwear_delivery_phone", val);
+  };
+  const changeDeliveryAddressLine = (val) => {
+    setDeliveryAddressLine(val);
+    localStorage.setItem("arcwear_delivery_address_line", val);
+  };
+  const changeDeliveryCity = (val) => {
+    setDeliveryCity(val);
+    localStorage.setItem("arcwear_delivery_city", val);
+  };
+  const changeDeliveryState = (val) => {
+    setDeliveryState(val);
+    localStorage.setItem("arcwear_delivery_state", val);
+  };
+  const changeDeliveryNotes = (val) => {
+    setDeliveryNotes(val);
+    localStorage.setItem("arcwear_delivery_notes", val);
+  };
+  const changePickupLocation = (val) => {
+    setPickupLocation(val);
+    localStorage.setItem("arcwear_pickup_location", val);
+  };
+  const changeDeliveryAddress = () => {};
+
+  const getDeliveryFee = (st) => {
+    const s = (st || "").toLowerCase().trim();
+    if (s === "lagos") return 5.0;
+    if (s === "abuja") return 8.0;
+    if (s === "rivers") return 10.0;
+    return 6.0;
+  };
+  const deliveryFee = fulfillmentMethod === "delivery" ? getDeliveryFee(deliveryState) : 0;
+
+  const deliveryAddress = [
+    deliveryFullName && `Name: ${deliveryFullName}`,
+    deliveryPhone && `Phone: ${deliveryPhone}`,
+    deliveryAddressLine,
+    deliveryCity,
+    deliveryState,
+    deliveryNotes && `Notes: ${deliveryNotes}`
+  ].filter(Boolean).join(", ");
+
   // ── Wishlist State ──
   const [wishlist, setWishlist] = useState(() => {
     try {
@@ -2591,7 +3107,17 @@ export default function ArcWear() {
       createdAt: new Date().toISOString(),
       jobId: extra.jobId ?? null,
       escrowStatus: extra.escrowStatus ?? (extra.escrow ? "completed" : null),
-      escrow: extra.escrow ?? false
+      escrow: extra.escrow ?? false,
+      fulfillmentMethod: extra.fulfillmentMethod ?? fulfillmentMethod,
+      deliveryAddress: extra.deliveryAddress ?? (fulfillmentMethod === "delivery" ? deliveryAddress : null),
+      pickupLocation: extra.pickupLocation ?? (fulfillmentMethod === "pickup" ? pickupLocation : null),
+      deliveryFullName: extra.deliveryFullName ?? (fulfillmentMethod === "delivery" ? deliveryFullName : null),
+      deliveryPhone: extra.deliveryPhone ?? (fulfillmentMethod === "delivery" ? deliveryPhone : null),
+      deliveryAddressLine: extra.deliveryAddressLine ?? (fulfillmentMethod === "delivery" ? deliveryAddressLine : null),
+      deliveryCity: extra.deliveryCity ?? (fulfillmentMethod === "delivery" ? deliveryCity : null),
+      deliveryState: extra.deliveryState ?? (fulfillmentMethod === "delivery" ? deliveryState : null),
+      deliveryNotes: extra.deliveryNotes ?? (fulfillmentMethod === "delivery" ? deliveryNotes : null),
+      deliveryFee: extra.deliveryFee !== undefined ? extra.deliveryFee : (fulfillmentMethod === "delivery" ? deliveryFee : 0)
     };
 
     // Add locally immediately
@@ -3280,7 +3806,7 @@ export default function ArcWear() {
 
         {/* Mobile section tabs */}
         <div
-          className="nav-mobile-tabs"
+          className="nav-mobile-tabs hide-scrollbar"
           role="tablist"
           aria-label="Shop by gender"
           style={{ display: "none", gap: 6, overflowX: "auto", padding: "8px 12px 10px", borderTop: "1px solid #f0ede8" }}
@@ -3431,7 +3957,7 @@ export default function ArcWear() {
           className="filter-wrap"
           style={{ maxWidth: "100%", padding: "0 4%", height: 48, display: "flex", alignItems: "center", justifyContent: "space-between" }}
         >
-          <div style={{ display: "flex", gap: 6, overflowX: "auto", padding: "4px 0" }} role="group" aria-label="Filter by category">
+          <div className="hide-scrollbar" style={{ display: "flex", gap: 6, overflowX: "auto", padding: "4px 0" }} role="group" aria-label="Filter by category">
             {[["all", "All"], ...cats.map(([k, c]) => [k, c.label])].map(([k, label]) => {
               const isActive = (k === "all" && !activeCat) || activeCat === k;
               return (
@@ -3736,14 +4262,19 @@ export default function ArcWear() {
         />
       )}
       {editItem && <EditModal item={editItem} onClose={() => setEditItem(null)} onSave={addToCartWithOptions} />}
-      {cartOpen && <CartDrawer cart={cart} onRemove={id => setCart(p => p.filter(x => x.id !== id))} onCheckout={() => { if (!wallet) { connectWallet(); return; } setCartOpen(false); setCheckout(true); }} onClose={() => setCartOpen(false)} wallet={wallet} />}
+      {cartOpen && <CartDrawer cart={cart} onRemove={(id, size, color) => setCart(p => p.filter(x => !(x.id === id && x.size === size && x.color === color)))} onCheckout={() => { if (!wallet) { connectWallet(); return; } setCartOpen(false); setCheckout(true); }} onClose={() => setCartOpen(false)} wallet={wallet} />}
       {checkout && (
         <CheckoutModal
           cart={cart}
           wallet={wallet}
           onClose={() => setCheckout(false)}
           onTxSent={(hash) => {
-            const saved = saveOrder(hash, cart.reduce((s, i) => s + i.price * i.qty, 0), cart);
+            const itemsTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+            const saved = saveOrder(hash, itemsTotal + (fulfillmentMethod === "delivery" ? deliveryFee : 0), cart, {
+              fulfillmentMethod,
+              deliveryAddress: fulfillmentMethod === "delivery" ? deliveryAddress : null,
+              pickupLocation: fulfillmentMethod === "pickup" ? pickupLocation : null
+            });
             setCart([]);
             return saved;
           }}
@@ -3755,9 +4286,65 @@ export default function ArcWear() {
           addToast={addToast}
           customerEmail={customerEmail}
           setCustomerEmail={changeCustomerEmail}
+          fulfillmentMethod={fulfillmentMethod}
+          setFulfillmentMethod={changeFulfillmentMethod}
+          deliveryAddress={deliveryAddress}
+          setDeliveryAddress={changeDeliveryAddress}
+          pickupLocation={pickupLocation}
+          setPickupLocation={changePickupLocation}
+          deliveryFullName={deliveryFullName}
+          setDeliveryFullName={changeDeliveryFullName}
+          deliveryPhone={deliveryPhone}
+          setDeliveryPhone={changeDeliveryPhone}
+          deliveryAddressLine={deliveryAddressLine}
+          setDeliveryAddressLine={changeDeliveryAddressLine}
+          deliveryCity={deliveryCity}
+          setDeliveryCity={changeDeliveryCity}
+          deliveryState={deliveryState}
+          setDeliveryState={changeDeliveryState}
+          deliveryNotes={deliveryNotes}
+          setDeliveryNotes={changeDeliveryNotes}
+          deliveryFee={deliveryFee}
         />
       )}
-      {agentOpen && <AgentChat cart={cart} setCart={setCart} setActiveSection={setSection} setCheckoutOpen={setCheckout} addToast={addToast} onClose={() => setAgentOpen(false)} wallet={wallet} allowance={allowance} onRequestApproval={(amt) => { setApprovalAmount(amt); setApprovalOpen(true); }} onRefreshAllowance={refreshAllowance} onSaveOrder={saveOrder} wishlist={wishlist} onToggleWishlist={toggleWishlist} customerEmail={customerEmail} setCustomerEmail={changeCustomerEmail} />}
+      {agentOpen && (
+        <AgentChat
+          cart={cart}
+          setCart={setCart}
+          setActiveSection={setSection}
+          setCheckoutOpen={setCheckout}
+          addToast={addToast}
+          onClose={() => setAgentOpen(false)}
+          wallet={wallet}
+          allowance={allowance}
+          onRequestApproval={(amt) => { setApprovalAmount(amt); setApprovalOpen(true); }}
+          onRefreshAllowance={refreshAllowance}
+          onSaveOrder={saveOrder}
+          wishlist={wishlist}
+          onToggleWishlist={toggleWishlist}
+          customerEmail={customerEmail}
+          setCustomerEmail={changeCustomerEmail}
+          fulfillmentMethod={fulfillmentMethod}
+          setFulfillmentMethod={changeFulfillmentMethod}
+          deliveryAddress={deliveryAddress}
+          setDeliveryAddress={changeDeliveryAddress}
+          pickupLocation={pickupLocation}
+          setPickupLocation={changePickupLocation}
+          deliveryFullName={deliveryFullName}
+          setDeliveryFullName={changeDeliveryFullName}
+          deliveryPhone={deliveryPhone}
+          setDeliveryPhone={changeDeliveryPhone}
+          deliveryAddressLine={deliveryAddressLine}
+          setDeliveryAddressLine={changeDeliveryAddressLine}
+          deliveryCity={deliveryCity}
+          setDeliveryCity={changeDeliveryCity}
+          deliveryState={deliveryState}
+          setDeliveryState={changeDeliveryState}
+          deliveryNotes={deliveryNotes}
+          setDeliveryNotes={changeDeliveryNotes}
+          deliveryFee={deliveryFee}
+        />
+      )}
       {approvalOpen && <ApprovalModal wallet={wallet} requestedAmount={approvalAmount} onApprove={async (amt) => { const hash = await approveAgent(amt); setApprovalOpen(false); addToast(`✓ Agent mode enabled — ${amt} USDC approved`, "success"); return hash; }} onClose={() => setApprovalOpen(false)} />}
       {wishlistOpen && <WishlistDrawer wishlist={wishlist} allProducts={ALL_PRODUCTS} onClose={() => setWishlistOpen(false)} onRemove={toggleWishlist} onAddToCart={addToCart} />}
       {ordersOpen && (

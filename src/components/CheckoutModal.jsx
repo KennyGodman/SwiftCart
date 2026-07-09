@@ -4,12 +4,67 @@ import { ARC_CHAIN_ID, ARC_CHAIN_CONFIG, USDC_ADDRESS, MERCHANT_ADDR, MEMO_ADDRE
 
 const generateTempTxHash = () => "pending_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7);
 
-export default function CheckoutModal({ cart, wallet, onClose, onSuccess, onTxSent, onTxHashUpdated, addToast }) {
-  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+export default function CheckoutModal({
+  cart, wallet, onClose, onSuccess, onTxSent, onTxHashUpdated, addToast,
+  customerEmail: propCustomerEmail, setCustomerEmail: propSetCustomerEmail,
+  fulfillmentMethod: propFulfillmentMethod, setFulfillmentMethod: propSetFulfillmentMethod,
+  deliveryAddress: propDeliveryAddress, setDeliveryAddress: propSetDeliveryAddress,
+  pickupLocation: propPickupLocation, setPickupLocation: propSetPickupLocation,
+  deliveryFullName: propDeliveryFullName, setDeliveryFullName: propSetDeliveryFullName,
+  deliveryPhone: propDeliveryPhone, setDeliveryPhone: propSetDeliveryPhone,
+  deliveryAddressLine: propDeliveryAddressLine, setDeliveryAddressLine: propSetDeliveryAddressLine,
+  deliveryCity: propDeliveryCity, setDeliveryCity: propSetDeliveryCity,
+  deliveryState: propDeliveryState, setDeliveryState: propSetDeliveryState,
+  deliveryNotes: propDeliveryNotes, setDeliveryNotes: propSetDeliveryNotes,
+  deliveryFee = 0
+}) {
+  const itemsTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const total = itemsTotal + (propFulfillmentMethod === "delivery" ? deliveryFee : 0);
   const [step, setStep] = useState("review");
   const [txHash, setTxHash] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
   const [createdOrderId, setCreatedOrderId] = useState(null);
+
+  const [localEmail, setLocalEmail] = useState("");
+  const [localFMethod, setLocalFMethod] = useState("delivery");
+  const [localAddress, setLocalAddress] = useState("");
+  const [localPickup, setLocalPickup] = useState("ArcWear Flagship - Downtown");
+
+  const [localFullName, setLocalFullName] = useState("");
+  const [localPhone, setLocalPhone] = useState("");
+  const [localAddressLine, setLocalAddressLine] = useState("");
+  const [localCity, setLocalCity] = useState("");
+  const [localState, setLocalState] = useState("Lagos");
+  const [localNotes, setLocalNotes] = useState("");
+
+  const customerEmail = propCustomerEmail !== undefined ? propCustomerEmail : localEmail;
+  const setCustomerEmail = propSetCustomerEmail || setLocalEmail;
+
+  const fulfillmentMethod = propFulfillmentMethod !== undefined ? propFulfillmentMethod : localFMethod;
+  const setFulfillmentMethod = propSetFulfillmentMethod || setLocalFMethod;
+
+  const deliveryAddress = propDeliveryAddress !== undefined ? propDeliveryAddress : localAddress;
+  const setDeliveryAddress = propSetDeliveryAddress || setLocalAddress;
+
+  const pickupLocation = propPickupLocation !== undefined ? propPickupLocation : localPickup;
+  const setPickupLocation = propSetPickupLocation || setLocalPickup;
+
+  const deliveryFullName = propDeliveryFullName !== undefined ? propDeliveryFullName : localFullName;
+  const setDeliveryFullName = propSetDeliveryFullName || setLocalFullName;
+
+  const deliveryPhone = propDeliveryPhone !== undefined ? propDeliveryPhone : localPhone;
+  const setDeliveryPhone = propSetDeliveryPhone || setLocalPhone;
+
+  const deliveryAddressLine = propDeliveryAddressLine !== undefined ? propDeliveryAddressLine : localAddressLine;
+  const setDeliveryAddressLine = propSetDeliveryAddressLine || setLocalAddressLine;
+
+  const deliveryCity = propDeliveryCity !== undefined ? propDeliveryCity : localCity;
+  const setDeliveryCity = propSetDeliveryCity || setLocalCity;
+
+  const deliveryState = propDeliveryState !== undefined ? propDeliveryState : localState;
+  const setDeliveryState = propSetDeliveryState || setLocalState;
+
+  const deliveryNotes = propDeliveryNotes !== undefined ? propDeliveryNotes : localNotes;
+  const setDeliveryNotes = propSetDeliveryNotes || setLocalNotes;
 
   const pay = async () => {
     if (!window.ethereum) { addToast("No wallet detected", "error"); return; }
@@ -111,7 +166,23 @@ export default function CheckoutModal({ cart, wallet, onClose, onSuccess, onTxSe
           await fetch("/api/send-confirmation", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ customerEmail, customerWallet: wallet, items: cart, total, txHash: hash }),
+            body: JSON.stringify({
+              customerEmail,
+              customerWallet: wallet,
+              items: cart,
+              total,
+              txHash: hash,
+              fulfillmentMethod,
+              deliveryAddress,
+              pickupLocation,
+              deliveryFullName,
+              deliveryPhone,
+              deliveryAddressLine,
+              deliveryCity,
+              deliveryState,
+              deliveryNotes,
+              deliveryFee
+            }),
           });
           addToast("Confirmation email sent!", "success");
         } catch (e) {
@@ -172,6 +243,216 @@ export default function CheckoutModal({ cart, wallet, onClose, onSuccess, onTxSe
                 placeholder="you@email.com"
               />
             </div>
+
+            {/* Fulfillment Toggle */}
+            <div style={{ marginBottom: 14 }}>
+              <span className="label" style={{ display: "block", marginBottom: 6 }}>📦 Fulfillment Method</span>
+              <div style={{ display: "flex", gap: 6 }}>
+                <button
+                  type="button"
+                  onClick={() => setFulfillmentMethod("delivery")}
+                  style={{
+                    flex: 1, padding: "8px", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                    border: fulfillmentMethod === "delivery" ? "1px solid #f97316" : "1px solid #e7e4e0",
+                    background: fulfillmentMethod === "delivery" ? "#fff7ed" : "#fff",
+                    color: fulfillmentMethod === "delivery" ? "#f97316" : "#78716c",
+                    transition: "all 0.2s"
+                  }}
+                >
+                  🚚 Delivery
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFulfillmentMethod("pickup")}
+                  style={{
+                    flex: 1, padding: "8px", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer",
+                    border: fulfillmentMethod === "pickup" ? "1px solid #f97316" : "1px solid #e7e4e0",
+                    background: fulfillmentMethod === "pickup" ? "#fff7ed" : "#fff",
+                    color: fulfillmentMethod === "pickup" ? "#f97316" : "#78716c",
+                    transition: "all 0.2s"
+                  }}
+                >
+                  🏪 Store Pickup
+                </button>
+              </div>
+            </div>
+
+            {/* Fulfillment Input */}
+            {fulfillmentMethod === "delivery" ? (
+              <div style={{
+                background: "#1c1917",
+                border: "1px solid #292524",
+                borderRadius: "12px",
+                padding: "16px",
+                color: "#fff",
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px",
+                marginBottom: "14px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+              }}>
+                {/* Row 1: Full name & Phone */}
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: "10px", color: "#a8a29e", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Full name</label>
+                    <input
+                      type="text"
+                      value={deliveryFullName}
+                      onChange={e => setDeliveryFullName(e.target.value)}
+                      placeholder="Kehinde Odubunmi"
+                      required
+                      style={{
+                        width: "100%",
+                        background: "#292524",
+                        border: "1px solid #44403c",
+                        borderRadius: "8px",
+                        padding: "8px 12px",
+                        color: "#fff",
+                        fontSize: "12px",
+                        outline: "none",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: "10px", color: "#a8a29e", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Phone</label>
+                    <input
+                      type="text"
+                      value={deliveryPhone}
+                      onChange={e => setDeliveryPhone(e.target.value)}
+                      placeholder="+234 800 000 0000"
+                      required
+                      style={{
+                        width: "100%",
+                        background: "#292524",
+                        border: "1px solid #44403c",
+                        borderRadius: "8px",
+                        padding: "8px 12px",
+                        color: "#fff",
+                        fontSize: "12px",
+                        outline: "none",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Row 2: Street address */}
+                <div>
+                  <label style={{ display: "block", fontSize: "10px", color: "#a8a29e", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Street address</label>
+                  <input
+                    type="text"
+                    value={deliveryAddressLine}
+                    onChange={e => setDeliveryAddressLine(e.target.value)}
+                    placeholder="12 Admiralty Way, Lekki Phase 1"
+                    required
+                    style={{
+                      width: "100%",
+                      background: "#292524",
+                      border: "1px solid #44403c",
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      color: "#fff",
+                      fontSize: "12px",
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+
+                {/* Row 3: City & State */}
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: "10px", color: "#a8a29e", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>City</label>
+                    <input
+                      type="text"
+                      value={deliveryCity}
+                      onChange={e => setDeliveryCity(e.target.value)}
+                      placeholder="Lagos"
+                      required
+                      style={{
+                        width: "100%",
+                        background: "#292524",
+                        border: "1px solid #44403c",
+                        borderRadius: "8px",
+                        padding: "8px 12px",
+                        color: "#fff",
+                        fontSize: "12px",
+                        outline: "none",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: "block", fontSize: "10px", color: "#a8a29e", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>State</label>
+                    <select
+                      value={deliveryState}
+                      onChange={e => setDeliveryState(e.target.value)}
+                      style={{
+                        width: "100%",
+                        background: "#292524",
+                        border: "1px solid #44403c",
+                        borderRadius: "8px",
+                        padding: "8px 12px",
+                        color: "#fff",
+                        fontSize: "12px",
+                        outline: "none",
+                        cursor: "pointer",
+                        boxSizing: "border-box"
+                      }}
+                    >
+                      <option value="Lagos">Lagos</option>
+                      <option value="Abuja">Abuja</option>
+                      <option value="Rivers">Rivers</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Row 4: Delivery notes */}
+                <div>
+                  <label style={{ display: "block", fontSize: "10px", color: "#a8a29e", marginBottom: "4px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Delivery notes (optional)</label>
+                  <input
+                    type="text"
+                    value={deliveryNotes}
+                    onChange={e => setDeliveryNotes(e.target.value)}
+                    placeholder="Landmark, gate code, preferred time"
+                    style={{
+                      width: "100%",
+                      background: "#292524",
+                      border: "1px solid #44403c",
+                      borderRadius: "8px",
+                      padding: "8px 12px",
+                      color: "#fff",
+                      fontSize: "12px",
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+
+                {/* Row 5: Delivery fee */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #292524", paddingTop: "10px", marginTop: "4px" }}>
+                  <span style={{ fontSize: "11px", color: "#a8a29e" }}>Delivery fee</span>
+                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#fb923c" }}>{deliveryFee.toFixed(2)} USDC</span>
+                </div>
+              </div>
+            ) : (
+              <div style={{ marginBottom: 14 }}>
+                <label htmlFor="checkout-pickup" className="label">🏪 Select Pickup Store</label>
+                <select
+                  id="checkout-pickup"
+                  className="input"
+                  value={pickupLocation}
+                  onChange={e => setPickupLocation(e.target.value)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <option value="ArcWear Flagship - Downtown">ArcWear Flagship - Downtown</option>
+                  <option value="ArcWear L1 Hub - Uptown">ArcWear L1 Hub - Uptown</option>
+                  <option value="Circle Locker - East Side">Circle Locker - East Side</option>
+                </select>
+              </div>
+            )}
 
             {/* Item list */}
             <div style={{ background: "#faf9f7", borderRadius: 10, border: "1px solid #f0ede8", marginBottom: 16, maxHeight: 140, overflowY: "auto" }}>
