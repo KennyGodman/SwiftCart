@@ -1229,7 +1229,11 @@ function AgentChat({
 
   // Auto-resume agent checkout when allowance is approved
   useEffect(() => {
-    const totalAmount = cartRef.current.reduce((s, i) => s + i.price * i.qty, 0);
+    const itemsTotal = cartRef.current.reduce((s, i) => s + i.price * i.qty, 0);
+    const activeFulfillmentMethod = localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod;
+    const activeDeliveryState = localStorage.getItem("arcwear_delivery_state") || deliveryState;
+    const activeDeliveryFee = activeFulfillmentMethod === "delivery" ? getDeliveryFee(activeDeliveryState) : 0;
+    const totalAmount = itemsTotal + activeDeliveryFee; // include delivery fee, same as what agent-pay receives
     if (waitingForApproval.current && allowance >= totalAmount && totalAmount > 0 && !loading) {
       waitingForApproval.current = false;
       
