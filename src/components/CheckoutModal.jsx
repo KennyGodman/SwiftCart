@@ -209,12 +209,7 @@ export default function CheckoutModal({
         role="dialog"
         aria-modal="true"
         aria-label="Checkout"
-        style={{
-          background: "#fff", borderRadius: 16,
-          width: 460, maxWidth: "100%", padding: 28,
-          position: "relative", boxShadow: "0 32px 80px rgba(0,0,0,0.3)",
-          maxHeight: "90vh", overflowY: "auto",
-        }}
+        className="checkout-dialog"
       >
         <button
           className="btn-icon"

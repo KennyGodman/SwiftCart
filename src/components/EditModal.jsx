@@ -18,11 +18,7 @@ export default function EditModal({ item, onClose, onSave }) {
       background: "rgba(0,0,0,0.55)", zIndex: 3000,
       display: "flex", alignItems: "center", justifyContent: "center", padding: 16,
     }}>
-      <div style={{
-        background: "#fff", borderRadius: 16,
-        width: 440, maxWidth: "100%", overflow: "hidden",
-        boxShadow: "var(--shadow-xl)",
-      }}>
+      <div className="edit-dialog">
         {/* Header */}
         <div style={{
           display: "flex", alignItems: "center", gap: 12,

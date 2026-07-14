@@ -388,7 +388,22 @@ body {
 }
 
 /* =========================================================
-   Responsive — Tablet (641px–1024px)
+   Responsive — General Tablets & Mobiles (≤ 1024px)
+   ========================================================= */
+@media (max-width: 1024px) {
+  .nav-desktop       { display: none !important; }
+  .nav-mobile-tabs   { display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important; }
+  .desktop-only      { display: none !important; }
+  .mobile-bottom-nav { display: flex !important; }
+  .hero-stats        { display: none !important; }
+  .fab-agent         { bottom: 76px !important; right: 16px !important; }
+
+  .nav-wrap          { padding: 0 12px !important; }
+  .filter-wrap       { padding: 0 12px !important; }
+}
+
+/* =========================================================
+   Responsive — Tablet Grid (641px–1024px)
    ========================================================= */
 @media (max-width: 1024px) and (min-width: 641px) {
   .product-grid     { grid-template-columns: repeat(3, 1fr); }
@@ -400,12 +415,6 @@ body {
    Responsive — Mobile (≤ 640px)
    ========================================================= */
 @media (max-width: 640px) {
-  .nav-desktop       { display: none !important; }
-  .nav-mobile-tabs   { display: flex !important; }
-  .desktop-only      { display: none !important; }
-  .mobile-bottom-nav { display: flex !important; }
-  .hero-stats        { display: none !important; }
-
   .product-grid      { grid-template-columns: repeat(2, 1fr); }
   .product-img       { height: 150px !important; }
 
@@ -419,12 +428,9 @@ body {
     border-radius: var(--radius-2xl) var(--radius-2xl) 0 0 !important;
   }
 
-  .nav-wrap       { padding: 0 12px !important; }
   .hero-section   { padding: 24px 16px !important; }
-  .filter-wrap    { padding: 0 12px !important; }
   .main-wrap      { padding: 12px 8px 100px !important; }
   .section-header { padding: 0 4px !important; }
-  .fab-agent      { bottom: 76px !important; right: 16px !important; }
   .scroll-top     { display: none !important; }
 
   .topbar-text { font-size: 0; }
@@ -802,4 +808,123 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;             /* Chrome, Safari and Opera */
 }
+
+/* ── Dialog Modals Responsiveness ── */
+.checkout-dialog {
+  background: #fff;
+  border-radius: 16px;
+  width: 460px;
+  max-width: 100%;
+  padding: 28px;
+  position: relative;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.approval-dialog {
+  background: #fff;
+  border-radius: 18px;
+  width: 480px;
+  max-width: 100%;
+  position: relative;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: fadeUp 0.25s ease;
+}
+
+.approval-header {
+  background: linear-gradient(135deg, #1c1917 0%, #292524 100%);
+  padding: 24px 28px 20px;
+  border-radius: 18px 18px 0 0;
+}
+
+.approval-body {
+  padding: 24px 28px 28px;
+}
+
+.edit-dialog {
+  background: #fff;
+  border-radius: 16px;
+  width: 440px;
+  max-width: 100%;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+}
+
+@media (max-width: 480px) {
+  .checkout-dialog {
+    padding: 20px 16px !important;
+    border-radius: 12px !important;
+    max-height: 95vh !important;
+  }
+  .approval-dialog {
+    border-radius: 12px !important;
+    max-height: 95vh !important;
+  }
+  .approval-header {
+    padding: 16px 16px 14px !important;
+    border-radius: 12px 12px 0 0 !important;
+  }
+  .approval-body {
+    padding: 16px !important;
+  }
+  .edit-dialog {
+    border-radius: 12px !important;
+  }
+}
+
+.approval-signing {
+  text-align: center;
+  padding: 60px 28px;
+}
+
+.approval-success {
+  text-align: center;
+  padding: 50px 28px;
+}
+
+@media (max-width: 480px) {
+  .approval-signing {
+    padding: 40px 16px !important;
+  }
+  .approval-success {
+    padding: 30px 16px !important;
+  }
+}
+
+/* ── Compact Header & Mobile Navigation Styles ── */
+@media (max-width: 480px) {
+  .logo-text, .cart-btn-text {
+    display: none !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .mobile-bottom-nav button span {
+    font-size: 9.5px !important;
+  }
+}
+
+/* ── Mobile Navigation Dark Mode Overrides ── */
+[data-theme="dark"] .mobile-bottom-nav {
+  background: #161412 !important;
+  border-top: 1px solid #292524 !important;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.4) !important;
+}
+
+[data-theme="dark"] .mobile-bottom-nav button span {
+  color: #a8a29e !important;
+}
+
+[data-theme="dark"] .mobile-bottom-nav button:hover span {
+  color: #fff !important;
+}
+
+[data-theme="dark"] .nav-mobile-tabs {
+  border-top-color: #292524 !important;
+}
+
 

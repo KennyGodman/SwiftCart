@@ -897,7 +897,7 @@ export const CATALOGUE = {
             "price": 299,
             "oldPrice": 380,
             "desc": "15-bar pressure pump, built-in steam wand",
-            "img": "https://images.unsplash.com/photo-1579888944880-d98341148733?w=400&q=80"
+            "img": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=400&q=80"
           },
           {
             "id": "app-k3",
@@ -914,6 +914,54 @@ export const CATALOGUE = {
             "oldPrice": 85,
             "desc": "Temperature control, stainless steel interior",
             "img": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&q=80"
+          },
+          {
+            "id": "app-k5",
+            "name": "Retro 2-Slice Toaster",
+            "price": 45,
+            "oldPrice": 60,
+            "desc": "Wide slots, browning control, crumb tray",
+            "img": "https://images.unsplash.com/photo-1583623025817-d180a2221d0a?w=400&q=80"
+          },
+          {
+            "id": "app-k6",
+            "name": "Smart Countertop Microwave",
+            "price": 180,
+            "oldPrice": 220,
+            "desc": "900W, sensor cooking, inverter technology",
+            "img": "https://images.unsplash.com/photo-1574269909862-7e1d70bb8078?w=400&q=80"
+          },
+          {
+            "id": "app-k7",
+            "name": "Precision Sous Vide Cooker",
+            "price": 99,
+            "oldPrice": 130,
+            "desc": "WiFi enabled, 1000W precision heater",
+            "img": "https://images.unsplash.com/photo-1547082299-de196ea013d6?w=400&q=80"
+          },
+          {
+            "id": "app-k8",
+            "name": "9-in-1 Instant Cooker",
+            "price": 110,
+            "oldPrice": 140,
+            "desc": "6QT multi-use pressure cooker, stainless pot",
+            "img": "https://images.unsplash.com/photo-1544233726-9f1d2b27be8b?w=400&q=80"
+          },
+          {
+            "id": "app-k9",
+            "name": "Electric Citrus Juicer",
+            "price": 35,
+            "oldPrice": 48,
+            "desc": "Dual-cone rotation, pulp density control",
+            "img": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80"
+          },
+          {
+            "id": "app-k10",
+            "name": "Food Processor 12-Cup",
+            "price": 149,
+            "oldPrice": 199,
+            "desc": "Heavy-duty induction motor, adjustable slicing disc",
+            "img": "https://images.unsplash.com/photo-1590794056226-79ef3a8147e1?w=400&q=80"
           }
         ]
       },
@@ -936,6 +984,70 @@ export const CATALOGUE = {
             "oldPrice": 280,
             "desc": "LiDAR navigation, automatic self-charging",
             "img": "https://images.unsplash.com/photo-1518310383802-640c2de311b2?w=400&q=80"
+          },
+          {
+            "id": "app-c3",
+            "name": "Cool Mist Humidifier",
+            "price": 48,
+            "oldPrice": 65,
+            "desc": "4L tank, essential oil tray, auto shut-off",
+            "img": "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=400&q=80"
+          },
+          {
+            "id": "app-c4",
+            "name": "Oscillating Tower Fan",
+            "price": 90,
+            "oldPrice": 120,
+            "desc": "10 speeds, quiet airflow, remote control",
+            "img": "https://images.unsplash.com/photo-1622737133809-d95047b9e673?w=400&q=80"
+          },
+          {
+            "id": "app-c5",
+            "name": "Ceramic Space Heater",
+            "price": 59,
+            "oldPrice": 79,
+            "desc": "1500W, tip-over protection, digital thermostat",
+            "img": "https://images.unsplash.com/photo-1604014237800-1c9102c219da?w=400&q=80"
+          },
+          {
+            "id": "app-c6",
+            "name": "Cordless Stick Vacuum",
+            "price": 189,
+            "oldPrice": 240,
+            "desc": "25kPa suction, 45 min runtime, lightweight",
+            "img": "https://images.unsplash.com/photo-1558317374-067fb5f30001?w=400&q=80"
+          },
+          {
+            "id": "app-c7",
+            "name": "Smart Thermostat",
+            "price": 179,
+            "oldPrice": 219,
+            "desc": "WiFi programmable, energy saving analyzer",
+            "img": "https://images.unsplash.com/photo-1558002038-1055907df827?w=400&q=80"
+          },
+          {
+            "id": "app-c8",
+            "name": "Garment Steamer Pro",
+            "price": 75,
+            "oldPrice": 95,
+            "desc": "Continuous steam, 1500W, large water tank",
+            "img": "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400&q=80"
+          },
+          {
+            "id": "app-c9",
+            "name": "Smart Plug 4-Pack",
+            "price": 28,
+            "oldPrice": 38,
+            "desc": "WiFi, energy monitoring, voice assistant support",
+            "img": "https://images.unsplash.com/photo-1558002038-1055907df827?w=400&q=80"
+          },
+          {
+            "id": "app-c10",
+            "name": "Dehumidifier 30-Pint",
+            "price": 169,
+            "oldPrice": 210,
+            "desc": "Auto-defrost, 24h timer, quiet operation",
+            "img": "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=400&q=80"
           }
         ]
       }
@@ -964,6 +1076,70 @@ export const CATALOGUE = {
             "oldPrice": 649,
             "desc": "Portable gaming console, 512GB NVMe SSD",
             "img": "https://images.unsplash.com/photo-1605901309584-818e25960a8f?w=400&q=80"
+          },
+          {
+            "id": "gam-c3",
+            "name": "PlayStation 5 Slim",
+            "price": 499,
+            "oldPrice": 599,
+            "desc": "Digital edition, 1TB SSD, dualsense controller",
+            "img": "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=400&q=80"
+          },
+          {
+            "id": "gam-c4",
+            "name": "Xbox Series X",
+            "price": 499,
+            "oldPrice": 599,
+            "desc": "12 TFLOPS processing power, 1TB custom SSD",
+            "img": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&q=80"
+          },
+          {
+            "id": "gam-c5",
+            "name": "Nintendo Switch OLED",
+            "price": 349,
+            "oldPrice": 399,
+            "desc": "7-inch OLED screen, 64GB storage, neon blue/red",
+            "img": "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=400&q=80"
+          },
+          {
+            "id": "gam-c6",
+            "name": "Retro Arcade Cabinet",
+            "price": 299,
+            "oldPrice": 379,
+            "desc": "Bartop arcade machine, 250 built-in classic games",
+            "img": "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=400&q=80"
+          },
+          {
+            "id": "gam-c7",
+            "name": "Racing Wheel & Pedals Set",
+            "price": 199,
+            "oldPrice": 250,
+            "desc": "Dual-motor force feedback, leather steering wheel",
+            "img": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80"
+          },
+          {
+            "id": "gam-c8",
+            "name": "Flight Simulator Joystick",
+            "price": 120,
+            "oldPrice": 150,
+            "desc": "Precision hands-on throttle and stick setup",
+            "img": "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&q=80"
+          },
+          {
+            "id": "gam-c9",
+            "name": "Handheld Retro Console",
+            "price": 89,
+            "oldPrice": 119,
+            "desc": "3.5 inch IPS screen, 10000+ classic games",
+            "img": "https://images.unsplash.com/photo-1531525645387-7f14be1bdbbd?w=400&q=80"
+          },
+          {
+            "id": "gam-c10",
+            "name": "VR Motion Tracker Set",
+            "price": 150,
+            "oldPrice": 190,
+            "desc": "Full-body tracking trackers for SteamVR games",
+            "img": "https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?w=400&q=80"
           }
         ]
       },
@@ -994,6 +1170,62 @@ export const CATALOGUE = {
             "oldPrice": 119,
             "desc": "Adjustable-tension thumbsticks, hair trigger locks",
             "img": "https://images.unsplash.com/photo-1600861195091-690c92f1d2cc?w=400&q=80"
+          },
+          {
+            "id": "gam-a4",
+            "name": "Pro Gaming Headset",
+            "price": 110,
+            "oldPrice": 145,
+            "desc": "7.1 surround sound, noise-canceling mic",
+            "img": "https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?w=400&q=80"
+          },
+          {
+            "id": "gam-a5",
+            "name": "Ergonomic Gaming Chair",
+            "price": 249,
+            "oldPrice": 320,
+            "desc": "Memory foam lumbar cushion, 4D armrests",
+            "img": "https://images.unsplash.com/photo-1505797149-43b0069ec26b?w=400&q=80"
+          },
+          {
+            "id": "gam-a6",
+            "name": "USB Streaming Microphone",
+            "price": 85,
+            "oldPrice": 115,
+            "desc": "Cardioid pattern, tap-to-mute, RGB lighting",
+            "img": "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&q=80"
+          },
+          {
+            "id": "gam-a7",
+            "name": "Custom Stream Deck",
+            "price": 149,
+            "oldPrice": 189,
+            "desc": "15 customizable LCD keys for app control",
+            "img": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?w=400&q=80"
+          },
+          {
+            "id": "gam-a8",
+            "name": "Superlight Mouse Pad XL",
+            "price": 29,
+            "oldPrice": 39,
+            "desc": "Low-friction surface, stitched edges, water-resistant",
+            "img": "https://images.unsplash.com/photo-1616440347437-b1c73416efc2?w=400&q=80"
+          },
+          {
+            "id": "gam-a9",
+            "name": "RGB Desk Ambient Light Bar",
+            "price": 49,
+            "oldPrice": 65,
+            "desc": "Syncs with game audio, smart app control",
+            "img": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400&q=80"
+          },
+          {
+            "id": "gam-a10",
+            "name": "Capture Card 4K",
+            "price": 129,
+            "oldPrice": 169,
+            "desc": "4K30 HDR pass-through, low-latency streaming",
+            "img": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400&q=80"
           }
         ]
       }
@@ -1013,7 +1245,7 @@ export const CATALOGUE = {
             "price": 999,
             "oldPrice": 1199,
             "desc": "M3 chip equivalent, 16GB RAM, 512GB SSD",
-            "img": "https://images.unsplash.com/photo-1496181130204-7552cc145cdb?w=400&q=80"
+            "img": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&q=80"
           },
           {
             "id": "ele-c2",
@@ -1022,6 +1254,70 @@ export const CATALOGUE = {
             "oldPrice": 420,
             "desc": "IPS panel, 99% sRGB, 65W power delivery",
             "img": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400&q=80"
+          },
+          {
+            "id": "ele-c3",
+            "name": "Gaming Desktop PC",
+            "price": 1299,
+            "oldPrice": 1499,
+            "desc": "Intel i7, RTX 4070, 32GB RAM, 1TB SSD",
+            "img": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400&q=80"
+          },
+          {
+            "id": "ele-c4",
+            "name": "34-inch Ultrawide Monitor",
+            "price": 449,
+            "oldPrice": 549,
+            "desc": "1440p curved panel, 144Hz refresh rate",
+            "img": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400&q=80"
+          },
+          {
+            "id": "ele-c5",
+            "name": "Mini PC Pro",
+            "price": 389,
+            "oldPrice": 480,
+            "desc": "AMD Ryzen 7, 16GB DDR5, compact metal case",
+            "img": "https://images.unsplash.com/photo-1547082299-de196ea013d6?w=400&q=80"
+          },
+          {
+            "id": "ele-c6",
+            "name": "1080p Streaming Webcam",
+            "price": 59,
+            "oldPrice": 79,
+            "desc": "Auto focus, dual stereo mics, privacy cover",
+            "img": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400&q=80"
+          },
+          {
+            "id": "ele-c7",
+            "name": "Aluminum Laptop Stand",
+            "price": 29,
+            "oldPrice": 39,
+            "desc": "Ergonomic height adjustment, heat dissipation",
+            "img": "https://images.unsplash.com/photo-1616440347437-b1c73416efc2?w=400&q=80"
+          },
+          {
+            "id": "ele-c8",
+            "name": "USB-C Dual Docking Station",
+            "price": 89,
+            "oldPrice": 119,
+            "desc": "10-in-1 ports expansion, 100W power delivery",
+            "img": "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=400&q=80"
+          },
+          {
+            "id": "ele-c9",
+            "name": "Wireless Desktop Keyboard",
+            "price": 79,
+            "oldPrice": 99,
+            "desc": "Sleek low profile, multi-device switching",
+            "img": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&q=80"
+          },
+          {
+            "id": "ele-c10",
+            "name": "Ergonomic Vertical Mouse",
+            "price": 49,
+            "oldPrice": 65,
+            "desc": "Reduces wrist strain, rechargeable battery",
+            "img": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400&q=80"
           }
         ]
       },
@@ -1044,6 +1340,70 @@ export const CATALOGUE = {
             "oldPrice": 99,
             "desc": "IP67 waterproof, 360-degree sound",
             "img": "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&q=80"
+          },
+          {
+            "id": "ele-a3",
+            "name": "True Wireless Earbuds",
+            "price": 129,
+            "oldPrice": 159,
+            "desc": "Active noise cancelling, IPX7 waterproof",
+            "img": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&q=80"
+          },
+          {
+            "id": "ele-a4",
+            "name": "Hi-Fi Stereo Soundbar",
+            "price": 189,
+            "oldPrice": 230,
+            "desc": "Built-in subwoofer, optical and Bluetooth inputs",
+            "img": "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&q=80"
+          },
+          {
+            "id": "ele-a5",
+            "name": "Vintage Vinyl Record Player",
+            "price": 149,
+            "oldPrice": 199,
+            "desc": "Belt-driven turntable, built-in speakers, Bluetooth",
+            "img": "https://images.unsplash.com/photo-1539627831859-a911cf04d3cd?w=400&q=80"
+          },
+          {
+            "id": "ele-a6",
+            "name": "Professional Condenser Mic",
+            "price": 119,
+            "oldPrice": 149,
+            "desc": "USB/XLR output, studio-grade vocal recording",
+            "img": "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400&q=80"
+          },
+          {
+            "id": "ele-a7",
+            "name": "RGB Headphone Stand",
+            "price": 25,
+            "oldPrice": 35,
+            "desc": "Dual USB charging ports, solid non-slip base",
+            "img": "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&q=80"
+          },
+          {
+            "id": "ele-a8",
+            "name": "Desktop DAC & Amplifier",
+            "price": 99,
+            "oldPrice": 129,
+            "desc": "High-res audio converter, drives audiophile cans",
+            "img": "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&q=80"
+          },
+          {
+            "id": "ele-a9",
+            "name": "Retro Bluetooth Boombox",
+            "price": 79,
+            "oldPrice": 99,
+            "desc": "Cassette tape slot, FM radio, rechargeable battery",
+            "img": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&q=80"
+          },
+          {
+            "id": "ele-a10",
+            "name": "Bookshelf Reference Speakers",
+            "price": 159,
+            "oldPrice": 199,
+            "desc": "Active monitors, pristine studio frequency response",
+            "img": "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400&q=80"
           }
         ]
       }
@@ -1072,6 +1432,70 @@ export const CATALOGUE = {
             "oldPrice": 399,
             "desc": "6.4\" screen, long battery life, 128GB",
             "img": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80"
+          },
+          {
+            "id": "phg-p3",
+            "name": "Flip Foldable Smartphone",
+            "price": 999,
+            "oldPrice": 1199,
+            "desc": "6.7\" folding AMOLED, dual screen exterior",
+            "img": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80"
+          },
+          {
+            "id": "phg-p4",
+            "name": "Hardened Rugged Phone",
+            "price": 289,
+            "oldPrice": 350,
+            "desc": "IP68 water/dust proof, drop-resistant, 10Ah battery",
+            "img": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80"
+          },
+          {
+            "id": "phg-p5",
+            "name": "Pro Gaming Smartphone",
+            "price": 799,
+            "oldPrice": 949,
+            "desc": "144Hz screen, built-in cooling fan, triggers",
+            "img": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80"
+          },
+          {
+            "id": "phg-p6",
+            "name": "Stylus Business Edition",
+            "price": 499,
+            "oldPrice": 599,
+            "desc": "Built-in smart pen, large screen organizer",
+            "img": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80"
+          },
+          {
+            "id": "phg-p7",
+            "name": "Mini Pocket Smartphone",
+            "price": 249,
+            "oldPrice": 299,
+            "desc": "3.0\" touch screen, dual SIM, ultra compact size",
+            "img": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80"
+          },
+          {
+            "id": "phg-p8",
+            "name": "Developer Sandbox Phone",
+            "price": 349,
+            "oldPrice": 420,
+            "desc": "Stock OS, unlocked bootloader, privacy toggles",
+            "img": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80"
+          },
+          {
+            "id": "phg-p9",
+            "name": "Cinema Camera Pro Phone",
+            "price": 899,
+            "oldPrice": 1099,
+            "desc": "Premium lens equivalent, raw video capture mode",
+            "img": "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80"
+          },
+          {
+            "id": "phg-p10",
+            "name": "Global LTE Rover Phone",
+            "price": 199,
+            "oldPrice": 240,
+            "desc": "Dual-band GPS, long-range antenna, rugged body",
+            "img": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400&q=80"
           }
         ]
       },
@@ -1094,6 +1518,70 @@ export const CATALOGUE = {
             "oldPrice": 79,
             "desc": "Step tracker, 14-day battery life",
             "img": "https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=400&q=80"
+          },
+          {
+            "id": "phg-w3",
+            "name": "Smart Titanium Ring",
+            "price": 229,
+            "oldPrice": 279,
+            "desc": "Continuous sleep, temperature, HRV biometric sensor",
+            "img": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&q=80"
+          },
+          {
+            "id": "phg-w4",
+            "name": "Chest Strap Heart Rate Monitor",
+            "price": 69,
+            "oldPrice": 89,
+            "desc": "ECG-accurate tracking, Bluetooth and ANT+",
+            "img": "https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=400&q=80"
+          },
+          {
+            "id": "phg-w5",
+            "name": "Smart Sunglasses with Speakers",
+            "price": 149,
+            "oldPrice": 189,
+            "desc": "Polarized lenses, open-ear audio, built-in mic",
+            "img": "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&q=80"
+          },
+          {
+            "id": "phg-w6",
+            "name": "Kids GPS Safety Watch",
+            "price": 89,
+            "oldPrice": 119,
+            "desc": "Real-time tracking, voice calling, SOS button",
+            "img": "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&q=80"
+          },
+          {
+            "id": "phg-w7",
+            "name": "Hybrid Classic Smartwatch",
+            "price": 179,
+            "oldPrice": 219,
+            "desc": "Mechanical hands, hidden OLED info display",
+            "img": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80"
+          },
+          {
+            "id": "phg-w8",
+            "name": "Smart Safety Alarm Band",
+            "price": 49,
+            "oldPrice": 65,
+            "desc": "One-touch alert, GPS location sharing, vibration",
+            "img": "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&q=80"
+          },
+          {
+            "id": "phg-w9",
+            "name": "VR Fitness Hand Straps",
+            "price": 39,
+            "oldPrice": 49,
+            "desc": "Adjustable weights, grip controllers for active play",
+            "img": "https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=400&q=80"
+          },
+          {
+            "id": "phg-w10",
+            "name": "Smart Cycling Computer",
+            "price": 119,
+            "oldPrice": 149,
+            "desc": "GPS navigation, heart rate sync, cadence sensor",
+            "img": "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&q=80"
           }
         ]
       },
@@ -1107,7 +1595,79 @@ export const CATALOGUE = {
             "price": 35,
             "oldPrice": 45,
             "desc": "Dual USB-C and USB-A, fold-flat plug",
-            "img": "https://images.unsplash.com/photo-1619134591230-801280e2277c?w=400&q=80"
+            "img": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=400&q=80"
+          },
+          {
+            "id": "phg-ch2",
+            "name": "20,000mAh Power Bank",
+            "price": 45,
+            "oldPrice": 59,
+            "desc": "22.5W fast charging, LED display, dual USB-C",
+            "img": "https://images.unsplash.com/photo-1620288627223-53302f4e8c74?w=400&q=80"
+          },
+          {
+            "id": "phg-ch3",
+            "name": "Magnetic Wireless Charger",
+            "price": 39,
+            "oldPrice": 49,
+            "desc": "15W fast magnetic alignment pad, USB-C input",
+            "img": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=400&q=80"
+          },
+          {
+            "id": "phg-ch4",
+            "name": "100W 4-Port Desktop Station",
+            "price": 69,
+            "oldPrice": 89,
+            "desc": "GaN fast charging for multiple laptops/tablets",
+            "img": "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=400&q=80"
+          },
+          {
+            "id": "phg-ch5",
+            "name": "Solar Outdoor Power Bank",
+            "price": 49,
+            "oldPrice": 65,
+            "desc": "15,000mAh, dual solar panels, built-in flashlight",
+            "img": "https://images.unsplash.com/photo-1613665813446-82a78c468a1d?w=400&q=80"
+          },
+          {
+            "id": "phg-ch6",
+            "name": "Dual USB Car Charger",
+            "price": 19,
+            "oldPrice": 25,
+            "desc": "QC 3.0 support, metal construction, voltmeter",
+            "img": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=400&q=80"
+          },
+          {
+            "id": "phg-ch7",
+            "name": "Travel Adapter Universal",
+            "price": 29,
+            "oldPrice": 39,
+            "desc": "Works in 150+ countries, 4 USB ports plus AC outlet",
+            "img": "https://images.unsplash.com/photo-1558002038-1055907df827?w=400&q=80"
+          },
+          {
+            "id": "phg-ch8",
+            "name": "Braided USB-C to USB-C Cable",
+            "price": 15,
+            "oldPrice": 20,
+            "desc": "100W power delivery, durable nylon braid, 6ft",
+            "img": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=400&q=80"
+          },
+          {
+            "id": "phg-ch9",
+            "name": "Magnetic Cable Organizer",
+            "price": 12,
+            "oldPrice": 18,
+            "desc": "Organizes cables on desk, includes 5 magnetic clips",
+            "img": "https://images.unsplash.com/photo-1549654929-e63d34779e41?w=400&q=80"
+          },
+          {
+            "id": "phg-ch10",
+            "name": "Wireless Charging Stand",
+            "price": 35,
+            "oldPrice": 45,
+            "desc": "Charges phone and watch simultaneously",
+            "img": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=400&q=80"
           }
         ]
       }
@@ -1136,6 +1696,70 @@ export const CATALOGUE = {
             "oldPrice": 32,
             "desc": "Locks in moisture, strengthens skin barrier",
             "img": "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=400&q=80"
+          },
+          {
+            "id": "hbc-s3",
+            "name": "Gentle Hydrating Cleanser",
+            "price": 18,
+            "oldPrice": 24,
+            "desc": "Soap-free, maintains natural skin balance, 200ml",
+            "img": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&q=80"
+          },
+          {
+            "id": "hbc-s4",
+            "name": "AHA/BHA Exfoliating Toner",
+            "price": 22,
+            "oldPrice": 28,
+            "desc": "Minimizes pores, removes dead skin cells",
+            "img": "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&q=80"
+          },
+          {
+            "id": "hbc-s5",
+            "name": "Broad Spectrum SPF 50",
+            "price": 25,
+            "oldPrice": 32,
+            "desc": "Lightweight daily sunscreen, zero white cast",
+            "img": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&q=80"
+          },
+          {
+            "id": "hbc-s6",
+            "name": "Hydrating Sheet Mask Pack",
+            "price": 15,
+            "oldPrice": 20,
+            "desc": "Set of 5 masks with green tea extract",
+            "img": "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=400&q=80"
+          },
+          {
+            "id": "hbc-s7",
+            "name": "Under-Eye Revive Cream",
+            "price": 29,
+            "oldPrice": 38,
+            "desc": "Reduces dark circles and puffiness with caffeine",
+            "img": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&q=80"
+          },
+          {
+            "id": "hbc-s8",
+            "name": "Nourishing Facial Oil",
+            "price": 34,
+            "oldPrice": 45,
+            "desc": "Pure jojoba and rosehip blend, glow booster",
+            "img": "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&q=80"
+          },
+          {
+            "id": "hbc-s9",
+            "name": "Soothing Aloe Gel",
+            "price": 12,
+            "oldPrice": 16,
+            "desc": "100% organic aloe, cools sun-irritated skin",
+            "img": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&q=80"
+          },
+          {
+            "id": "hbc-s10",
+            "name": "Gentle Facial Scrub",
+            "price": 19,
+            "oldPrice": 25,
+            "desc": "Fine apricot kernel particles, softens skin texture",
+            "img": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&q=80"
           }
         ]
       },
@@ -1149,6 +1773,78 @@ export const CATALOGUE = {
             "price": 19,
             "oldPrice": 26,
             "desc": "Rich pigment, transfer-proof finish, 8-hour wear",
+            "img": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&q=80"
+          },
+          {
+            "id": "hbc-m2",
+            "name": "Long-Wear Volumizing Mascara",
+            "price": 18,
+            "oldPrice": 24,
+            "desc": "Smudge-proof, dramatic lash volume, intense black",
+            "img": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80"
+          },
+          {
+            "id": "hbc-m3",
+            "name": "Liquid Satin Foundation",
+            "price": 35,
+            "oldPrice": 45,
+            "desc": "Medium buildable coverage, dewy skin finish",
+            "img": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80"
+          },
+          {
+            "id": "hbc-m4",
+            "name": "Neutral Eyeshadow Palette",
+            "price": 38,
+            "oldPrice": 48,
+            "desc": "12 highly pigmented matte and shimmer shades",
+            "img": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&q=80"
+          },
+          {
+            "id": "hbc-m5",
+            "name": "Full Coverage Concealer",
+            "price": 22,
+            "oldPrice": 28,
+            "desc": "Waterproof formula, creases-free, under-eye highlight",
+            "img": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80"
+          },
+          {
+            "id": "hbc-m6",
+            "name": "Precision Liquid Eyeliner",
+            "price": 15,
+            "oldPrice": 20,
+            "desc": "Ultra fine felt tip, waterproof 24h wear",
+            "img": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80"
+          },
+          {
+            "id": "hbc-m7",
+            "name": "Dewy Finish Setting Spray",
+            "price": 19,
+            "oldPrice": 25,
+            "desc": "Locks in makeup, delivers light radiant glow",
+            "img": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80"
+          },
+          {
+            "id": "hbc-m8",
+            "name": "Hydrating Makeup Primer",
+            "price": 24,
+            "oldPrice": 30,
+            "desc": "Smooths pores, creates perfect base for makeup",
+            "img": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&q=80"
+          },
+          {
+            "id": "hbc-m9",
+            "name": "Premium 10-Piece Brush Set",
+            "price": 45,
+            "oldPrice": 59,
+            "desc": "Synthetic vegan bristles, elegant storage bag",
+            "img": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80"
+          },
+          {
+            "id": "hbc-m10",
+            "name": "High-Shine Lip Gloss",
+            "price": 16,
+            "oldPrice": 22,
+            "desc": "Non-sticky moisturizing formula, peach scent",
             "img": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&q=80"
           }
         ]
@@ -1172,6 +1868,70 @@ export const CATALOGUE = {
             "oldPrice": 24,
             "desc": "Natural sleep support, drug-free formulation",
             "img": "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&q=80"
+          },
+          {
+            "id": "hbc-w3",
+            "name": "Daily Multivitamin Gummies",
+            "price": 22,
+            "oldPrice": 28,
+            "desc": "Essential vitamins and minerals for active lifestyle",
+            "img": "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&q=80"
+          },
+          {
+            "id": "hbc-w4",
+            "name": "Premium Marine Collagen",
+            "price": 38,
+            "oldPrice": 48,
+            "desc": "Supports skin elasticity and joint health, 300g",
+            "img": "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=400&q=80"
+          },
+          {
+            "id": "hbc-w5",
+            "name": "Organic Matcha Green Tea",
+            "price": 25,
+            "oldPrice": 32,
+            "desc": "Ceremonial grade, rich antioxidants, 100g",
+            "img": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=400&q=80"
+          },
+          {
+            "id": "hbc-w6",
+            "name": "High-Density Yoga Mat",
+            "price": 29,
+            "oldPrice": 39,
+            "desc": "6mm non-slip cushioning, includes carry strap",
+            "img": "https://images.unsplash.com/photo-1599447421416-3414500d18a5?w=400&q=80"
+          },
+          {
+            "id": "hbc-w7",
+            "name": "Vacuum Insulated Water Bottle",
+            "price": 24,
+            "oldPrice": 30,
+            "desc": "Keep cold 24h, hot 12h, leakproof cap, 32oz",
+            "img": "https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400&q=80"
+          },
+          {
+            "id": "hbc-w8",
+            "name": "Therapeutic Massage Gun",
+            "price": 89,
+            "oldPrice": 119,
+            "desc": "6 speed settings, 4 interchangeable heads",
+            "img": "https://images.unsplash.com/photo-1579758629938-03607ccdbaba?w=400&q=80"
+          },
+          {
+            "id": "hbc-w9",
+            "name": "Omega-3 Fish Oil Softgels",
+            "price": 19,
+            "oldPrice": 25,
+            "desc": "1000mg wild-caught fish oil, brain & heart support",
+            "img": "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=400&q=80"
+          },
+          {
+            "id": "hbc-w10",
+            "name": "Organic Chamomile Tea",
+            "price": 12,
+            "oldPrice": 16,
+            "desc": "Caffeine-free herbal tea bags, relaxes body & mind",
+            "img": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=400&q=80"
           }
         ]
       }
@@ -1200,6 +1960,70 @@ export const CATALOGUE = {
             "oldPrice": 380,
             "desc": "Dual-motor steel frame, memory presets, 48x24\"",
             "img": "https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=400&q=80"
+          },
+          {
+            "id": "hmo-f3",
+            "name": "Under-Desk Drawer Cabinet",
+            "price": 89,
+            "oldPrice": 115,
+            "desc": "Mobile steel file cabinet, locking keys, 3-drawers",
+            "img": "https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=400&q=80"
+          },
+          {
+            "id": "hmo-f4",
+            "name": "Ergonomic Foot Rest Cushion",
+            "price": 25,
+            "oldPrice": 35,
+            "desc": "High-density foam, teardrop shape, washable cover",
+            "img": "https://images.unsplash.com/photo-1505797149-43b0069ec26b?w=400&q=80"
+          },
+          {
+            "id": "hmo-f5",
+            "name": "Wooden Monitor Stand Riser",
+            "price": 39,
+            "oldPrice": 49,
+            "desc": "Elevates screen to eye level, storage drawer underneath",
+            "img": "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&q=80"
+          },
+          {
+            "id": "hmo-f6",
+            "name": "Minimalist Desk LED Lamp",
+            "price": 45,
+            "oldPrice": 59,
+            "desc": "Dimmable, color temperature control, USB charging port",
+            "img": "https://images.unsplash.com/photo-1505797149-43b0069ec26b?w=400&q=80"
+          },
+          {
+            "id": "hmo-f7",
+            "name": "Padded Drafting Stool",
+            "price": 79,
+            "oldPrice": 99,
+            "desc": "Height adjustable, 360 rotation, chrome foot ring",
+            "img": "https://images.unsplash.com/photo-1505797149-43b0069ec26b?w=400&q=80"
+          },
+          {
+            "id": "hmo-f8",
+            "name": "Floating Wall Shelf Set",
+            "price": 29,
+            "oldPrice": 39,
+            "desc": "3-piece rustic wood shelves with metal brackets",
+            "img": "https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=400&q=80"
+          },
+          {
+            "id": "hmo-f9",
+            "name": "Anti-Fatigue Standing Mat",
+            "price": 35,
+            "oldPrice": 45,
+            "desc": "Cushioned kitchen & office floor mat, non-slip",
+            "img": "https://images.unsplash.com/photo-1505797149-43b0069ec26b?w=400&q=80"
+          },
+          {
+            "id": "hmo-f10",
+            "name": "Curved Desk Partition Screen",
+            "price": 49,
+            "oldPrice": 65,
+            "desc": "Acoustic privacy screen, sound-absorbing felt",
+            "img": "https://images.unsplash.com/photo-1595515106969-1ce29566ff1c?w=400&q=80"
           }
         ]
       },
@@ -1213,6 +2037,78 @@ export const CATALOGUE = {
             "price": 32,
             "oldPrice": 42,
             "desc": "Natural bamboo, multiple slots and drawer",
+            "img": "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&q=80"
+          },
+          {
+            "id": "hmo-o2",
+            "name": "Neoprene Cable Sleeves Set",
+            "price": 15,
+            "oldPrice": 20,
+            "desc": "4-pack zippered cable wrap, hides desktop wires",
+            "img": "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&q=80"
+          },
+          {
+            "id": "hmo-o3",
+            "name": "Desk Drawer Dividers Set",
+            "price": 19,
+            "oldPrice": 25,
+            "desc": "Adjustable bamboo expanders, fits standard drawers",
+            "img": "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&q=80"
+          },
+          {
+            "id": "hmo-o4",
+            "name": "Vertical File Folder Sorter",
+            "price": 22,
+            "oldPrice": 28,
+            "desc": "5-slot metal wire desktop document organizer",
+            "img": "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&q=80"
+          },
+          {
+            "id": "hmo-o5",
+            "name": "Under-Desk Cable Management Tray",
+            "price": 28,
+            "oldPrice": 35,
+            "desc": "Spacious wire basket, mounts under desk surface",
+            "img": "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&q=80"
+          },
+          {
+            "id": "hmo-o6",
+            "name": "Smart Label Maker Machine",
+            "price": 39,
+            "oldPrice": 49,
+            "desc": "Bluetooth connected, prints thermal label stickers",
+            "img": "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&q=80"
+          },
+          {
+            "id": "hmo-o7",
+            "name": "Wall Pegboard Organizer Kit",
+            "price": 49,
+            "oldPrice": 65,
+            "desc": "2 panels, hooks and bins for craft or office storage",
+            "img": "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&q=80"
+          },
+          {
+            "id": "hmo-o8",
+            "name": "Magnetic Dry Erase Whiteboard",
+            "price": 35,
+            "oldPrice": 45,
+            "desc": "Aluminum frame, includes markers, eraser & magnets",
+            "img": "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&q=80"
+          },
+          {
+            "id": "hmo-o9",
+            "name": "Felt Desk Mat Mouse Pad",
+            "price": 18,
+            "oldPrice": 24,
+            "desc": "Extra large desk protector, keyboard & mouse mat",
+            "img": "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&q=80"
+          },
+          {
+            "id": "hmo-o10",
+            "name": "Metal Mesh Trash Can Set",
+            "price": 16,
+            "oldPrice": 22,
+            "desc": "3-pack matching waste baskets for home office",
             "img": "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&q=80"
           }
         ]

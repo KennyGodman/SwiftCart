@@ -50,24 +50,13 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
         role="dialog"
         aria-modal="true"
         aria-label="Approve agent spending"
-        style={{
-          background: "#fff", borderRadius: 18,
-          width: 480, maxWidth: "100%",
-          position: "relative",
-          boxShadow: "0 32px 80px rgba(0,0,0,0.3)",
-          maxHeight: "90vh", overflowY: "auto",
-          animation: "fadeUp .25s ease",
-        }}
+        className="approval-dialog"
       >
         {/* ── Review Step ── */}
         {step === "review" && (
           <>
             {/* Header */}
-            <div style={{
-              background: "linear-gradient(135deg, #1c1917 0%, #292524 100%)",
-              padding: "24px 28px 20px",
-              borderRadius: "18px 18px 0 0",
-            }}>
+            <div className="approval-header">
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <div style={{
@@ -103,7 +92,7 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
             </div>
 
             {/* Body */}
-            <div style={{ padding: "22px 28px 26px" }}>
+            <div className="approval-body">
               {/* Explanation */}
               <div style={{
                 background: "#faf9f7", borderRadius: 12,
@@ -245,7 +234,7 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
 
         {/* ── Signing Step ── */}
         {step === "signing" && (
-          <div style={{ textAlign: "center", padding: "60px 28px" }}>
+          <div className="approval-signing">
             <img
               src="/arc-logo-signing.jpg"
               alt="Signing Transaction"
@@ -277,7 +266,7 @@ export default function ApprovalModal({ wallet, onApprove, onClose, requestedAmo
 
         {/* ── Success Step ── */}
         {step === "success" && (
-          <div style={{ textAlign: "center", padding: "50px 28px" }}>
+          <div className="approval-success">
             <div style={{
               width: 60, height: 60, background: "linear-gradient(135deg, #c47d2a, #f97316)",
               borderRadius: "50%", margin: "0 auto 18px",

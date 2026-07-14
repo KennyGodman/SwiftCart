@@ -183,7 +183,7 @@ function LogoImage() {
         }}>
           <span style={{ fontSize: 12, fontWeight: 800, color: "#c47d2a", letterSpacing: 1 }}>AW</span>
         </div>
-        <span style={{ fontFamily: "var(--font-serif)", fontSize: 16, fontWeight: 700, color: "#1c1917", letterSpacing: 0.5 }}>
+        <span className="logo-text" style={{ fontFamily: "var(--font-serif)", fontSize: 16, fontWeight: 700, color: "#1c1917", letterSpacing: 0.5 }}>
           ArcWear
         </span>
       </div>
@@ -3896,7 +3896,7 @@ export default function ArcWear() {
               onMouseEnter={e => { e.currentTarget.style.background = "#7c4a1a"; e.currentTarget.style.borderColor = "#7c4a1a"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "#f97316"; e.currentTarget.style.borderColor = "#f97316"; }}
             >
-              🛒 Cart
+              🛒<span className="cart-btn-text"> Cart</span>
               {cartCount > 0 && (
                 <span style={{ background: "#fff", color: "#f97316", borderRadius: "50%", width: 16, height: 16, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 800 }}>
                   {cartCount}
@@ -3911,7 +3911,7 @@ export default function ArcWear() {
           className="nav-mobile-tabs hide-scrollbar"
           role="tablist"
           aria-label="Shop by gender"
-          style={{ display: "none", gap: 6, overflowX: "auto", padding: "8px 12px 10px", borderTop: "1px solid #f0ede8" }}
+          style={{ display: "none", gap: 6, overflowX: "auto", padding: "8px 12px 10px", borderTop: "1px solid #f0ede8", flexWrap: "nowrap" }}
         >
           {Object.keys(CATALOGUE).map(k => {
             const s = CATALOGUE[k];
@@ -4059,7 +4059,7 @@ export default function ArcWear() {
           className="filter-wrap"
           style={{ maxWidth: "100%", padding: "0 4%", height: 48, display: "flex", alignItems: "center", justifyContent: "space-between" }}
         >
-          <div className="hide-scrollbar" style={{ display: "flex", gap: 6, overflowX: "auto", padding: "4px 0" }} role="group" aria-label="Filter by category">
+          <div className="hide-scrollbar" style={{ display: "flex", gap: 6, overflowX: "auto", padding: "4px 0", flexWrap: "nowrap" }} role="group" aria-label="Filter by category">
             {[["all", "All"], ...cats.map(([k, c]) => [k, c.label])].map(([k, label]) => {
               const isActive = (k === "all" && !activeCat) || activeCat === k;
               return (
