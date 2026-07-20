@@ -3152,49 +3152,52 @@ export default function ArcWear() {
   };
 
   // ── Orders State & Syncing ──
-  const [orders, setOrders] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("arcwear_orders") || "[]");
-    } catch {
-      return [];
-    }
-  });
+  const getOrdersStorageKey = (w) => w ? `arcwear_orders_${w.toLowerCase()}` : "arcwear_orders_local";
+
+  const [orders, setOrders] = useState([]);
   const [ordersOpen, setOrdersOpen] = useState(false);
 
-  // Sync orders to localStorage
+  // Sync orders to localStorage whenever orders or wallet changes
   useEffect(() => {
-    localStorage.setItem("arcwear_orders", JSON.stringify(orders));
-  }, [orders]);
+    const key = getOrdersStorageKey(wallet);
+    localStorage.setItem(key, JSON.stringify(orders));
+  }, [orders, wallet]);
 
-  // Load orders from API when wallet is connected
-  const loadOrders = async (userWallet) => {
-    if (!userWallet) return;
+  // Load orders from API & localStorage when wallet is connected or changed
+  useEffect(() => {
+    const key = getOrdersStorageKey(wallet);
+    let localOrders = [];
     try {
-      const res = await fetch(`/api/orders?wallet=${userWallet}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.orders) {
-          setOrders(prev => {
-            const merged = [...data.orders];
-            for (const localOrder of prev) {
-              if (!merged.some(o => o.txHash === localOrder.txHash)) {
-                merged.push(localOrder);
-              }
-            }
-            return merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          });
-        }
-      }
+      const saved = localStorage.getItem(key) || (!wallet ? localStorage.getItem("arcwear_orders") : null) || "[]";
+      localOrders = JSON.parse(saved);
     } catch (e) {
-      console.error("Error loading orders from API:", e);
+      console.error("Failed to parse local orders:", e);
     }
-  };
+    setOrders(localOrders);
 
-  useEffect(() => {
     if (wallet) {
+      const loadOrders = async (userWallet) => {
+        try {
+          const res = await fetch(`/api/orders?wallet=${userWallet}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.orders) {
+              setOrders(prev => {
+                const merged = [...data.orders];
+                for (const localOrder of prev) {
+                  if (!merged.some(o => o.txHash === localOrder.txHash)) {
+                    merged.push(localOrder);
+                  }
+                }
+                return merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+              });
+            }
+          }
+        } catch (e) {
+          console.error("Error loading orders from API:", e);
+        }
+      };
       loadOrders(wallet);
-    } else {
-      setOrders([]);
     }
   }, [wallet]);
 
