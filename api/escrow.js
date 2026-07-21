@@ -1,7 +1,7 @@
 /**
  * escrow.js — ERC-8183 Agentic Commerce Protocol lifecycle handler.
  *
- * Manages the full ERC-8183 job lifecycle for ArcWear agent-initiated orders:
+ * Manages the full ERC-8183 job lifecycle for SwiftCart agent-initiated orders:
  *   createJob → fundOnBehalf → submit → complete  (or reject / claimRefund)
  *
  * All contract calls are signed by the Circle Programmable Wallet (agent wallet)
@@ -165,7 +165,7 @@ async function callFundOnBehalfWithMemo(jobId, client, expectedBudget, orderId, 
 
   const innerData = encodeFundOnBehalf(jobId, client, expectedBudget);
   const memoId = encodeMemoId(orderId);
-  const memoData = encodeMemoData("ArcWear Order");
+  const memoData = encodeMemoData("SwiftCart Order");
 
   const res = await fetch(`${CIRCLE_BASE}/developer/transactions/contractExecution`, {
     method: "POST",
@@ -205,7 +205,7 @@ async function callCreateJobWithMemo(client, provider, evaluator, token, budget,
   const ciphertext = await buildCiphertext(apiKey, entitySecret);
   const innerData  = encodeCreateJob(client, provider, evaluator, token, budget, expiredAt, description);
   const memoId     = encodeMemoId(orderId);
-  const memoData   = encodeMemoData("ArcWear Order");
+  const memoData   = encodeMemoData("SwiftCart Order");
 
   const res = await fetch(`${CIRCLE_BASE}/developer/transactions/contractExecution`, {
     method: "POST",
@@ -242,7 +242,7 @@ async function callSubmitWithMemo(jobId, deliverableHex, orderId, apiKey, entity
   const ciphertext = await buildCiphertext(apiKey, entitySecret);
   const innerData  = encodeSubmit(jobId, deliverableHex);
   const memoId     = encodeMemoId(orderId);
-  const memoData   = encodeMemoData("ArcWear Order");
+  const memoData   = encodeMemoData("SwiftCart Order");
 
   const res = await fetch(`${CIRCLE_BASE}/developer/transactions/contractExecution`, {
     method: "POST",
@@ -440,7 +440,7 @@ async function executeEscrowFlow(userWallet, total, orderId, apiKey, entitySecre
   const evaluator = EVALUATOR_ADDR();
   const expiredAt = Math.floor(Date.now() / 1000) + EXPIRY_SECONDS;
   const budgetRaw = Math.round(total * 1e6).toString(); // USDC 6 decimals
-  const description = `ArcWear Order ${orderId.slice(0, 8)}`;
+  const description = `SwiftCart Order ${orderId.slice(0, 8)}`;
 
   console.log(`[escrow] Starting ERC-8183 flow for ${userWallet}, ${total} USDC`);
   console.log(`[escrow] Contract: ${escrowAddr}, Evaluator: ${evaluator}`);

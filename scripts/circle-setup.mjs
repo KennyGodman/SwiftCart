@@ -114,7 +114,7 @@ async function createWallet(walletSetId, entitySecretCiphertext) {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log("\n🔵 ArcWear — Circle Agent Wallet Setup\n");
+  console.log("\n🔵 SwiftCart — Circle Agent Wallet Setup\n");
   console.log("═".repeat(50));
 
   // ── Step 0: Validate env ──────────────────────────────

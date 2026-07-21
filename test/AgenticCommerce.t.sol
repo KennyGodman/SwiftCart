@@ -16,8 +16,8 @@ import {
     AgenticCommerce__ExpiryNotReached,
     AgenticCommerce__ZeroTreasuryWithFee,
     AgenticCommerce__JobTerminal
-} from "../contracts/ArcWearErrors.sol";
-import {JobStatus, Job} from "../contracts/ArcWearTypes.sol";
+} from "../contracts/SwiftCartErrors.sol";
+import {JobStatus, Job} from "../contracts/SwiftCartTypes.sol";
 
 contract AgenticCommerceTest is Test {
     AgenticCommerce public commerce;

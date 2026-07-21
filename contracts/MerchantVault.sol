@@ -31,8 +31,8 @@ import {
     MerchantVault__ReturnWindowOpen,
     MerchantVault__TooEarlyForNonBuyer,
     MerchantVault__ActiveEscrowsExist
-} from "./ArcWearErrors.sol";
-import {OrderStatus, Order} from "./ArcWearTypes.sol";
+} from "./SwiftCartErrors.sol";
+import {OrderStatus, Order} from "./SwiftCartTypes.sol";
 import {
     PaymentRecorded,
     OrderShipped,
@@ -43,11 +43,11 @@ import {
     Refunded,
     AgentUpdated,
     UsdcTokenUpdated
-} from "./ArcWearEvents.sol";
+} from "./SwiftCartEvents.sol";
 
 /**
  * @title  MerchantVault v3
- * @author ArcWear
+ * @author SwiftCart
  * @notice Trustless escrow vault for autonomous order lifecycle management on Arc.
  *
  * @dev Lifecycle:

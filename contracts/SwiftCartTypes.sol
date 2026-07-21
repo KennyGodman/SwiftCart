@@ -37,7 +37,7 @@ enum JobStatus {
 struct Job {
     address client;           ///< Buyer wallet that funds the escrow.
     address provider;         ///< Merchant wallet (receives USDC on Completed).
-    address evaluator;        ///< ArcWear backend or agent (calls complete/reject).
+    address evaluator;        ///< SwiftCart backend or agent (calls complete/reject).
     address token;            ///< USDC token contract address on Arc.
     uint256 budget;           ///< USDC held in escrow (6-decimal raw units).
     uint256 expiredAt;        ///< Unix timestamp after which claimRefund() works.

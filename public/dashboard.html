@@ -1,6 +1,6 @@
-<div id="arcwear-dash-root"></div>
+<div id="swiftcart-dash-root"></div>
 <style>
-  #arcwear-dash-root {
+  #swiftcart-dash-root {
     --stone-950: #1c1917;
     --stone-900: #292524;
     --stone-800: #3a3531;
@@ -20,7 +20,7 @@
     max-width: 920px;
     margin: 0 auto;
   }
-  #arcwear-dash-root * { box-sizing: border-box; }
+  #swiftcart-dash-root * { box-sizing: border-box; }
   .aw-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 10px; }
   .aw-brand { display: flex; align-items: center; gap: 10px; }
   .aw-logo { width: 30px; height: 30px; flex-shrink: 0; }
@@ -63,7 +63,7 @@
   const AGENT_WALLET = "0x51894a584A1E186151b31b23ea3aDD16fce5fF56";
   const EXPLORER = "https://testnet.arcscan.app/address/" + ESCROW_ADDRESS;
 
-  const root = document.getElementById("arcwear-dash-root");
+  const root = document.getElementById("swiftcart-dash-root");
   root.innerHTML = `
     <div class="aw-header">
       <div class="aw-brand">
@@ -72,7 +72,7 @@
           <path d="M50 5 V50 M50 50 L90 27.5 M50 50 L10 27.5 M50 50 V95" stroke="#f5b82e" stroke-width="4"/>
         </svg>
         <div>
-          <div class="aw-title">ArcWear</div>
+          <div class="aw-title">SwiftCart</div>
           <div class="aw-sub">Live Network Analytics</div>
         </div>
       </div>

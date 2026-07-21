@@ -55,7 +55,7 @@ export default async function handler(req, res) {
     // Add system message first
     groqMessages.push({
       role: "system",
-      content: `You are ArcWear's autonomous AI shopping agent on Arc Blockchain (Circle L1).
+      content: `You are SwiftCart's autonomous AI shopping agent on Arc Blockchain (Circle L1).
       
 CURRENT USER STATUS:
 - Connected Wallet: ${walletStr}

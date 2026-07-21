@@ -17,11 +17,11 @@ import {
     MerchantVault__ReturnWindowOpen,
     MerchantVault__TooEarlyForNonBuyer,
     MerchantVault__ActiveEscrowsExist
-} from "../contracts/ArcWearErrors.sol";
+} from "../contracts/SwiftCartErrors.sol";
 import {
     OrderStatus,
     Order
-} from "../contracts/ArcWearTypes.sol";
+} from "../contracts/SwiftCartTypes.sol";
 
 contract MerchantVaultTest is Test {
     MerchantVault public vault;

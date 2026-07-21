@@ -26,7 +26,7 @@ export default async function handler(req, res) {
   const fMethod = fulfillmentMethod || "delivery";
   let fDetail = "";
   if (fMethod === "pickup") {
-    fDetail = `Store: ${pickupLocation || "ArcWear Flagship - Downtown"}`;
+    fDetail = `Store: ${pickupLocation || "SwiftCart Flagship - Downtown"}`;
   } else {
     fDetail = `
       <strong>Recipient:</strong> ${deliveryFullName || "Not specified"}<br/>
@@ -142,7 +142,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         sender: {
-          name: "ArcWear",
+          name: "SwiftCart",
           email: "dannymark67@gmail.com",
         },
         to: [
@@ -151,7 +151,7 @@ export default async function handler(req, res) {
             name: customerEmail,
           }
         ],
-        subject: "✓ Your ArcWear Order is Confirmed!",
+        subject: "✓ Your SwiftCart Order is Confirmed!",
         htmlContent: emailHtml,
       }),
     });

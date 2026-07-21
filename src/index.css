@@ -1,5 +1,5 @@
 /* =========================================================
-   ARCWEAR — Global Design System
+   SWIFTCART — Global Design System
    ========================================================= */
 
 /* ── Design Tokens ── */
@@ -16,7 +16,7 @@
   --color-ink-faint: #a8a29e;   /* disabled / captions */
   --color-ink-stone: #57534e;   /* dark surface text */
 
-  --color-brand:     #c47d2a;   /* ArcWear gold */
+  --color-brand:     #c47d2a;   /* SwiftCart gold */
   --color-brand-lt:  #e8a849;   /* lighter gold */
   --color-accent:    #f97316;   /* orange CTA */
   --color-accent-dk: #ea6c0a;   /* orange hover */

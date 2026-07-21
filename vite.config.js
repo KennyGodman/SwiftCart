@@ -53,7 +53,7 @@ export default defineConfig(({ mode }) => {
                   <html>
                   <body style="margin:0;padding:0;background:#f5f3f0;font-family:sans-serif;">
                     <div style="background:#1c1917;padding:24px 32px;text-align:center;">
-                      <p style="color:#c47d2a;font-size:22px;font-weight:800;margin:0;">◎ ARCWEAR</p>
+                      <p style="color:#c47d2a;font-size:22px;font-weight:800;margin:0;">◎ SWIFTCART</p>
                       <p style="color:#78716c;font-size:11px;margin:4px 0 0;letter-spacing:1.5px;text-transform:uppercase;">Arc Blockchain</p>
                     </div>
                     <div style="background:#f97316;padding:16px 32px;text-align:center;">
@@ -121,7 +121,7 @@ export default defineConfig(({ mode }) => {
                       </div>
                     </div>
                     <div style="max-width:560px;margin:0 auto;padding:0 0 32px;text-align:center;">
-                      <p style="font-size:10px;color:#c8c3bc;margin:0;">© 2026 ArcWear · Powered by Arc Blockchain</p>
+                      <p style="font-size:10px;color:#c8c3bc;margin:0;">© 2026 SwiftCart · Powered by Arc Blockchain</p>
                       <p style="font-size:10px;color:#c8c3bc;margin:4px 0 0;">Privacy Policy · Terms · Unsubscribe</p>
                     </div>
                   </body>
@@ -135,9 +135,9 @@ export default defineConfig(({ mode }) => {
                     'api-key': env.BREVO_API_KEY,
                   },
                   body: JSON.stringify({
-                    sender: { name: 'ArcWear', email: 'dannymark67@gmail.com' },
+                    sender: { name: 'SwiftCart', email: 'dannymark67@gmail.com' },
                     to: [{ email: customerEmail, name: customerEmail }],
-                    subject: '✓ Your ArcWear Order is Confirmed!',
+                    subject: '✓ Your SwiftCart Order is Confirmed!',
                     htmlContent: emailHtml,
                   }),
                 })

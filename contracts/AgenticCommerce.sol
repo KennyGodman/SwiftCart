@@ -21,13 +21,13 @@ import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 
 /**
  * @title  AgenticCommerce v2
- * @author ArcWear
+ * @author SwiftCart
  * @notice Trustless job escrow implementing a subset of ERC-8183 Agentic Commerce Protocol.
  *
- * @dev Role mapping for ArcWear:
+ * @dev Role mapping for SwiftCart:
  *   client    = buyer wallet (funds the escrow)
- *   provider  = ArcWear merchant wallet (receives USDC on completion)
- *   evaluator = ArcWear backend / Circle agent (triggers complete or reject)
+ *   provider  = SwiftCart merchant wallet (receives USDC on completion)
+ *   evaluator = SwiftCart backend / Circle agent (triggers complete or reject)
  *   agent     = Circle agent wallet (creates jobs and funds on behalf of client)
  *
  * Lifecycle:
@@ -59,8 +59,8 @@ import {
     AgenticCommerce__BudgetExceedsMax,
     AgenticCommerce__ZeroTreasuryWithFee,
     AgenticCommerce__JobTerminal
-} from "./ArcWearErrors.sol";
-import {JobStatus, Job} from "./ArcWearTypes.sol";
+} from "./SwiftCartErrors.sol";
+import {JobStatus, Job} from "./SwiftCartTypes.sol";
 import {
     JobCreated,
     JobFunded,
@@ -71,7 +71,7 @@ import {
     AgentUpdated,
     FeeUpdated,
     EvaluatorUpdated
-} from "./ArcWearEvents.sol";
+} from "./SwiftCartEvents.sol";
 
 contract AgenticCommerce is ReentrancyGuard, Ownable2Step, Pausable {
     using SafeERC20 for IERC20;

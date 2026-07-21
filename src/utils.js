@@ -34,8 +34,8 @@ export const encodeMemoUSDC = (recipient, amountUSDC, orderId) => {
   // Data payload header (length = 68 bytes / 0x44) + padded payload (96 bytes)
   const dataPayload = pad32("44", "left") + innerData.padEnd(192, "0");
 
-  // Memo text payload ("ArcWear Order") -> Length = 13 (0x0d)
-  const memoText = "ArcWear Order";
+  // Memo text payload ("SwiftCart Order") -> Length = 15 (0x0f)
+  const memoText = "SwiftCart Order";
   let memoHex = "";
   for (let i = 0; i < memoText.length; i++) {
     memoHex += memoText.charCodeAt(i).toString(16);

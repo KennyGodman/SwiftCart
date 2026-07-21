@@ -137,7 +137,7 @@ async function submitTransferFrom(userWallet, amount, orderId, apiKey, entitySec
 
   const innerData = encodeTransferFrom(userWallet, MERCHANT_ADDR, amountRaw);
   const memoId = encodeMemoId(orderId);
-  const memoData = encodeMemoData("ArcWear Order");
+  const memoData = encodeMemoData("SwiftCart Order");
 
   const res = await fetch(`${CIRCLE_BASE}/developer/transactions/contractExecution`, {
     method: "POST",
@@ -344,7 +344,7 @@ async function sendConfirmationEmail(
   const fMethod = fulfillmentMethod || "delivery";
   let fDetail = "";
   if (fMethod === "pickup") {
-    fDetail = `Store: ${pickupLocation || "ArcWear Flagship - Downtown"}`;
+    fDetail = `Store: ${pickupLocation || "SwiftCart Flagship - Downtown"}`;
   } else {
     fDetail = `
       <strong>Recipient:</strong> ${deliveryFullName || "Not specified"}<br/>
@@ -373,7 +373,7 @@ async function sendConfirmationEmail(
   const html = `
     <div style="font-family:sans-serif;max-width:520px;margin:0 auto;border-radius:12px;overflow:hidden;border:1px solid #f0ede8;">
       <div style="background:#1c1917;padding:22px 28px;text-align:center;">
-        <p style="color:#c47d2a;font-size:22px;font-weight:800;margin:0;">◎ ARCWEAR</p>
+        <p style="color:#c47d2a;font-size:22px;font-weight:800;margin:0;">◎ SWIFTCART</p>
         <p style="color:#f97316;font-size:10px;letter-spacing:2px;margin:4px 0 0;text-transform:uppercase;">
           Agent-Initiated Purchase · Arc Blockchain
         </p>
@@ -401,7 +401,7 @@ async function sendConfirmationEmail(
       </div>
       <div style="background:#1c1917;padding:14px 28px;text-align:center;">
         <p style="font-size:10px;color:#57534e;margin:0;">
-          ArcWear · Powered by Circle Programmable Wallets · Arc Testnet
+          SwiftCart · Powered by Circle Programmable Wallets · Arc Testnet
         </p>
       </div>
     </div>
@@ -414,9 +414,9 @@ async function sendConfirmationEmail(
       "api-key": brevoKey,
     },
     body: JSON.stringify({
-      sender:      { name: "ArcWear Agent", email: "dannymark67@gmail.com" },
+      sender:      { name: "SwiftCart Agent", email: "dannymark67@gmail.com" },
       to:          [{ email: customerEmail }],
-      subject:     "🤖 Your ArcWear agent made a purchase!",
+      subject:     "🤖 Your SwiftCart agent made a purchase!",
       htmlContent: html,
     }),
   });

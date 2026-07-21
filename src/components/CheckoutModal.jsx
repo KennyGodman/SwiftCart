@@ -27,7 +27,7 @@ export default function CheckoutModal({
   const [localEmail, setLocalEmail] = useState("");
   const [localFMethod, setLocalFMethod] = useState("delivery");
   const [localAddress, setLocalAddress] = useState("");
-  const [localPickup, setLocalPickup] = useState("ArcWear Flagship - Downtown");
+  const [localPickup, setLocalPickup] = useState("SwiftCart Flagship - Downtown");
 
   const [localFullName, setLocalFullName] = useState("");
   const [localPhone, setLocalPhone] = useState("");
@@ -442,8 +442,8 @@ export default function CheckoutModal({
                   onChange={e => setPickupLocation(e.target.value)}
                   style={{ cursor: "pointer" }}
                 >
-                  <option value="ArcWear Flagship - Downtown">ArcWear Flagship - Downtown</option>
-                  <option value="ArcWear L1 Hub - Uptown">ArcWear L1 Hub - Uptown</option>
+                  <option value="SwiftCart Flagship - Downtown">SwiftCart Flagship - Downtown</option>
+                  <option value="SwiftCart L1 Hub - Uptown">SwiftCart L1 Hub - Uptown</option>
                   <option value="Circle Locker - East Side">Circle Locker - East Side</option>
                 </select>
               </div>

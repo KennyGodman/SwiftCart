@@ -6,7 +6,7 @@ import { encodeMemoUSDC } from "./utils";
 import { CATALOGUE, ALL_PRODUCTS } from "./catalogue";
 
 /* =========================================================
-   ARCWEAR — Main Application
+   SWIFTCART — Main Application
    Arc Blockchain · USDC Payments · AI Agent
    ========================================================= */
 
@@ -160,7 +160,7 @@ const AGENT_TOOLS = [
         city: { type: "string", description: "The city name (required for delivery)." },
         state: { type: "string", enum: ["Lagos", "Abuja", "Rivers", "Other"], description: "The delivery zone/state (required for delivery)." },
         deliveryNotes: { type: "string", description: "Any landmark, gate code or instructions (optional)." },
-        pickupLocation: { type: "string", enum: ["ArcWear Flagship - Downtown", "ArcWear L1 Hub - Uptown", "Circle Locker - East Side"], description: "The pickup location (required if method is 'pickup')." },
+        pickupLocation: { type: "string", enum: ["SwiftCart Flagship - Downtown", "SwiftCart L1 Hub - Uptown", "Circle Locker - East Side"], description: "The pickup location (required if method is 'pickup')." },
       },
     },
   },
@@ -176,15 +176,15 @@ function LogoImage() {
     return (
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
         <div style={{
-          width: 36, height: 36,
-          background: "#1c1917", borderRadius: 8,
+          width: 28, height: 28,
+          background: "#1c1917", borderRadius: 6,
           display: "flex", alignItems: "center", justifyContent: "center",
           flexShrink: 0,
         }}>
-          <span style={{ fontSize: 12, fontWeight: 800, color: "#c47d2a", letterSpacing: 1 }}>AW</span>
+          <span style={{ fontSize: 11, fontWeight: 800, color: "#c47d2a", letterSpacing: 1 }}>SC</span>
         </div>
-        <span className="logo-text" style={{ fontFamily: "var(--font-serif)", fontSize: 16, fontWeight: 700, color: "#1c1917", letterSpacing: 0.5 }}>
-          ArcWear
+        <span className="logo-text" style={{ fontFamily: "var(--font-serif)", fontSize: 14, fontWeight: 700, color: "var(--color-ink)", letterSpacing: 0.5 }}>
+          SwiftCart
         </span>
       </div>
     );
@@ -192,9 +192,9 @@ function LogoImage() {
 
   return (
     <img
-      src="/arcc.png"
-      alt="ArcWear"
-      style={{ height: "44px", width: "auto", objectFit: "contain", maxWidth: 160 }}
+      src="/swiftcart.jpg"
+      alt="SwiftCart"
+      style={{ height: "28px", width: "auto", objectFit: "contain", maxWidth: 110, borderRadius: "6px" }}
       onError={() => setErr(true)}
     />
   );
@@ -821,8 +821,8 @@ function CheckoutModal({
                   onChange={e => setPickupLocation(e.target.value)}
                   style={{ cursor: "pointer" }}
                 >
-                  <option value="ArcWear Flagship - Downtown">ArcWear Flagship - Downtown</option>
-                  <option value="ArcWear L1 Hub - Uptown">ArcWear L1 Hub - Uptown</option>
+                  <option value="SwiftCart Flagship - Downtown">SwiftCart Flagship - Downtown</option>
+                  <option value="SwiftCart L1 Hub - Uptown">SwiftCart L1 Hub - Uptown</option>
                   <option value="Circle Locker - East Side">Circle Locker - East Side</option>
                 </select>
               </div>
@@ -998,7 +998,7 @@ function AgentChat({
 }) {
   const [msgs, setMsgs] = useState([{
     role: "assistant",
-    text: "Hi! I'm your ArcWear AI agent 👋\n\nTell me what you're looking for — an outfit, a budget, an occasion — and I'll search, add items to your cart, and handle USDC checkout on Arc." + (allowance > 0 ? `\n\n🔓 Agent mode active — ${allowance.toFixed(2)} USDC remaining allowance.` : ""),
+    text: "Hi! I'm your SwiftCart AI agent 👋\n\nTell me what you're looking for — an outfit, a budget, an occasion — and I'll search, add items to your cart, and handle USDC checkout on Arc." + (allowance > 0 ? `\n\n🔓 Agent mode active — ${allowance.toFixed(2)} USDC remaining allowance.` : ""),
   }]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -1030,7 +1030,7 @@ function AgentChat({
   };
 
   const [voiceEnabled, setVoiceEnabled] = useState(() => {
-    return localStorage.getItem("arcwear_agent_voice_enabled") === "true";
+    return (localStorage.getItem("swiftcart_agent_voice_enabled") || localStorage.getItem("arcwear_agent_voice_enabled")) === "true";
   });
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef(null);
@@ -1127,7 +1127,7 @@ function AgentChat({
     };
   }, []);
 
-  const welcomeMsgText = "Hi! I'm your ArcWear AI agent 👋\n\nTell me what you're looking for — an outfit, a budget, an occasion — and I'll search, add items to your cart, and handle USDC checkout on Arc." + (allowance > 0 ? `\n\n🔓 Agent mode active — ${allowance.toFixed(2)} USDC remaining allowance.` : "");
+  const welcomeMsgText = "Hi! I'm your SwiftCart AI agent 👋\n\nTell me what you're looking for — an outfit, a budget, an occasion — and I'll search, add items to your cart, and handle USDC checkout on Arc." + (allowance > 0 ? `\n\n🔓 Agent mode active — ${allowance.toFixed(2)} USDC remaining allowance.` : "");
 
   // Load chat history from Vercel KV or localStorage
   useEffect(() => {
@@ -1149,7 +1149,9 @@ function AgentChat({
       
       if (!loadedMsgs) {
         try {
-          const local = localStorage.getItem(wallet ? `arcwear_chat_history_${wallet.toLowerCase()}` : "arcwear_chat_history");
+          const keyNew = wallet ? `swiftcart_chat_history_${wallet.toLowerCase()}` : "swiftcart_chat_history";
+          const keyOld = wallet ? `arcwear_chat_history_${wallet.toLowerCase()}` : "arcwear_chat_history";
+          const local = localStorage.getItem(keyNew) || localStorage.getItem(keyOld);
           if (local) {
             const parsed = JSON.parse(local);
             if (Array.isArray(parsed) && parsed.length > 0) {
@@ -1196,7 +1198,7 @@ function AgentChat({
     }
 
     const saveHistory = async () => {
-      const key = wallet ? `arcwear_chat_history_${wallet.toLowerCase()}` : "arcwear_chat_history";
+      const key = wallet ? `swiftcart_chat_history_${wallet.toLowerCase()}` : "swiftcart_chat_history";
       const userAndAgentMsgs = msgs.filter(m => (m.text || m.content) !== welcomeMsgText);
       const sanitizedMsgs = userAndAgentMsgs.map(m => ({
         role: m.role,
@@ -1230,8 +1232,8 @@ function AgentChat({
   // Auto-resume agent checkout when allowance is approved
   useEffect(() => {
     const itemsTotal = cartRef.current.reduce((s, i) => s + i.price * i.qty, 0);
-    const activeFulfillmentMethod = localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod;
-    const activeDeliveryState = localStorage.getItem("arcwear_delivery_state") || deliveryState;
+    const activeFulfillmentMethod = localStorage.getItem("swiftcart_fulfillment_method") || localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod;
+    const activeDeliveryState = localStorage.getItem("swiftcart_delivery_state") || localStorage.getItem("arcwear_delivery_state") || deliveryState;
     const activeDeliveryFee = activeFulfillmentMethod === "delivery" ? getDeliveryFee(activeDeliveryState) : 0;
     const totalAmount = itemsTotal + activeDeliveryFee; // include delivery fee, same as what agent-pay receives
     if (waitingForApproval.current && allowance >= totalAmount && totalAmount > 0 && !loading) {
@@ -1244,18 +1246,18 @@ function AgentChat({
 
         const c = cartRef.current;
         const itemsTotal = c.reduce((s, i) => s + i.price * i.qty, 0);
-        const activeFulfillmentMethod = localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod;
-        const activeDeliveryState = localStorage.getItem("arcwear_delivery_state") || deliveryState;
+        const activeFulfillmentMethod = localStorage.getItem("swiftcart_fulfillment_method") || localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod;
+        const activeDeliveryState = localStorage.getItem("swiftcart_delivery_state") || localStorage.getItem("arcwear_delivery_state") || deliveryState;
         const activeDeliveryFee = activeFulfillmentMethod === "delivery" ? getDeliveryFee(activeDeliveryState) : 0;
         const total = itemsTotal + activeDeliveryFee;
 
         try {
           addToast("🤖 Agent executing purchase...", "agent");
-          const activeFullName = localStorage.getItem("arcwear_delivery_fullname") || deliveryFullName;
-          const activePhone = localStorage.getItem("arcwear_delivery_phone") || deliveryPhone;
-          const activeAddressLine = localStorage.getItem("arcwear_delivery_address_line") || deliveryAddressLine;
-          const activeCity = localStorage.getItem("arcwear_delivery_city") || deliveryCity;
-          const activeNotes = localStorage.getItem("arcwear_delivery_notes") || deliveryNotes;
+          const activeFullName = localStorage.getItem("swiftcart_delivery_fullname") || localStorage.getItem("arcwear_delivery_fullname") || deliveryFullName;
+          const activePhone = localStorage.getItem("swiftcart_delivery_phone") || localStorage.getItem("arcwear_delivery_phone") || deliveryPhone;
+          const activeAddressLine = localStorage.getItem("swiftcart_delivery_address_line") || localStorage.getItem("arcwear_delivery_address_line") || deliveryAddressLine;
+          const activeCity = localStorage.getItem("swiftcart_delivery_city") || localStorage.getItem("arcwear_delivery_city") || deliveryCity;
+          const activeNotes = localStorage.getItem("swiftcart_delivery_notes") || localStorage.getItem("arcwear_delivery_notes") || deliveryNotes;
           
           const activeDeliveryAddress = activeFulfillmentMethod === "delivery" ? [
             activeFullName && `Name: ${activeFullName}`,
@@ -1266,7 +1268,7 @@ function AgentChat({
             activeNotes && `Notes: ${activeNotes}`
           ].filter(Boolean).join(", ") : null;
 
-          const activePickupLocation = activeFulfillmentMethod === "pickup" ? (localStorage.getItem("arcwear_pickup_location") || pickupLocation) : null;
+          const activePickupLocation = activeFulfillmentMethod === "pickup" ? (localStorage.getItem("swiftcart_pickup_location") || localStorage.getItem("arcwear_pickup_location") || pickupLocation) : null;
 
           const res = await fetch("/api/agent-pay", {
             method: "POST",
@@ -1454,8 +1456,8 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
     if (name === "agent_checkout") {
       const c = cartRef.current;
       const itemsTotal = c.reduce((s, i) => s + i.price * i.qty, 0);
-      const activeFulfillmentMethod = localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod;
-      const activeDeliveryState = localStorage.getItem("arcwear_delivery_state") || deliveryState;
+      const activeFulfillmentMethod = localStorage.getItem("swiftcart_fulfillment_method") || localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod;
+      const activeDeliveryState = localStorage.getItem("swiftcart_delivery_state") || localStorage.getItem("arcwear_delivery_state") || deliveryState;
       const activeDeliveryFee = activeFulfillmentMethod === "delivery" ? getDeliveryFee(activeDeliveryState) : 0;
       const total = itemsTotal + activeDeliveryFee;
 
@@ -1470,11 +1472,11 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
       // Call the agent-pay backend
       try {
         addToast("🤖 Agent executing purchase...", "agent");
-        const activeFullName = localStorage.getItem("arcwear_delivery_fullname") || deliveryFullName;
-        const activePhone = localStorage.getItem("arcwear_delivery_phone") || deliveryPhone;
-        const activeAddressLine = localStorage.getItem("arcwear_delivery_address_line") || deliveryAddressLine;
-        const activeCity = localStorage.getItem("arcwear_delivery_city") || deliveryCity;
-        const activeNotes = localStorage.getItem("arcwear_delivery_notes") || deliveryNotes;
+        const activeFullName = localStorage.getItem("swiftcart_delivery_fullname") || localStorage.getItem("arcwear_delivery_fullname") || deliveryFullName;
+        const activePhone = localStorage.getItem("swiftcart_delivery_phone") || localStorage.getItem("arcwear_delivery_phone") || deliveryPhone;
+        const activeAddressLine = localStorage.getItem("swiftcart_delivery_address_line") || localStorage.getItem("arcwear_delivery_address_line") || deliveryAddressLine;
+        const activeCity = localStorage.getItem("swiftcart_delivery_city") || localStorage.getItem("arcwear_delivery_city") || deliveryCity;
+        const activeNotes = localStorage.getItem("swiftcart_delivery_notes") || localStorage.getItem("arcwear_delivery_notes") || deliveryNotes;
         
         const activeDeliveryAddress = activeFulfillmentMethod === "delivery" ? [
           activeFullName && `Name: ${activeFullName}`,
@@ -1485,7 +1487,7 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
           activeNotes && `Notes: ${activeNotes}`
         ].filter(Boolean).join(", ") : null;
 
-        const activePickupLocation = activeFulfillmentMethod === "pickup" ? (localStorage.getItem("arcwear_pickup_location") || pickupLocation) : null;
+        const activePickupLocation = activeFulfillmentMethod === "pickup" ? (localStorage.getItem("swiftcart_pickup_location") || localStorage.getItem("arcwear_pickup_location") || pickupLocation) : null;
 
         const res = await fetch("/api/agent-pay", {
           method: "POST",
@@ -1546,7 +1548,7 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
       const p = ALL_PRODUCTS.find(x => x.id === inp.productId);
       if (!p) return { error: "Product not found" };
       // Store reorder in localStorage for MVP
-      const reorders = JSON.parse(localStorage.getItem("arcwear_reorders") || "[]");
+      const reorders = JSON.parse(localStorage.getItem("swiftcart_reorders") || localStorage.getItem("arcwear_reorders") || "[]");
       const newReorder = {
         id: Date.now().toString(),
         productId: p.id,
@@ -1559,7 +1561,7 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
         active: true,
       };
       reorders.push(newReorder);
-      localStorage.setItem("arcwear_reorders", JSON.stringify(reorders));
+      localStorage.setItem("swiftcart_reorders", JSON.stringify(reorders));
       addToast(`🔁 Auto-reorder set: ${p.name} every ${inp.intervalDays} days`, "agent");
       return {
         success: true,
@@ -1642,15 +1644,15 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
         cart: cartRef.current,
         wishlist: ALL_PRODUCTS.filter(p => wishlistRef.current.includes(p.id)),
         customerEmail,
-        fulfillmentMethod: localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod,
-        pickupLocation: localStorage.getItem("arcwear_pickup_location") || pickupLocation,
-        deliveryFullName: localStorage.getItem("arcwear_delivery_fullname") || deliveryFullName,
-        deliveryPhone: localStorage.getItem("arcwear_delivery_phone") || deliveryPhone,
-        deliveryAddressLine: localStorage.getItem("arcwear_delivery_address_line") || deliveryAddressLine,
-        deliveryCity: localStorage.getItem("arcwear_delivery_city") || deliveryCity,
-        deliveryState: localStorage.getItem("arcwear_delivery_state") || deliveryState,
-        deliveryNotes: localStorage.getItem("arcwear_delivery_notes") || deliveryNotes,
-        deliveryFee: (localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod) === "delivery" ? getDeliveryFee(localStorage.getItem("arcwear_delivery_state") || deliveryState) : 0
+        fulfillmentMethod: localStorage.getItem("swiftcart_fulfillment_method") || localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod,
+        pickupLocation: localStorage.getItem("swiftcart_pickup_location") || localStorage.getItem("arcwear_pickup_location") || pickupLocation,
+        deliveryFullName: localStorage.getItem("swiftcart_delivery_fullname") || localStorage.getItem("arcwear_delivery_fullname") || deliveryFullName,
+        deliveryPhone: localStorage.getItem("swiftcart_delivery_phone") || localStorage.getItem("arcwear_delivery_phone") || deliveryPhone,
+        deliveryAddressLine: localStorage.getItem("swiftcart_delivery_address_line") || localStorage.getItem("arcwear_delivery_address_line") || deliveryAddressLine,
+        deliveryCity: localStorage.getItem("swiftcart_delivery_city") || localStorage.getItem("arcwear_delivery_city") || deliveryCity,
+        deliveryState: localStorage.getItem("swiftcart_delivery_state") || localStorage.getItem("arcwear_delivery_state") || deliveryState,
+        deliveryNotes: localStorage.getItem("swiftcart_delivery_notes") || localStorage.getItem("arcwear_delivery_notes") || deliveryNotes,
+        deliveryFee: (localStorage.getItem("swiftcart_fulfillment_method") || localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod) === "delivery" ? getDeliveryFee(localStorage.getItem("swiftcart_delivery_state") || localStorage.getItem("arcwear_delivery_state") || deliveryState) : 0
       }),
     });
     const data = await res.json();
@@ -1759,7 +1761,7 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
         className="agent-panel"
         role="dialog"
         aria-modal="true"
-        aria-label="ArcWear AI shopping agent"
+        aria-label="SwiftCart AI shopping agent"
       >
         {/* Header */}
         <div style={{ background: "#1c1917", padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
@@ -1769,7 +1771,7 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
               <div style={{ position: "absolute", bottom: -1, right: -1, width: 10, height: 10, background: "#22c55e", borderRadius: "50%", border: "2px solid #1c1917" }} aria-hidden="true" />
             </div>
             <div>
-              <p style={{ fontSize: 16, fontWeight: 700, color: "#fff", margin: 0, lineHeight: 1 }}>ArcWear Agent</p>
+              <p style={{ fontSize: 16, fontWeight: 700, color: "#fff", margin: 0, lineHeight: 1 }}>SwiftCart Agent</p>
               <p style={{ fontSize: 10, color: "#c47d2a", letterSpacing: 1.5, textTransform: "uppercase", margin: "2px 0 0" }}>AI · USDC · Arc Blockchain</p>
             </div>
           </div>
@@ -1810,7 +1812,7 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
               onClick={() => {
                 const newVal = !voiceEnabled;
                 setVoiceEnabled(newVal);
-                localStorage.setItem("arcwear_agent_voice_enabled", String(newVal));
+                localStorage.setItem("swiftcart_agent_voice_enabled", String(newVal));
                 if (!newVal && window.speechSynthesis) {
                   window.speechSynthesis.cancel();
                 }
@@ -2111,8 +2113,9 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
                     stopListening();
                     setMsgs([{ role: "assistant", text: welcomeMsgText }]);
                     
-                    const key = wallet ? `arcwear_chat_history_${wallet.toLowerCase()}` : "arcwear_chat_history";
+                    const key = wallet ? `swiftcart_chat_history_${wallet.toLowerCase()}` : "swiftcart_chat_history";
                     localStorage.removeItem(key);
+                    localStorage.removeItem(wallet ? `arcwear_chat_history_${wallet.toLowerCase()}` : "arcwear_chat_history");
 
                     if (wallet) {
                       try {
@@ -2597,7 +2600,7 @@ function OrderDrawer({ orders, onClose, onRetryOrder, onCancelOrder, onDeleteOrd
                       </div>
                       <div style={{ fontSize: 11, wordBreak: "break-all" }}>
                         {order.fulfillmentMethod === "pickup" 
-                          ? `Store: ${order.pickupLocation || "ArcWear Flagship - Downtown"}`
+                          ? `Store: ${order.pickupLocation || "SwiftCart Flagship - Downtown"}`
                           : `Address: ${order.deliveryAddress || "Not specified"}`}
                       </div>
                     </div>
@@ -2788,7 +2791,7 @@ function CombinedFooter({ addToast }) {
       addToast("Please enter a valid email address.", "error");
       return;
     }
-    addToast("✓ Subscribed successfully! Thank you for joining ArcWear.", "success");
+    addToast("✓ Subscribed successfully! Thank you for joining SwiftCart.", "success");
     setEmail("");
   };
 
@@ -2845,7 +2848,7 @@ function CombinedFooter({ addToast }) {
         {/* Connect & Social Links */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <h4 style={{ fontSize: 14, fontWeight: 700, color: "#fff", textTransform: "uppercase", letterSpacing: 1, margin: 0 }}>
-            Connect with ArcWear
+            Connect with SwiftCart
           </h4>
           <p style={{ color: "#a8a29e", fontSize: 13, lineHeight: 1.5, margin: 0 }}>
             Follow us to stay updated on web3 fashion, developer drops, and new AI capabilities.
@@ -2854,7 +2857,7 @@ function CombinedFooter({ addToast }) {
             {[
               {
                 name: "Twitter",
-                url: "https://x.com/arcwear_",
+                url: "https://x.com/swiftcart_",
                 icon: (
                   <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -2863,7 +2866,7 @@ function CombinedFooter({ addToast }) {
               },
               {
                 name: "Instagram",
-                url: "https://www.instagram.com/arcwear__",
+                url: "https://www.instagram.com/swiftcart__",
                 icon: (
                   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
@@ -2874,7 +2877,7 @@ function CombinedFooter({ addToast }) {
               },
               {
                 name: "TikTok",
-                url: "https://tiktok.com/@arcwear_",
+                url: "https://tiktok.com/@swiftcart_",
                 icon: (
                   <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.17-2.86-.74-3.94-1.72-.01 2.93-.01 5.85-.02 8.78-.1 1.78-.71 3.56-1.95 4.86-1.24 1.35-3.03 2.21-4.87 2.37-2.01.19-4.14-.3-5.71-1.63-1.65-1.37-2.52-3.56-2.31-5.7.13-2.18 1.31-4.22 3.19-5.32 1.34-.82 2.94-1.21 4.5-.96.01 1.39.01 2.78.01 4.17-1-.21-2.11-.08-3 .46-.77.47-1.29 1.33-1.34 2.25-.09.99.31 2.02 1.07 2.68.79.72 1.93.99 2.97.77 1.05-.2 2.01-.99 2.37-1.99.28-.75.24-1.57.26-2.37.01-4.29.01-8.58.01-12.87z" />
@@ -2985,7 +2988,7 @@ function CombinedFooter({ addToast }) {
         fontSize: 11,
       }}>
         <p style={{ margin: 0 }}>
-          &copy; {new Date().getFullYear()} ArcWear. All rights reserved.
+          &copy; {new Date().getFullYear()} SwiftCart. All rights reserved.
         </p>
         <p style={{ margin: 0, display: "flex", alignItems: "center", gap: 4 }}>
           Powered by <span style={{ color: "#c47d2a", fontWeight: 600 }}>Arc Blockchain</span>
@@ -2996,9 +2999,9 @@ function CombinedFooter({ addToast }) {
 }
 
 /* =========================================================
-   ArcWear — Root Page Component
+   SwiftCart — Root Page Component
    ========================================================= */
-export default function ArcWear() {
+export default function SwiftCart() {
   const [section, setSection] = useState("fashion");
   const [activeCat, setActiveCat] = useState(null);
   const [cart, setCart] = useState([]);
@@ -3015,7 +3018,7 @@ export default function ArcWear() {
   // ── Dark / Light Mode ──
   const [darkMode, setDarkMode] = useState(() => {
     try {
-      return localStorage.getItem("arcwear_theme") === "dark";
+      return (localStorage.getItem("swiftcart_theme") || localStorage.getItem("arcwear_theme")) === "dark";
     } catch {
       return false;
     }
@@ -3024,7 +3027,7 @@ export default function ArcWear() {
   const toggleTheme = () => {
     setDarkMode(prev => {
       const next = !prev;
-      try { localStorage.setItem("arcwear_theme", next ? "dark" : "light"); } catch {}
+      try { localStorage.setItem("swiftcart_theme", next ? "dark" : "light"); } catch {}
       return next;
     });
   };
@@ -3033,70 +3036,70 @@ export default function ArcWear() {
   const [approvalAmount, setApprovalAmount] = useState(500);
   const [detailItem, setDetailItem] = useState(null);
   const [customerEmail, setCustomerEmail] = useState(() => {
-    return localStorage.getItem("arcwear_customer_email") || "";
+    return localStorage.getItem("swiftcart_customer_email") || localStorage.getItem("arcwear_customer_email") || "";
   });
 
   const changeCustomerEmail = (val) => {
     setCustomerEmail(val);
-    localStorage.setItem("arcwear_customer_email", val);
+    localStorage.setItem("swiftcart_customer_email", val);
   };
 
   const [fulfillmentMethod, setFulfillmentMethod] = useState(() => {
-    return localStorage.getItem("arcwear_fulfillment_method") || "delivery";
+    return localStorage.getItem("swiftcart_fulfillment_method") || localStorage.getItem("arcwear_fulfillment_method") || "delivery";
   });
   const [deliveryFullName, setDeliveryFullName] = useState(() => {
-    return localStorage.getItem("arcwear_delivery_fullname") || "";
+    return localStorage.getItem("swiftcart_delivery_fullname") || localStorage.getItem("arcwear_delivery_fullname") || "";
   });
   const [deliveryPhone, setDeliveryPhone] = useState(() => {
-    return localStorage.getItem("arcwear_delivery_phone") || "";
+    return localStorage.getItem("swiftcart_delivery_phone") || localStorage.getItem("arcwear_delivery_phone") || "";
   });
   const [deliveryAddressLine, setDeliveryAddressLine] = useState(() => {
-    return localStorage.getItem("arcwear_delivery_address_line") || "";
+    return localStorage.getItem("swiftcart_delivery_address_line") || localStorage.getItem("arcwear_delivery_address_line") || "";
   });
   const [deliveryCity, setDeliveryCity] = useState(() => {
-    return localStorage.getItem("arcwear_delivery_city") || "";
+    return localStorage.getItem("swiftcart_delivery_city") || localStorage.getItem("arcwear_delivery_city") || "";
   });
   const [deliveryState, setDeliveryState] = useState(() => {
-    return localStorage.getItem("arcwear_delivery_state") || "Lagos";
+    return localStorage.getItem("swiftcart_delivery_state") || localStorage.getItem("arcwear_delivery_state") || "Lagos";
   });
   const [deliveryNotes, setDeliveryNotes] = useState(() => {
-    return localStorage.getItem("arcwear_delivery_notes") || "";
+    return localStorage.getItem("swiftcart_delivery_notes") || localStorage.getItem("arcwear_delivery_notes") || "";
   });
   const [pickupLocation, setPickupLocation] = useState(() => {
-    return localStorage.getItem("arcwear_pickup_location") || "ArcWear Flagship - Downtown";
+    return localStorage.getItem("swiftcart_pickup_location") || localStorage.getItem("arcwear_pickup_location") || "SwiftCart Flagship - Downtown";
   });
 
   const changeFulfillmentMethod = (val) => {
     setFulfillmentMethod(val);
-    localStorage.setItem("arcwear_fulfillment_method", val);
+    localStorage.setItem("swiftcart_fulfillment_method", val);
   };
   const changeDeliveryFullName = (val) => {
     setDeliveryFullName(val);
-    localStorage.setItem("arcwear_delivery_fullname", val);
+    localStorage.setItem("swiftcart_delivery_fullname", val);
   };
   const changeDeliveryPhone = (val) => {
     setDeliveryPhone(val);
-    localStorage.setItem("arcwear_delivery_phone", val);
+    localStorage.setItem("swiftcart_delivery_phone", val);
   };
   const changeDeliveryAddressLine = (val) => {
     setDeliveryAddressLine(val);
-    localStorage.setItem("arcwear_delivery_address_line", val);
+    localStorage.setItem("swiftcart_delivery_address_line", val);
   };
   const changeDeliveryCity = (val) => {
     setDeliveryCity(val);
-    localStorage.setItem("arcwear_delivery_city", val);
+    localStorage.setItem("swiftcart_delivery_city", val);
   };
   const changeDeliveryState = (val) => {
     setDeliveryState(val);
-    localStorage.setItem("arcwear_delivery_state", val);
+    localStorage.setItem("swiftcart_delivery_state", val);
   };
   const changeDeliveryNotes = (val) => {
     setDeliveryNotes(val);
-    localStorage.setItem("arcwear_delivery_notes", val);
+    localStorage.setItem("swiftcart_delivery_notes", val);
   };
   const changePickupLocation = (val) => {
     setPickupLocation(val);
-    localStorage.setItem("arcwear_pickup_location", val);
+    localStorage.setItem("swiftcart_pickup_location", val);
   };
   const changeDeliveryAddress = () => {};
 
@@ -3121,7 +3124,7 @@ export default function ArcWear() {
   // ── Wishlist State ──
   const [wishlist, setWishlist] = useState(() => {
     try {
-      const stored = JSON.parse(localStorage.getItem("arcwear_wishlist") || "[]");
+      const stored = JSON.parse(localStorage.getItem("swiftcart_wishlist") || localStorage.getItem("arcwear_wishlist") || "[]");
       const validIds = ALL_PRODUCTS.map(p => p.id);
       return Array.isArray(stored) ? stored.filter(id => validIds.includes(id)) : [];
     } catch {
@@ -3132,7 +3135,7 @@ export default function ArcWear() {
 
   // Sync wishlist to localStorage
   useEffect(() => {
-    localStorage.setItem("arcwear_wishlist", JSON.stringify(wishlist));
+    localStorage.setItem("swiftcart_wishlist", JSON.stringify(wishlist));
   }, [wishlist]);
 
   const toggleWishlist = (item) => {
@@ -3152,7 +3155,7 @@ export default function ArcWear() {
   };
 
   // ── Orders State & Syncing ──
-  const getOrdersStorageKey = (w) => w ? `arcwear_orders_${w.toLowerCase()}` : "arcwear_orders_local";
+  const getOrdersStorageKey = (w) => w ? `swiftcart_orders_${w.toLowerCase()}` : "swiftcart_orders_local";
 
   const [orders, setOrders] = useState([]);
   const [ordersOpen, setOrdersOpen] = useState(false);
@@ -3168,7 +3171,7 @@ export default function ArcWear() {
     const key = getOrdersStorageKey(wallet);
     let localOrders = [];
     try {
-      const saved = localStorage.getItem(key) || (!wallet ? localStorage.getItem("arcwear_orders") : null) || "[]";
+      const saved = localStorage.getItem(key) || (!wallet ? (localStorage.getItem("swiftcart_orders") || localStorage.getItem("arcwear_orders")) : null) || "[]";
       localOrders = JSON.parse(saved);
     } catch (e) {
       console.error("Failed to parse local orders:", e);
@@ -3961,7 +3964,7 @@ export default function ArcWear() {
                 <span style={{ fontSize: 9, color: "#fb923c", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase" }}>AI Agent · Live on Arc</span>
               </div>
               <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(26px,4vw,48px)", fontWeight: 700, color: "#fff", lineHeight: 1.15, marginBottom: 10 }}>
-                Shop with ArcWear
+                Shop with SwiftCart
               </h1>
               <p style={{ fontSize: 13, color: "#78716c", lineHeight: 1.65, marginBottom: 22 }}>
                 {sec.label}&apos;s collection — shirts, trousers, belts, headwear &amp; footwear · Pay with USDC on Arc

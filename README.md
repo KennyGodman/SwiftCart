@@ -1,6 +1,6 @@
-# 👗 ArcWear
+# 🛒 SwiftCart
 
-ArcWear is an agentic, Web3-native luxury storefront built on Circle's **Arc L1 Blockchain** utilizing **USDC stablecoin** payments. Shoppers can browse, customize, and purchase luxury items either manually or through an **Autonomous AI Shopping Agent** powered by ERC-8183 escrow agreements.
+SwiftCart is an agentic, Web3-native luxury storefront built on Circle's **Arc L1 Blockchain** utilizing **USDC stablecoin** payments. Shoppers can browse, customize, and purchase luxury items either manually or through an **Autonomous AI Shopping Agent** powered by ERC-8183 escrow agreements.
 
 ---
 
@@ -26,9 +26,9 @@ ArcWear is an agentic, Web3-native luxury storefront built on Circle's **Arc L1 
 ├── contracts/                    # Solidity Smart Contracts (Foundry)
 │   ├── AgenticCommerce.sol       # Core commerce contract handling trustless escrows
 │   ├── MerchantVault.sol         # Vault contract for merchant settlements
-│   ├── ArcWearTypes.sol          # Shared data structs & type definitions
-│   ├── ArcWearErrors.sol         # Contract-specific revert errors
-│   └── ArcWearEvents.sol         # On-chain transaction events
+│   ├── SwiftCartTypes.sol        # Shared data structs & type definitions
+│   ├── SwiftCartErrors.sol       # Contract-specific revert errors
+│   └── SwiftCartEvents.sol       # On-chain transaction events
 ├── test/                         # Foundry Smart Contract Test Suites
 │   ├── AgenticCommerce.t.sol     # Coverage for escrows, confirmations & timeouts
 │   └── MerchantVault.t.sol       # Coverage for fee cuts, lockups & withdrawals
@@ -48,7 +48,7 @@ ArcWear is an agentic, Web3-native luxury storefront built on Circle's **Arc L1 
 
 ## 🛠️ Smart Contract Details
 
-ArcWear runs on a custom **Arc L1 Testnet** architecture using the following specifications:
+SwiftCart runs on a custom **Arc L1 Testnet** architecture using the following specifications:
 
 | Asset / Contract | Contract Address |
 | :--- | :--- |
