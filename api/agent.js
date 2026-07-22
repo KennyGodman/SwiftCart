@@ -161,9 +161,12 @@ TOOL CALLS:
           const assistantMsg = { role: "assistant" };
           if (textContent) assistantMsg.content = textContent;
           if (toolCalls.length > 0) assistantMsg.tool_calls = toolCalls;
+          if (!assistantMsg.content && (!assistantMsg.tool_calls || assistantMsg.tool_calls.length === 0)) {
+            assistantMsg.content = " ";
+          }
           groqMessages.push(assistantMsg);
         } else {
-          groqMessages.push({ role: "assistant", content: msg.content });
+          groqMessages.push({ role: "assistant", content: msg.content || " " });
         }
       }
     }
@@ -325,6 +328,10 @@ TOOL CALLS:
 
     if (extractedToolCalls.length > 0) {
       content.push(...extractedToolCalls);
+    }
+
+    if (content.length === 0) {
+      content.push({ type: "text", text: "How can I assist you with your order?" });
     }
 
     return res.status(200).json({ content });

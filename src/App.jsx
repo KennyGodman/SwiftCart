@@ -1705,14 +1705,18 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
       return runAgent([...apiMsgs, { role: "assistant", content: data.content }, { role: "user", content: results }], depth + 1);
     }
 
-    // Fail-safe: if the user asked for checkout/buy/pay or agent mentioned allowance/approval
-    const lowerText = text.toLowerCase();
-    const lastUserMsg = (apiMsgs[apiMsgs.length - 1]?.content || "").toLowerCase();
-    if (
-      lastUserMsg.includes("checkout") || lastUserMsg.includes("buy") || lastUserMsg.includes("pay") ||
-      ((lowerText.includes("allowance") || lowerText.includes("spending limit") || lowerText.includes("approve")) &&
-       (lowerText.includes("request") || lowerText.includes("popup") || lowerText.includes("pop up") || lowerText.includes("modal")))
-    ) {
+    // Fail-safe: ONLY if user EXPLICITLY asked for checkout/buy/pay and tool was not called
+    const lastUserMsg = (apiMsgs[apiMsgs.length - 1]?.content || "").toLowerCase().trim();
+    const isExplicitCheckoutIntent =
+      lastUserMsg === "checkout" ||
+      lastUserMsg === "buy" ||
+      lastUserMsg === "pay" ||
+      lastUserMsg.includes("proceed to checkout") ||
+      lastUserMsg.includes("pay now") ||
+      lastUserMsg.includes("buy now") ||
+      lastUserMsg.includes("complete checkout");
+
+    if (isExplicitCheckoutIntent) {
       const totalAmount = cartRef.current.reduce((s, i) => s + i.price * i.qty, 0);
       if (totalAmount > 0) {
         if (allowance >= totalAmount && wallet) {
@@ -1720,7 +1724,7 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
           const execRes = await exec("agent_checkout", {});
           if (execRes.success && execRes.txHash) {
             setTools([]);
-            return `✓ Purchase confirmed! I've autonomously executed the transaction via the escrow contract.\n\nOrdered: ${cartRef.current.map(i => `${i.name} (x${i.qty})`).join(", ")}\nTotal: ${execRes.total} USDC\nTransaction Hash: ${execRes.txHash}`;
+            return `✓ Purchase confirmed! I've autonomously executed the transaction via the escrow contract.\n\nOrdered: ${cartRef.current.map(i => `${i.name} (${i.size || "M"}) (x${i.qty})`).join(", ")}\nTotal: ${execRes.total} USDC\nTransaction Hash: ${execRes.txHash}`;
           }
         }
         console.log("[runAgent] Fail-safe: Triggering request_approval / checkout modal");
