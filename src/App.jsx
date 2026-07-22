@@ -1655,8 +1655,19 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
         deliveryFee: (localStorage.getItem("swiftcart_fulfillment_method") || localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod) === "delivery" ? getDeliveryFee(localStorage.getItem("swiftcart_delivery_state") || localStorage.getItem("arcwear_delivery_state") || deliveryState) : 0
       }),
     });
-    const data = await res.json();
-    if (data.error) { setTools([]); return "Sorry, I ran into an issue. Please try again."; }
+
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (e) {
+      setTools([]);
+      return "The AI agent server is temporarily unavailable. Please try again in a moment.";
+    }
+
+    if (!res.ok || data.error) {
+      setTools([]);
+      return data.error || "Sorry, I ran into an issue. Please try again.";
+    }
 
     let text = "";
     const toolBlocks = [];

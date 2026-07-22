@@ -180,9 +180,10 @@ TOOL CALLS:
 
     // Call Groq API with fallback and retry logic
     const candidateModels = [
-      "llama-3.3-70b-versatile",
       "llama-3.1-8b-instant",
-      "qwen/qwen3.6-27b"
+      "llama-3.3-70b-versatile",
+      "qwen/qwen3.6-27b",
+      "mixtral-8x7b-32768"
     ];
 
     let lastError = null;
@@ -192,7 +193,7 @@ TOOL CALLS:
 
     for (const model of candidateModels) {
       console.log(`[agent] Attempting chat completion with model: ${model}`);
-      const MAX_RETRIES = 3;
+      const MAX_RETRIES = 2;
       let modelSucceeded = false;
 
       for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
@@ -216,7 +217,10 @@ TOOL CALLS:
           data = await response.json();
 
           if (response.status === 429) {
-            console.warn(`[agent] Model ${model} rate limited (429). Details: ${JSON.stringify(data.error || data)}. Falling back to next model immediately.`);
+            const errorMsg = data.error?.message || `Model ${model} rate limited (429)`;
+            console.warn(`[agent] Model ${model} rate limited (429). Details: ${errorMsg}. Falling back to next model.`);
+            lastError = new Error(errorMsg);
+            await new Promise(r => setTimeout(r, 500));
             break; // Break retry loop to try next model immediately
           }
 
@@ -241,7 +245,12 @@ TOOL CALLS:
 
     if (!successfulModel) {
       console.error("[agent] All models failed. Last error:", lastError?.message);
-      return res.status(500).json({ error: lastError?.message || "All Groq models failed" });
+      const isRateLimit = lastError?.message?.toLowerCase().includes("rate limit") || lastError?.message?.includes("429");
+      return res.status(isRateLimit ? 429 : 500).json({
+        error: isRateLimit
+          ? "The AI agent is experiencing high traffic (Groq rate limit). Please wait a few seconds and try again."
+          : (lastError?.message || "All Groq models failed")
+      });
     }
 
     const message = data.choices?.[0]?.message;
