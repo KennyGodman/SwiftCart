@@ -180,9 +180,9 @@ TOOL CALLS:
 
     // Call Groq API with fallback and retry logic
     const candidateModels = [
-      "llama-3.1-8b-instant",
       "llama-3.3-70b-versatile",
       "qwen/qwen3.6-27b",
+      "llama-3.1-8b-instant",
       "mixtral-8x7b-32768"
     ];
 
@@ -262,8 +262,44 @@ TOOL CALLS:
     // Convert Groq response back to Anthropic format for frontend
     const content = [];
 
-    if (message.content) {
-      content.push({ type: "text", text: message.content });
+    let rawText = message.content || "";
+    const extractedToolCalls = [];
+
+    // Parse any embedded <function(...)></function> tags from raw text
+    if (rawText.includes("<function")) {
+      const funcRegex = /<function\s*\(\s*([^)]+)\s*\)\s*([\s\S]*?)\s*><\/function>/gi;
+      let match;
+      while ((match = funcRegex.exec(rawText)) !== null) {
+        const fnName = match[1].trim();
+        const rawArgs = match[2].trim();
+        let input = {};
+
+        if (rawArgs && rawArgs !== "[]" && rawArgs !== "{}") {
+          try {
+            input = JSON.parse(rawArgs);
+          } catch (e) {
+            try {
+              const jsonified = rawArgs.replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":');
+              input = JSON.parse(jsonified);
+            } catch (e2) {
+              input = {};
+            }
+          }
+        }
+
+        extractedToolCalls.push({
+          type: "tool_use",
+          id: "call_" + Math.random().toString(36).substring(2, 9),
+          name: fnName,
+          input,
+        });
+      }
+
+      rawText = rawText.replace(/<function\s*\([\s\S]*?><\/function>/gi, "").trim();
+    }
+
+    if (rawText) {
+      content.push({ type: "text", text: rawText });
     }
 
     if (message.tool_calls?.length > 0) {
@@ -281,6 +317,10 @@ TOOL CALLS:
           input,
         });
       }
+    }
+
+    if (extractedToolCalls.length > 0) {
+      content.push(...extractedToolCalls);
     }
 
     return res.status(200).json({ content });
