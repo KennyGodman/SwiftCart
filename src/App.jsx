@@ -3712,7 +3712,6 @@ export default function SwiftCart() {
       {/* ── NAVBAR ── */}
       <nav
         aria-label="Main navigation"
-        className="top-navbar-hover"
         style={{
           position: "sticky", top: 0, zIndex: 1500,
           background: scrolled
@@ -3722,7 +3721,7 @@ export default function SwiftCart() {
           border: "none",
           borderBottom: "none",
           boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.3)" : "none",
-          transition: "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, background 0.3s ease",
+          transition: "background 0.3s ease, box-shadow 0.3s ease",
         }}
       >
         <div

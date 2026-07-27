@@ -1002,37 +1002,20 @@ body {
   border: none !important;
 }
 
-/* ── Navbar Hover Pop-Out & Border Removal Styles ── */
+/* ── Fixed Position Clean Navbar & Border Removal Styles ── */
 .top-navbar-hover {
-  transform: translateY(-82%);
-  opacity: 0.85;
+  transform: none !important;
+  opacity: 1 !important;
   border: none !important;
   border-bottom: none !important;
-  box-shadow: none !important;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, box-shadow 0.3s ease !important;
-}
-
-.top-navbar-hover:hover,
-.top-navbar-hover:focus-within {
-  transform: translateY(0%) !important;
-  opacity: 1 !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
 }
 
 .mobile-bottom-nav {
-  transform: translateY(75%);
-  opacity: 0.85;
+  transform: none !important;
+  opacity: 1 !important;
   border: none !important;
   border-top: none !important;
-  box-shadow: none !important;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, box-shadow 0.3s ease !important;
-}
-
-.mobile-bottom-nav:hover,
-.mobile-bottom-nav:focus-within {
-  transform: translateY(0%) !important;
-  opacity: 1 !important;
-  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.08) !important;
 }
 
 
