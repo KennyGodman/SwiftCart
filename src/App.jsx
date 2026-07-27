@@ -3048,22 +3048,6 @@ export default function SwiftCart() {
   const [toasts, setToasts] = useState([]);
   const [scrolled, setScrolled] = useState(false);
 
-  // ── Dark / Light Mode ──
-  const [darkMode, setDarkMode] = useState(() => {
-    try {
-      return (localStorage.getItem("swiftcart_theme") || localStorage.getItem("arcwear_theme")) === "dark";
-    } catch {
-      return false;
-    }
-  });
-
-  const toggleTheme = () => {
-    setDarkMode(prev => {
-      const next = !prev;
-      try { localStorage.setItem("swiftcart_theme", next ? "dark" : "light"); } catch {}
-      return next;
-    });
-  };
   const [editItem, setEditItem] = useState(null);
   const [approvalOpen, setApprovalOpen] = useState(false);
   const [approvalAmount, setApprovalAmount] = useState(500);
@@ -3533,7 +3517,7 @@ export default function SwiftCart() {
       closeOnClick: true,
       pauseOnHover: false,
       draggable: true,
-      theme: darkMode ? "dark" : "light",
+      theme: "dark",
     };
 
     if (type === "success") {
@@ -3700,7 +3684,7 @@ export default function SwiftCart() {
   const displayCats = activeCat ? filteredCats.filter(([k]) => k === activeCat) : filteredCats;
 
   return (
-    <div data-theme={darkMode ? "dark" : "light"} style={{ minHeight: "100vh", background: "var(--color-bg)", fontFamily: "var(--font-sans)", colorScheme: darkMode ? "dark" : "light" }}>
+    <div data-theme="dark" style={{ minHeight: "100vh", background: "var(--color-bg)", fontFamily: "var(--font-sans)", colorScheme: "dark" }}>
 
       {/* ── TOP BAR ── */}
       <div style={{ background: "linear-gradient(135deg, #0b1329, #0f172a)", padding: "7px 0", textAlign: "center", overflow: "hidden", whiteSpace: "nowrap", borderBottom: "1px solid #1e293b" }}>
@@ -3777,17 +3761,6 @@ export default function SwiftCart() {
 
           {/* Actions */}
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-
-            {/* Dark / Light mode toggle */}
-            <button
-              onClick={toggleTheme}
-              className="desktop-only nav-action-btn"
-              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-              title={darkMode ? "Light mode" : "Dark mode"}
-              style={{ background: "#1e293b", color: "#e2e8f0", border: "none" }}
-            >
-              {darkMode ? "Dark" : "Light"}
-            </button>
 
 
             {/* Wallet chip / connect button */}
@@ -4505,7 +4478,7 @@ export default function SwiftCart() {
         pauseOnFocusLoss={false}
         draggable
         pauseOnHover={false}
-        theme={darkMode ? "dark" : "light"}
+        theme="dark"
         limit={1}
       />
     </div>
