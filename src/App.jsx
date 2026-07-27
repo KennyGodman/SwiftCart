@@ -172,33 +172,12 @@ const AGENT_TOOLS = [
    LogoImage
    ========================================================= */
 function LogoImage() {
-  const [err, setErr] = useState(false);
-
-  if (err) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <div style={{
-          width: 32, height: 32,
-          background: "#2563eb", borderRadius: 6,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          flexShrink: 0,
-        }}>
-          <span style={{ fontSize: 12, fontWeight: 800, color: "#fff", letterSpacing: 1 }}>SC</span>
-        </div>
-        <span className="logo-text" style={{ fontFamily: "var(--font-serif)", fontSize: 16, fontWeight: 700, color: "#ffffff", letterSpacing: 0.5 }}>
-          SwiftCart
-        </span>
-      </div>
-    );
-  }
-
   return (
-    <img
-      src="/swiftcart-logo.png"
-      alt="SwiftCart"
-      style={{ height: "42px", width: "auto", objectFit: "contain", maxWidth: 160, display: "block" }}
-      onError={() => setErr(true)}
-    />
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <span className="logo-text" style={{ fontFamily: "var(--font-serif)", fontSize: 18, fontWeight: 700, color: "#ffffff", letterSpacing: 0.5 }}>
+        SwiftCart
+      </span>
+    </div>
   );
 }
 
@@ -340,6 +319,7 @@ function ProductCard({ item, onAdd, onEdit, onViewDetail, agentPick, wishlist = 
   const [imgErr, setImgErr] = useState(false);
   const isWishlisted = wishlist.includes(item.id);
   const [added, setAdded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const pct = disc(item.price, item.oldPrice);
 
   const handleAdd = (e) => {
@@ -349,7 +329,26 @@ function ProductCard({ item, onAdd, onEdit, onViewDetail, agentPick, wishlist = 
   };
 
   return (
-    <div className="product-card" data-product-id={item.id}>
+    <div
+      className="product-card"
+      data-product-id={item.id}
+      title={`${item.name} — ${item.desc || ""}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{ position: "relative" }}
+    >
+      {/* Quick Look Hover Description Tooltip */}
+      {isHovered && (
+        <div className="quick-hover-tooltip">
+          <p style={{ fontSize: 11, fontWeight: 700, margin: "0 0 3px", lineHeight: 1.3 }}>
+            {item.name}
+          </p>
+          <p style={{ fontSize: 10.5, opacity: 0.85, margin: 0, lineHeight: 1.45 }}>
+            {item.desc || "Premium high-quality product available with instant USDC payments on Arc Blockchain."}
+          </p>
+        </div>
+      )}
+
       {/* Sale badge */}
       <div className="badge badge-sale" style={{ position: "absolute", top: 8, left: 8, zIndex: 2 }}>
         -{pct}%
@@ -408,7 +407,8 @@ function ProductCard({ item, onAdd, onEdit, onViewDetail, agentPick, wishlist = 
       {/* Info */}
       <div style={{ padding: "10px 12px 12px" }}>
         <p
-          style={{ fontSize: 15, fontWeight: 500, color: "#1c1917", margin: "0 0 4px", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer" }}
+          title={`${item.name} — ${item.desc || ""}`}
+          style={{ fontSize: 15, fontWeight: 500, color: "var(--color-ink)", margin: "0 0 4px", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", cursor: "pointer" }}
           onClick={() => onViewDetail(item)}
           role="button"
           tabIndex={0}
@@ -3712,15 +3712,17 @@ export default function SwiftCart() {
       {/* ── NAVBAR ── */}
       <nav
         aria-label="Main navigation"
+        className="top-navbar-hover"
         style={{
           position: "sticky", top: 0, zIndex: 1500,
           background: scrolled
             ? "rgba(15, 23, 42, 0.97)"
             : "#0f172a",
           backdropFilter: scrolled ? "blur(12px)" : "none",
-          borderBottom: "1px solid #1e293b",
+          border: "none",
+          borderBottom: "none",
           boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.3)" : "none",
-          transition: "all .3s",
+          transition: "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, background 0.3s ease",
         }}
       >
         <div
@@ -3742,7 +3744,7 @@ export default function SwiftCart() {
             className="nav-desktop"
             role="tablist"
             aria-label="Shop by gender"
-            style={{ gap: 0, background: "#1e293b", borderRadius: 8, padding: 3, border: "1px solid #334155" }}
+            style={{ gap: 0, background: "#1e293b", borderRadius: 8, padding: 3, border: "none" }}
           >
             {Object.keys(CATALOGUE).map(k => {
               const s = CATALOGUE[k];
@@ -3759,12 +3761,13 @@ export default function SwiftCart() {
                     color: isActive ? "#fff" : "#94a3b8",
                     borderRadius: 6,
                     fontWeight: isActive ? 700 : 600,
-                    transition: "all 0.2s ease"
+                    transition: "all 0.2s ease",
+                    border: "none"
                   }}
                   onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#fff"; } }}
                   onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#94a3b8"; } }}
                 >
-                  <span style={{ fontSize: 14 }}>{s.icon}</span>{s.label}
+                  {s.label}
                 </button>
               );
             })}
@@ -3779,18 +3782,12 @@ export default function SwiftCart() {
             {/* Dark / Light mode toggle */}
             <button
               onClick={toggleTheme}
-              className={`theme-toggle-btn${darkMode ? " dark" : ""}`}
+              className="desktop-only nav-action-btn"
               aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-              aria-pressed={darkMode}
               title={darkMode ? "Light mode" : "Dark mode"}
+              style={{ background: "#1e293b", color: "#e2e8f0", border: "none" }}
             >
-              <span className="theme-toggle-btn__track">
-                <span aria-hidden="true">☀️</span>
-                <span aria-hidden="true">🌙</span>
-              </span>
-              <span className="theme-toggle-btn__knob" aria-hidden="true">
-                {darkMode ? "🌙" : "☀️"}
-              </span>
+              {darkMode ? "Dark" : "Light"}
             </button>
 
 
@@ -3805,7 +3802,7 @@ export default function SwiftCart() {
                   aria-haspopup="true"
                   style={{
                     cursor: "pointer",
-                    border: walletDropdownOpen ? "1px solid #2563eb" : "1px solid #334155",
+                    border: "none",
                     background: "#1e293b",
                     display: "flex",
                     alignItems: "center",
@@ -3849,15 +3846,14 @@ export default function SwiftCart() {
                         width: 10,
                         height: 10,
                         background: "#1e293b",
-                        borderLeft: "1px solid #334155",
-                        borderTop: "1px solid #334155",
+                        border: "none",
                         zIndex: 1
                       }} />
 
                       {/* Inner Container */}
                       <div style={{
                         background: "#1e293b",
-                        border: "1px solid #334155",
+                        border: "none",
                         borderRadius: "var(--radius-md)",
                         minWidth: "155px",
                         position: "relative",
@@ -3875,7 +3871,6 @@ export default function SwiftCart() {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            gap: "8px",
                             padding: "10px 16px",
                             fontSize: "11px",
                             color: "#f87171",
@@ -3896,7 +3891,7 @@ export default function SwiftCart() {
                             e.currentTarget.style.color = "#f87171";
                           }}
                         >
-                          🔌 Disconnect Wallet
+                          Disconnect Wallet
                         </button>
                       </div>
                     </div>
@@ -3907,11 +3902,11 @@ export default function SwiftCart() {
               <button
                 onClick={connectWallet}
                 className="desktop-only nav-action-btn"
-                style={{ background: "#2563eb", color: "#fff", borderColor: "#2563eb" }}
-                onMouseEnter={e => { e.currentTarget.style.background = "#1d4ed8"; e.currentTarget.style.borderColor = "#1d4ed8"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "#2563eb"; e.currentTarget.style.borderColor = "#2563eb"; }}
+                style={{ background: "#2563eb", color: "#fff", border: "none" }}
+                onMouseEnter={e => { e.currentTarget.style.background = "#1d4ed8"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "#2563eb"; }}
               >
-                <span aria-hidden="true">◎</span> Connect Wallet
+                Connect Wallet
               </button>
             )}
 
@@ -3920,11 +3915,11 @@ export default function SwiftCart() {
               onClick={() => setWishlistOpen(true)}
               className="desktop-only nav-action-btn"
               aria-label={`Open wishlist — ${wishlist.length} items`}
-              style={{ background: "#1e293b", color: "#e2e8f0", borderColor: "#334155" }}
+              style={{ background: "#1e293b", color: "#e2e8f0", border: "none" }}
               onMouseEnter={e => { e.currentTarget.style.background = "#334155"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "#1e293b"; }}
             >
-              ❤️ Wishlist
+              Wishlist
               {wishlist.length > 0 && (
                 <span style={{ background: "#ef4444", color: "#fff", borderRadius: "50%", width: 16, height: 16, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 800 }}>
                   {wishlist.length}
@@ -3937,11 +3932,11 @@ export default function SwiftCart() {
               onClick={() => setOrdersOpen(true)}
               className="desktop-only nav-action-btn"
               aria-label={`Open order history — ${orders.length} orders`}
-              style={{ background: "#1e293b", color: "#e2e8f0", borderColor: "#334155" }}
+              style={{ background: "#1e293b", color: "#e2e8f0", border: "none" }}
               onMouseEnter={e => { e.currentTarget.style.background = "#334155"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "#1e293b"; }}
             >
-              📦 Orders
+              Orders
               {orders.length > 0 && (
                 <span style={{ background: "#2563eb", color: "#fff", borderRadius: "50%", width: 16, height: 16, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 800 }}>
                   {orders.length}
@@ -3955,11 +3950,11 @@ export default function SwiftCart() {
               onClick={() => setCartOpen(true)}
               className="nav-action-btn cart-btn-accent"
               aria-label={`Open cart — ${cartCount} item${cartCount !== 1 ? "s" : ""}`}
-              style={{ background: "#2563eb", borderColor: "#2563eb", color: "#fff" }}
-              onMouseEnter={e => { e.currentTarget.style.background = "#1d4ed8"; e.currentTarget.style.borderColor = "#1d4ed8"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "#2563eb"; e.currentTarget.style.borderColor = "#2563eb"; }}
+              style={{ background: "#2563eb", border: "none", color: "#fff" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#1d4ed8"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "#2563eb"; }}
             >
-              🛒<span className="cart-btn-text"> Cart</span>
+              <span className="cart-btn-text">Cart</span>
               {cartCount > 0 && (
                 <span style={{ background: "#fff", color: "#2563eb", borderRadius: "50%", width: 16, height: 16, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 800 }}>
                   {cartCount}
@@ -3974,7 +3969,7 @@ export default function SwiftCart() {
           className="nav-mobile-tabs hide-scrollbar"
           role="tablist"
           aria-label="Shop by gender"
-          style={{ display: "none", gap: 6, overflowX: "auto", padding: "8px 12px 10px", borderTop: "1px solid #1e293b", flexWrap: "nowrap" }}
+          style={{ display: "none", gap: 6, overflowX: "auto", padding: "8px 12px 10px", border: "none", flexWrap: "nowrap" }}
         >
           {Object.keys(CATALOGUE).map(k => {
             const s = CATALOGUE[k];
@@ -3988,14 +3983,14 @@ export default function SwiftCart() {
                 style={{
                   background: isActive ? "#2563eb" : "#1e293b",
                   color: isActive ? "#fff" : "#94a3b8",
-                  border: "1px solid #334155", cursor: "pointer",
+                  border: "none", cursor: "pointer",
                   padding: "8px 18px", borderRadius: 20,
                   fontSize: 12, fontWeight: 600,
-                  display: "flex", alignItems: "center", gap: 5,
+                  display: "flex", alignItems: "center",
                   whiteSpace: "nowrap", flexShrink: 0,
                 }}
               >
-                <span style={{ fontSize: 14 }}>{s.icon}</span>{s.label}
+                {s.label}
               </button>
             );
           })}
@@ -4343,28 +4338,15 @@ export default function SwiftCart() {
       <nav
         className="mobile-bottom-nav"
         aria-label="Mobile navigation"
-        style={{ display: "none", position: "fixed", bottom: 0, left: 0, right: 0, background: "#fff", borderTop: "1px solid #e7e4e0", zIndex: 600, boxShadow: "0 -4px 16px rgba(0,0,0,0.08)" }}
+        style={{ display: "none", position: "fixed", bottom: 0, left: 0, right: 0, background: "#fff", border: "none", zIndex: 600, boxShadow: "0 -4px 16px rgba(0,0,0,0.08)" }}
       >
         {[
           {
-            icon: (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg>
-            ),
             label: "Home",
             id: "mobile-home-btn",
             action: () => window.scrollTo({ top: 0, behavior: "smooth" })
           },
           {
-            icon: (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <rect width="20" height="14" x="2" y="5" rx="2" />
-                <path d="M12 12h.01" />
-                <path d="M16 9.5a2.5 2.5 0 0 1 0 5H2" />
-              </svg>
-            ),
             label: wallet ? "Disconnect" : "Wallet",
             id: "mobile-wallet-btn",
             action: wallet ? () => {
@@ -4373,47 +4355,28 @@ export default function SwiftCart() {
             } : connectWallet
           },
           {
-            icon: (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-              </svg>
-            ),
             label: wishlist.length > 0 ? `Wishlist (${wishlist.length})` : "Wishlist",
             id: "mobile-wishlist-btn",
             action: () => setWishlistOpen(true)
           },
           {
-            icon: (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-                <path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" />
-              </svg>
-            ),
             label: orders.length > 0 ? `Orders (${orders.length})` : "Orders",
             id: "mobile-orders-btn",
             action: () => setOrdersOpen(true)
           },
           {
-            icon: (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="8" cy="21" r="1" />
-                <circle cx="19" cy="21" r="1" />
-                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
-              </svg>
-            ),
             label: cartCount > 0 ? `Cart (${cartCount})` : "Cart",
             id: "mobile-cart-btn",
             action: () => setCartOpen(true)
           },
-        ].map(({ icon, label, id, action }) => (
+        ].map(({ label, id, action }) => (
           <button
             key={label}
             id={id}
             onClick={action}
             aria-label={label}
-            style={{ flex: 1, background: "none", border: "none", padding: "10px 4px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}
+            style={{ flex: 1, background: "none", border: "none", padding: "14px 4px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}
           >
-            <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#78716c", height: 24 }} aria-hidden="true">{icon}</span>
             <span style={{ fontSize: 11, color: "#78716c", fontWeight: 600, letterSpacing: 0.3 }}>{label}</span>
           </button>
         ))}
