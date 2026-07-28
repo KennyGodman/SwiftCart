@@ -1796,11 +1796,11 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
         aria-label="SwiftCart AI shopping agent"
       >
         {/* Header */}
-        <div style={{ background: "#0f172a", padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+        <div style={{ background: "var(--color-brand-dk)", padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ position: "relative" }}>
               <div style={{ width: 34, height: 34, background: "linear-gradient(135deg, #2563eb, #3b82f6)", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, color: "#fff" }}>◎</div>
-              <div style={{ position: "absolute", bottom: -1, right: -1, width: 10, height: 10, background: "#10b981", borderRadius: "50%", border: "2px solid #0f172a" }} aria-hidden="true" />
+              <div style={{ position: "absolute", bottom: -1, right: -1, width: 10, height: 10, background: "#10b981", borderRadius: "50%", border: "2px solid var(--color-brand-dk)" }} aria-hidden="true" />
             </div>
             <div>
               <p style={{ fontSize: 16, fontWeight: 700, color: "#fff", margin: 0, lineHeight: 1 }}>SwiftCart Agent</p>
@@ -3517,7 +3517,7 @@ export default function SwiftCart() {
       closeOnClick: true,
       pauseOnHover: false,
       draggable: true,
-      theme: "dark",
+      theme: "light",
     };
 
     if (type === "success") {
@@ -3684,11 +3684,11 @@ export default function SwiftCart() {
   const displayCats = activeCat ? filteredCats.filter(([k]) => k === activeCat) : filteredCats;
 
   return (
-    <div data-theme="dark" style={{ minHeight: "100vh", background: "var(--color-bg)", fontFamily: "var(--font-sans)", colorScheme: "dark" }}>
+    <div data-theme="light" style={{ minHeight: "100vh", background: "var(--color-bg)", fontFamily: "var(--font-sans)", colorScheme: "light" }}>
 
       {/* ── TOP BAR ── */}
-      <div style={{ background: "linear-gradient(135deg, #0b1329, #0f172a)", padding: "7px 0", textAlign: "center", overflow: "hidden", whiteSpace: "nowrap", borderBottom: "1px solid #1e293b" }}>
-        <p className="topbar-text" style={{ fontSize: 13, color: "#e2e8f0", fontWeight: 600, letterSpacing: 0.5, display: "inline-block" }}>
+      <div style={{ background: "linear-gradient(135deg, var(--color-brand), var(--color-brand-dk))", padding: "7px 0", textAlign: "center", overflow: "hidden", whiteSpace: "nowrap" }}>
+        <p className="topbar-text" style={{ fontSize: 13, color: "#ffffff", fontWeight: 600, letterSpacing: 0.5, display: "inline-block" }}>
           🎉 Free shipping on orders over 150 USDC · Pay with USDC on Arc Blockchain
         </p>
       </div>
@@ -3699,13 +3699,13 @@ export default function SwiftCart() {
         style={{
           position: "sticky", top: 0, zIndex: 1500,
           background: scrolled
-            ? "rgba(15, 23, 42, 0.97)"
-            : "#0f172a",
+            ? "rgba(255, 255, 255, 0.97)"
+            : "var(--color-bg)",
           backdropFilter: scrolled ? "blur(12px)" : "none",
           border: "none",
-          borderBottom: "none",
-          boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.3)" : "none",
-          transition: "background 0.3s ease, box-shadow 0.3s ease",
+          borderBottom: scrolled ? "1px solid var(--color-border)" : "none",
+          boxShadow: scrolled ? "var(--shadow-sm)" : "none",
+          transition: "background 0.3s ease, box-shadow 0.3s ease, border-bottom 0.3s ease",
         }}
       >
         <div
@@ -3727,7 +3727,7 @@ export default function SwiftCart() {
             className="nav-desktop"
             role="tablist"
             aria-label="Shop by gender"
-            style={{ gap: 0, background: "#1e293b", borderRadius: 8, padding: 3, border: "none" }}
+            style={{ gap: 0, background: "var(--color-surface)", borderRadius: 8, padding: 3, border: "1px solid var(--color-border)" }}
           >
             {Object.keys(CATALOGUE).map(k => {
               const s = CATALOGUE[k];
@@ -3741,14 +3741,14 @@ export default function SwiftCart() {
                   onClick={() => { setSection(k); setActiveCat(null); }}
                   style={{
                     background: isActive ? "#2563eb" : "transparent",
-                    color: isActive ? "#fff" : "#94a3b8",
+                    color: isActive ? "#fff" : "var(--color-ink-muted)",
                     borderRadius: 6,
                     fontWeight: isActive ? 700 : 600,
                     transition: "all 0.2s ease",
                     border: "none"
                   }}
-                  onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#fff"; } }}
-                  onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#94a3b8"; } }}
+                  onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = "rgba(0,0,0,0.05)"; e.currentTarget.style.color = "var(--color-ink)"; } }}
+                  onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--color-ink-muted)"; } }}
                 >
                   {s.label}
                 </button>
@@ -3774,8 +3774,8 @@ export default function SwiftCart() {
                   aria-haspopup="true"
                   style={{
                     cursor: "pointer",
-                    border: "none",
-                    background: "#1e293b",
+                    border: "1px solid var(--color-border)",
+                    background: "var(--color-surface)",
                     display: "flex",
                     alignItems: "center",
                     gap: "5px",
@@ -3785,8 +3785,8 @@ export default function SwiftCart() {
                   }}
                 >
                   <div className="wallet-chip__dot" aria-hidden="true" />
-                  <span className="wallet-chip__address" style={{ color: "#60a5fa" }}>{trunc(wallet)}</span>
-                  <span style={{ fontSize: 8, color: "#94a3b8", marginLeft: 2, display: "inline-block", transform: walletDropdownOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>▼</span>
+                  <span className="wallet-chip__address" style={{ color: "var(--color-brand)" }}>{trunc(wallet)}</span>
+                  <span style={{ fontSize: 8, color: "var(--color-ink-muted)", marginLeft: 2, display: "inline-block", transform: walletDropdownOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>▼</span>
                 </button>
                 {walletDropdownOpen && (
                   <>
@@ -3806,7 +3806,7 @@ export default function SwiftCart() {
                         marginTop: 10,
                         zIndex: 999,
                         animation: "walletDropdownIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards",
-                        filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))"
+                        filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.1))"
                       }}
                     >
                       {/* Triangle Arrow */}
@@ -3817,15 +3817,16 @@ export default function SwiftCart() {
                         transform: "translateX(-50%) rotate(45deg)",
                         width: 10,
                         height: 10,
-                        background: "#1e293b",
-                        border: "none",
+                        background: "var(--color-surface)",
+                        borderLeft: "1px solid var(--color-border)",
+                        borderTop: "1px solid var(--color-border)",
                         zIndex: 1
                       }} />
 
                       {/* Inner Container */}
                       <div style={{
-                        background: "#1e293b",
-                        border: "none",
+                        background: "var(--color-surface)",
+                        border: "1px solid var(--color-border)",
                         borderRadius: "var(--radius-md)",
                         minWidth: "155px",
                         position: "relative",
@@ -3887,9 +3888,9 @@ export default function SwiftCart() {
               onClick={() => setWishlistOpen(true)}
               className="desktop-only nav-action-btn"
               aria-label={`Open wishlist — ${wishlist.length} items`}
-              style={{ background: "#1e293b", color: "#e2e8f0", border: "none" }}
-              onMouseEnter={e => { e.currentTarget.style.background = "#334155"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "#1e293b"; }}
+              style={{ background: "var(--color-surface)", color: "var(--color-ink)", border: "1px solid var(--color-border)" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "var(--color-border-lt)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "var(--color-surface)"; }}
             >
               Wishlist
               {wishlist.length > 0 && (
@@ -3904,9 +3905,9 @@ export default function SwiftCart() {
               onClick={() => setOrdersOpen(true)}
               className="desktop-only nav-action-btn"
               aria-label={`Open order history — ${orders.length} orders`}
-              style={{ background: "#1e293b", color: "#e2e8f0", border: "none" }}
-              onMouseEnter={e => { e.currentTarget.style.background = "#334155"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "#1e293b"; }}
+              style={{ background: "var(--color-surface)", color: "var(--color-ink)", border: "1px solid var(--color-border)" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "var(--color-border-lt)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "var(--color-surface)"; }}
             >
               Orders
               {orders.length > 0 && (
@@ -3953,9 +3954,10 @@ export default function SwiftCart() {
                 aria-selected={isActive}
                 onClick={() => { setSection(k); setActiveCat(null); }}
                 style={{
-                  background: isActive ? "#2563eb" : "#1e293b",
-                  color: isActive ? "#fff" : "#94a3b8",
-                  border: "none", cursor: "pointer",
+                  background: isActive ? "#2563eb" : "var(--color-surface)",
+                  color: isActive ? "#fff" : "var(--color-ink-muted)",
+                  border: isActive ? "none" : "1px solid var(--color-border)",
+                  cursor: "pointer",
                   padding: "8px 18px", borderRadius: 20,
                   fontSize: 12, fontWeight: 600,
                   display: "flex", alignItems: "center",
@@ -3974,40 +3976,45 @@ export default function SwiftCart() {
         className="hero-section"
         aria-label="Hero"
         style={{
-          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+          background: "linear-gradient(135deg, var(--color-surface) 0%, var(--color-border-lt) 100%)",
           padding: "44px 5% 38px",
           position: "relative",
           overflow: "hidden"
         }}
       >
         {/* Background glow */}
-        <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 15% 50%, rgba(37,99,235,0.15) 0%, transparent 55%), radial-gradient(circle at 85% 20%, rgba(59,130,246,0.1) 0%, transparent 50%)", pointerEvents: "none" }} aria-hidden="true" />
+        <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 15% 50%, rgba(37,99,235,0.08) 0%, transparent 55%), radial-gradient(circle at 85% 20%, rgba(59,130,246,0.05) 0%, transparent 50%)", pointerEvents: "none" }} aria-hidden="true" />
 
         <div style={{ maxWidth: "100%", position: "relative" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 24 }}>
 
             {/* Copy */}
             <div style={{ maxWidth: 640 }}>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 20, padding: "4px 12px", marginBottom: 14 }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "rgba(37,99,235,0.08)", border: "1px solid rgba(37,99,235,0.2)", borderRadius: 20, padding: "4px 12px", marginBottom: 14 }}>
                 <div style={{ width: 6, height: 6, background: "#10b981", borderRadius: "50%", animation: "pulse 2s infinite" }} aria-hidden="true" />
-                <span style={{ fontSize: 9, color: "#93c5fd", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase" }}>AI Agent · Live on Arc</span>
+                <span style={{ fontSize: 9, color: "var(--color-brand)", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase" }}>AI Agent · Live on Arc</span>
               </div>
-              <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(26px,4vw,48px)", fontWeight: 700, color: "#fff", lineHeight: 1.15, marginBottom: 10 }}>
+              <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(26px,4vw,48px)", fontWeight: 700, color: "var(--color-ink)", lineHeight: 1.15, marginBottom: 10 }}>
                 Shop with SwiftCart
               </h1>
-              <p style={{ fontSize: 13, color: "#cbd5e1", lineHeight: 1.65, marginBottom: 22 }}>
+              <p style={{ fontSize: 13, color: "var(--color-ink-mid)", lineHeight: 1.65, marginBottom: 22 }}>
                 Why Shop When Agents Can? Pay with USDC on Arc
               </p>
               <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                 <button
                   onClick={() => setAgentOpen(true)}
-                  style={{ background: "linear-gradient(135deg, #2563eb, #3b82f6)", color: "#fff", border: "none", borderRadius: 10, padding: "11px 22px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 6px 20px rgba(37,99,235,0.45)", display: "flex", alignItems: "center", gap: 7 }}
+                  style={{ background: "linear-gradient(135deg, #2563eb, #3b82f6)", color: "#fff", border: "none", borderRadius: 10, padding: "11px 22px", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 6px 20px rgba(37,99,235,0.3)", display: "flex", alignItems: "center", gap: 7 }}
                 >
                   ◎ Shop with AI Agent
                 </button>
                 <button
                   onClick={() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" })}
-                  style={{ color: "#ffffff", border: "1px solid rgba(255,255,255,0.3)", background: "rgba(255,255,255,0.08)", borderRadius: 10, padding: "11px 22px", fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+                  style={{
+                    color: "var(--color-ink)",
+                    border: "1px solid var(--color-border)",
+                    background: "var(--color-bg)",
+                    borderRadius: 10, padding: "11px 22px", fontSize: 12, fontWeight: 600, cursor: "pointer"
+                  }}
                 >
                   Browse ↓
                 </button>
@@ -4075,8 +4082,8 @@ export default function SwiftCart() {
             <div className="hero-stats" style={{ gap: 20, flexWrap: "wrap" }}>
               {[["7", "Categories"], ["100+", "Products"], ["USDC", "Payment"], ["Arc", "Blockchain"]].map(([v, l]) => (
                 <div key={l} className="stat-item">
-                  <p className="stat-item__value" style={{ color: "#ffffff" }}>{v}</p>
-                  <p className="stat-item__label" style={{ color: "#94a3b8" }}>{l}</p>
+                  <p className="stat-item__value" style={{ color: "var(--color-ink)" }}>{v}</p>
+                  <p className="stat-item__label" style={{ color: "var(--color-ink-muted)" }}>{l}</p>
                 </div>
               ))}
             </div>
@@ -4310,7 +4317,7 @@ export default function SwiftCart() {
       <nav
         className="mobile-bottom-nav"
         aria-label="Mobile navigation"
-        style={{ display: "none", position: "fixed", bottom: 0, left: 0, right: 0, background: "#fff", border: "none", zIndex: 600, boxShadow: "0 -4px 16px rgba(0,0,0,0.08)" }}
+        style={{ display: "none", position: "fixed", bottom: 0, left: 0, right: 0, background: "var(--color-bg)", border: "none", zIndex: 600, boxShadow: "0 -4px 16px rgba(0,0,0,0.05)" }}
       >
         {[
           {
@@ -4478,7 +4485,7 @@ export default function SwiftCart() {
         pauseOnFocusLoss={false}
         draggable
         pauseOnHover={false}
-        theme="dark"
+        theme="light"
         limit={1}
       />
     </div>
