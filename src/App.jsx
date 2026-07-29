@@ -4,6 +4,7 @@ import "react-toastify/dist/ReactToastify.css";
 import useAllowance from "./hooks/useAllowance";
 import ApprovalModal from "./components/ApprovalModal";
 import ProductDetailPage from "./components/ProductDetailPage";
+import AgentSandboxModal from "./components/AgentSandboxModal";
 import { encodeMemoUSDC } from "./utils";
 import { CATALOGUE, ALL_PRODUCTS } from "./catalogue";
 
@@ -3040,6 +3041,7 @@ export default function SwiftCart() {
   const [cartOpen, setCartOpen] = useState(false);
   const [checkout, setCheckout] = useState(false);
   const [agentOpen, setAgentOpen] = useState(false);
+  const [sandboxOpen, setSandboxOpen] = useState(false);
   // Ref that AgentChat registers a callback into so CheckoutModal can post success back to chat
   const agentNotifyRef = useRef(null);
   const toastTimeoutRef = useRef(null);
@@ -3484,7 +3486,7 @@ export default function SwiftCart() {
 
   // Disable body scroll when any modal or drawer is open
   useEffect(() => {
-    const isAnyModalOpen = agentOpen || cartOpen || checkout || !!editItem || approvalOpen || !!detailItem || wishlistOpen || ordersOpen;
+    const isAnyModalOpen = agentOpen || cartOpen || checkout || !!editItem || approvalOpen || !!detailItem || wishlistOpen || ordersOpen || sandboxOpen;
     if (isAnyModalOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -3493,7 +3495,7 @@ export default function SwiftCart() {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [agentOpen, cartOpen, checkout, editItem, approvalOpen, detailItem, wishlistOpen, ordersOpen]);
+  }, [agentOpen, cartOpen, checkout, editItem, approvalOpen, detailItem, wishlistOpen, ordersOpen, sandboxOpen]);
 
   // Close wallet dropdown when clicking outside
   useEffect(() => {
@@ -3882,6 +3884,16 @@ export default function SwiftCart() {
                 Connect Wallet
               </button>
             )}
+            {/* Agent Gateway Sandbox */}
+            <button
+              onClick={() => setSandboxOpen(true)}
+              className="desktop-only nav-action-btn"
+              style={{ background: "rgba(37,99,235,0.08)", color: "var(--color-brand)", border: "1px solid rgba(37,99,235,0.15)" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "rgba(37,99,235,0.15)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "rgba(37,99,235,0.08)"; }}
+            >
+              🤖 Agent Gateway
+            </button>
 
             {/* Wishlist button */}
             <button
@@ -4473,7 +4485,7 @@ export default function SwiftCart() {
           onDeleteOrder={handleDeleteOrder}
           onConfirmDelivery={handleConfirmDelivery}
         />
-      )}
+      )}      {sandboxOpen && <AgentSandboxModal onClose={() => setSandboxOpen(false)} />}
 
       <ToastContainer
         position="top-right"
