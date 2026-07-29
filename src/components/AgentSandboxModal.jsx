@@ -27,12 +27,12 @@ export default function AgentSandboxModal({ onClose }) {
 
       const data = await res.json();
       
-      // Capture the target x402 headers
+      // Capture the target x402 headers (with JSON body fallback in case browser CORS blocks header access)
       const x402Headers = {
-        "X-USDC-Payment-Address": res.headers.get("x-usdc-payment-address") || "Not returned",
-        "X-USDC-Amount": res.headers.get("x-usdc-amount") || "Not returned",
-        "X-USDC-Chain-Id": res.headers.get("x-usdc-chain-id") || "Not returned",
-        "X-USDC-Memo": res.headers.get("x-usdc-memo") || "Not returned"
+        "X-USDC-Payment-Address": res.headers.get("x-usdc-payment-address") || data.paymentRequired?.address || "Not returned",
+        "X-USDC-Amount": res.headers.get("x-usdc-amount") ? `${res.headers.get("x-usdc-amount")} USDC` : (data.paymentRequired?.amount ? `${data.paymentRequired.amount}.00 USDC` : "Not returned"),
+        "X-USDC-Chain-Id": res.headers.get("x-usdc-chain-id") || (data.paymentRequired?.chainId ? String(data.paymentRequired.chainId) : "Not returned"),
+        "X-USDC-Memo": res.headers.get("x-usdc-memo") || data.paymentRequired?.memo || "Not returned"
       };
 
       setHeaders(x402Headers);
