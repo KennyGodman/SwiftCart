@@ -29,7 +29,7 @@ export default async function handler(req, res) {
       max_transaction_limit: "500 USDC",
       daily_cumulative_limit: "1000 USDC",
       whitelisted_token: "USDC (0x3600000000000000000000000000000000000000)",
-      whitelisted_merchants": [
+      "whitelisted_merchants": [
         "0xd515765a6c9b1c3f9a4df52f5326eea43ee42469"
       ]
     },
