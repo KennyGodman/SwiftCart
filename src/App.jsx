@@ -174,7 +174,7 @@ const AGENT_TOOLS = [
 function LogoImage() {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-      <span className="logo-text" style={{ fontFamily: "var(--font-serif)", fontSize: 18, fontWeight: 700, color: "#ffffff", letterSpacing: 0.5 }}>
+      <span className="logo-text" style={{ fontFamily: "var(--font-serif)", fontSize: 18, fontWeight: 700, color: "var(--color-brand)", letterSpacing: 0.5 }}>
         SwiftCart
       </span>
     </div>
