@@ -230,6 +230,16 @@ export default async function handler(req, res) {
     });
   }
 
+  // ── Spending Policy Enforcement (Guardrails) ──────────────────────────
+  const MAX_TX_LIMIT = Number(process.env.AGENT_MAX_TX_LIMIT || 500); // 500 USDC limit per purchase
+  if (total > MAX_TX_LIMIT) {
+    console.warn(`[agent-pay] Policy Violation: purchase total (${total} USDC) exceeds max transaction limit of ${MAX_TX_LIMIT} USDC.`);
+    return res.status(400).json({
+      error: "SPENDING_POLICY_VIOLATION",
+      message: `Transaction rejected: total amount (${total} USDC) exceeds the agent's spending cap of ${MAX_TX_LIMIT} USDC.`
+    });
+  }
+
   try {
     // ── 1. Verify on-chain allowance ──────────────────────────────────────
     const spenderLabel = ESCROW_CONTRACT() ? "escrow contract" : "agent wallet";

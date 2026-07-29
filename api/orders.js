@@ -37,7 +37,7 @@ async function getKV() {
 
 // ── CRUD Helpers ──────────────────────────────────────────────────────────────
 
-async function createOrder(data) {
+export async function createOrder(data) {
   const kv = await getKV();
   const id = crypto.randomUUID();
   const order = {

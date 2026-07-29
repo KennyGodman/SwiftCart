@@ -313,6 +313,14 @@ export default async function handler(req, res) {
           continue;
         }
 
+        // 2b. Spending Policy Enforcement (Guardrails)
+        const MAX_TX_LIMIT = Number(process.env.AGENT_MAX_TX_LIMIT || 500);
+        if (trigger.price > MAX_TX_LIMIT) {
+          console.warn(`[agent-cron] Policy Violation: trigger price (${trigger.price} USDC) exceeds max transaction limit of ${MAX_TX_LIMIT} USDC.`);
+          results.skipped.push({ id: trigger.id, product: trigger.productName, reason: "spending policy violation" });
+          continue;
+        }
+
         // 3. Execute transferFrom
         const orderId = crypto.randomUUID();
         const txHash = await executeTransferFrom(trigger.userWallet, trigger.price, orderId);
