@@ -1,14 +1,26 @@
 import { useState } from "react";
+import {
+  ARC_CHAIN_ID,
+  ARC_CHAIN_CONFIG,
+  MEMO_ADDRESS
+} from "../config";
+import { encodeMemoUSDC } from "../utils";
 
 export default function AgentSandboxModal({ onClose }) {
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState(null);
   const [headers, setHeaders] = useState(null);
+  const [txHash, setTxHash] = useState("");
+  const [paymentStep, setPaymentStep] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const simulateCheckout = async () => {
     setLoading(true);
     setResponse(null);
     setHeaders(null);
+    setTxHash("");
+    setPaymentStep(null);
+    setErrorMessage("");
     try {
       const res = await fetch("/api/agent-checkout", {
         method: "POST",
@@ -49,6 +61,99 @@ export default function AgentSandboxModal({ onClose }) {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const executePayment = async () => {
+    if (!window.ethereum) {
+      alert("No Ethereum wallet detected. Please install MetaMask or Rabby.");
+      return;
+    }
+    setPaymentStep("paying");
+    setErrorMessage("");
+
+    try {
+      // 1. Switch or Add Arc Testnet
+      const currentChain = await window.ethereum.request({ method: "eth_chainId" });
+      if (currentChain !== ARC_CHAIN_ID) {
+        try {
+          await window.ethereum.request({ method: "wallet_addEthereumChain", params: [ARC_CHAIN_CONFIG] });
+        } catch {
+          try {
+            await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARC_CHAIN_ID }] });
+          } catch (se) {
+            throw new Error("Please switch your wallet to the Arc Testnet.");
+          }
+        }
+      }
+
+      // 2. Request account if not already provided
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      const buyerAddress = accounts[0];
+
+      // 3. Extract parameters from the 402 payment details
+      const amount = response.body.paymentRequired.amount;
+      const memo = response.body.paymentRequired.memo;
+      const recipient = response.body.paymentRequired.address;
+
+      // 4. Encode on-chain Memo transaction
+      const data = encodeMemoUSDC(recipient, amount, memo);
+      
+      const hash = await window.ethereum.request({
+        method: "eth_sendTransaction",
+        params: [{ from: buyerAddress, to: MEMO_ADDRESS, data, gas: "0x30D40" }],
+      });
+
+      setTxHash(hash);
+
+      // 5. Wait for transaction to be mined
+      const waitForReceipt = async (txHash) => {
+        for (let i = 0; i < 30; i++) {
+          const receipt = await window.ethereum.request({
+            method: "eth_getTransactionReceipt",
+            params: [txHash],
+          });
+          if (receipt) return receipt;
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+        throw new Error("Transaction receipt timeout on Arc Testnet.");
+      };
+
+      await waitForReceipt(hash);
+
+      // 6. Submit TxHash to final checkout endpoint
+      setPaymentStep("verifying");
+      const checkoutRes = await fetch("/api/agent-checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-USDC-Payment-Tx": hash
+        },
+        body: JSON.stringify({
+          items: [
+            { id: "m-s1", qty: 1, size: "M", color: "Default" }
+          ],
+          userWallet: buyerAddress,
+          fulfillmentMethod: "delivery",
+          deliveryState: "Lagos"
+        })
+      });
+
+      const checkoutData = await checkoutRes.json();
+      if (!checkoutRes.ok) {
+        throw new Error(checkoutData.message || "Failed to finalize order verification.");
+      }
+
+      setResponse({
+        status: checkoutRes.status,
+        statusText: checkoutRes.statusText,
+        body: checkoutData
+      });
+      setPaymentStep("success");
+    } catch (err) {
+      console.error(err);
+      setErrorMessage(err.message || "Execution failed.");
+      setPaymentStep("error");
     }
   };
 
@@ -202,6 +307,67 @@ export default function AgentSandboxModal({ onClose }) {
                       {JSON.stringify(response.body, null, 2)}
                     </pre>
                   </div>
+
+                  {/* STEP 2: COMPLETE ON-CHAIN PAYMENT */}
+                  {response.status === 402 && (
+                    <div style={{
+                      marginTop: 6, padding: "12px 16px", background: "rgba(16,185,129,0.06)",
+                      border: "1px solid rgba(16,185,129,0.25)", borderRadius: 10, display: "flex", flexDirection: "column", gap: 8
+                    }}>
+                      <div>
+                        <h5 style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "#0f766e" }}>💳 Step 2: Complete Checkout Payment</h5>
+                        <p style={{ margin: "2px 0 0", fontSize: 10, color: "var(--color-ink-muted)" }}>
+                          Simulate the buying agent signing the USDC payment transaction on-chain via MetaMask.
+                        </p>
+                      </div>
+
+                      {paymentStep === null && (
+                        <button
+                          onClick={executePayment}
+                          style={{
+                            background: "#0f766e", color: "#fff", border: "none", borderRadius: 8, padding: "8px 14px",
+                            fontSize: 11, fontWeight: 700, cursor: "pointer", transition: "opacity 0.2s"
+                          }}
+                        >
+                          Execute Wallet Payment & Finalize Order
+                        </button>
+                      )}
+
+                      {paymentStep === "paying" && (
+                        <div style={{ fontSize: 10, color: "var(--color-ink-mid)", display: "flex", alignItems: "center", gap: 6 }}>
+                          <span className="spinner" style={{ border: "2px solid #ccc", borderTop: "2px solid #0f766e", borderRadius: "50%", width: 12, height: 12, display: "inline-block", animation: "spin 1s linear infinite" }}></span>
+                          {txHash ? `Confirming Tx on Arc: ${txHash.slice(0, 12)}...` : "Waiting for signature in MetaMask..."}
+                        </div>
+                      )}
+
+                      {paymentStep === "verifying" && (
+                        <div style={{ fontSize: 10, color: "var(--color-ink-mid)" }}>
+                          🔄 Payment confirmed on-chain! Finalizing order verification...
+                        </div>
+                      )}
+
+                      {paymentStep === "success" && (
+                        <div style={{ fontSize: 11, fontWeight: 700, color: "#0f766e" }}>
+                          🎉 Success! Transaction verified on-chain, and order registered!
+                        </div>
+                      )}
+
+                      {paymentStep === "error" && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <span style={{ fontSize: 10, color: "#dc2626" }}>Error: {errorMessage}</span>
+                          <button
+                            onClick={executePayment}
+                            style={{
+                              background: "#0f766e", color: "#fff", border: "none", borderRadius: 8, padding: "8px 14px",
+                              fontSize: 11, fontWeight: 700, cursor: "pointer"
+                            }}
+                          >
+                            Retry Payment
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -228,6 +394,12 @@ export default function AgentSandboxModal({ onClose }) {
           </button>
         </div>
       </div>
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
