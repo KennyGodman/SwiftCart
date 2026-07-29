@@ -86,6 +86,7 @@ export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-USDC-Payment-Tx");
+  res.setHeader("Access-Control-Expose-Headers", "X-USDC-Payment-Address, X-USDC-Amount, X-USDC-Chain-Id, X-USDC-Memo");
 
   if (req.method === "OPTIONS") return res.status(200).end();
 
