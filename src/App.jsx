@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useAllowance from "./hooks/useAllowance";
@@ -4004,17 +4003,8 @@ export default function SwiftCart() {
                 <div style={{ width: 6, height: 6, background: "#10b981", borderRadius: "50%", animation: "pulse 2s infinite" }} aria-hidden="true" />
                 <span style={{ fontSize: 9, color: "var(--color-brand)", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase" }}>AI Agent · Live on Arc</span>
               </div>
-              <motion.h1
-                animate={{
-                  color: ["#2563eb", "#db2777", "#059669", "#7c3aed", "#2563eb"],
-                  y: [0, -6, 0, 6, 0],
-                  scale: [1, 1.02, 1, 0.98, 1]
-                }}
-                transition={{
-                  duration: 8,
-                  ease: "easeInOut",
-                  repeat: Infinity
-                }}
+              <h1
+                className="animate-swiftcart-hero"
                 style={{
                   fontFamily: "var(--font-serif)",
                   fontSize: "clamp(26px,4vw,48px)",
@@ -4025,7 +4015,7 @@ export default function SwiftCart() {
                 }}
               >
                 Shop with SwiftCart
-              </motion.h1>
+              </h1>
               <p style={{ fontSize: 13, color: "var(--color-ink-mid)", lineHeight: 1.65, marginBottom: 22 }}>
                 Why Shop When Agents Can? Pay with USDC on Arc
               </p>

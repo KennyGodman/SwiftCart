@@ -1018,4 +1018,33 @@ body {
   box-shadow: 0 -4px 16px rgba(0,0,0,0.08) !important;
 }
 
+/* ── SwiftCart Hero Animations ── */
+@keyframes colorCycleAndFloat {
+  0% {
+    color: #2563eb;
+    transform: translateY(0px) scale(1);
+  }
+  25% {
+    color: #db2777;
+    transform: translateY(-5px) scale(1.01);
+  }
+  50% {
+    color: #059669;
+    transform: translateY(0px) scale(1);
+  }
+  75% {
+    color: #7c3aed;
+    transform: translateY(5px) scale(0.99);
+  }
+  100% {
+    color: #2563eb;
+    transform: translateY(0px) scale(1);
+  }
+}
+
+.animate-swiftcart-hero {
+  display: inline-block;
+  animation: colorCycleAndFloat 6s ease-in-out infinite;
+}
+
 
