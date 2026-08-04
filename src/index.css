@@ -1022,28 +1022,27 @@ body {
 @keyframes colorCycleAndFloat {
   0% {
     color: #2563eb;
-    transform: translateY(0px) scale(1);
+    transform: translateY(0px);
   }
   25% {
     color: #db2777;
-    transform: translateY(-5px) scale(1.01);
+    transform: translateY(-2px);
   }
   50% {
     color: #059669;
-    transform: translateY(0px) scale(1);
+    transform: translateY(0px);
   }
   75% {
     color: #7c3aed;
-    transform: translateY(5px) scale(0.99);
+    transform: translateY(2px);
   }
   100% {
     color: #2563eb;
-    transform: translateY(0px) scale(1);
+    transform: translateY(0px);
   }
 }
 
 .animate-swiftcart-hero {
-  display: inline-block;
   animation: colorCycleAndFloat 6s ease-in-out infinite;
 }
 
