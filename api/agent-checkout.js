@@ -14,6 +14,8 @@ function parseTransferTx(inputData) {
   return { recipient, amountRaw };
 }
 
+const MEMO_ADDRESS = "0x5294E9927c3306DcBaDb03fe70b92e01cCede505";
+
 async function verifyOnChainPayment(txHash, expectedAmount, expectedRecipient) {
   try {
     // 1. Fetch transaction details
@@ -33,16 +35,35 @@ async function verifyOnChainPayment(txHash, expectedAmount, expectedRecipient) {
     }
 
     const tx = txJson.result;
-    
-    // Check if recipient contract is the USDC token
-    if (!tx.to || tx.to.toLowerCase() !== USDC_ADDRESS.toLowerCase()) {
-      return { valid: false, reason: "Recipient contract is not the USDC token." };
+    if (!tx.to) {
+      return { valid: false, reason: "Invalid transaction: no recipient address." };
     }
 
-    // Parse the input data for transfer(address,uint256)
-    const transfer = parseTransferTx(tx.input);
+    let transfer = null;
+
+    if (tx.to.toLowerCase() === USDC_ADDRESS.toLowerCase()) {
+      // Direct USDC transfer
+      transfer = parseTransferTx(tx.input);
+    } else if (tx.to.toLowerCase() === MEMO_ADDRESS.toLowerCase()) {
+      // Memo-wrapped USDC transfer
+      const cleanInput = tx.input.replace("0x", "");
+      
+      // Parse target contract (Word 0, starts at char 8 after 4-byte selector)
+      const targetContract = "0x" + cleanInput.substring(8 + 24, 8 + 64).toLowerCase();
+      if (targetContract !== USDC_ADDRESS.toLowerCase()) {
+        return { valid: false, reason: `Memo target contract is not USDC. Expected ${USDC_ADDRESS}, got ${targetContract}` };
+      }
+
+      // Inner data starts at Word 5 (byte offset 5 * 32 = 160 bytes -> char offset 8 + 5 * 64 = 328)
+      // Length is 68 bytes (136 hex chars)
+      const innerData = "0x" + cleanInput.substring(8 + 5 * 64, 8 + 5 * 64 + 136);
+      transfer = parseTransferTx(innerData);
+    } else {
+      return { valid: false, reason: `Recipient contract (${tx.to}) is neither USDC nor the Memo contract.` };
+    }
+
     if (!transfer) {
-      return { valid: false, reason: "Not a standard ERC-20 transfer transaction." };
+      return { valid: false, reason: "Not a standard ERC-20 transfer transaction payload." };
     }
 
     if (transfer.recipient !== expectedRecipient.toLowerCase()) {
@@ -82,10 +103,61 @@ async function verifyOnChainPayment(txHash, expectedAmount, expectedRecipient) {
   }
 }
 
+async function verifyAgentIdentity(agentId, userWallet) {
+  try {
+    const IDENTITY_REGISTRY = "0x8004A818BFB912233c491871b3d84c89A494BD9e";
+    const arg = BigInt(agentId).toString(16).padStart(64, "0");
+    const data = "0x00339509" + arg;
+
+    const res = await fetch(ARC_RPC, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "eth_call",
+        params: [{ to: IDENTITY_REGISTRY, data }, "latest"]
+      })
+    });
+    const json = await res.json();
+    if (json.error || !json.result || json.result === "0x") {
+      return { valid: false, reason: "Agent ID not found in ERC-8004 registry." };
+    }
+
+    const registeredWallet = "0x" + json.result.slice(-40).toLowerCase();
+    if (registeredWallet !== userWallet.toLowerCase()) {
+      return {
+        valid: false,
+        reason: `Wallet mismatch on-chain. Registry has ${registeredWallet}, request has ${userWallet.toLowerCase()}`
+      };
+    }
+
+    return { valid: true };
+  } catch (err) {
+    return { valid: false, reason: "Identity verification failed: " + err.message };
+  }
+}
+
+function screenWalletAddress(wallet, headers) {
+  const simulateRiskHeader = headers["x-compliance-simulate-risk"] || headers["X-Compliance-Simulate-Risk"];
+  const blockedWallet = "0x1111111111111111111111111111111111111111";
+
+  if (wallet.toLowerCase() === blockedWallet.toLowerCase() || simulateRiskHeader === "high") {
+    return {
+      passed: false,
+      riskScore: 98,
+      riskCategory: "Severe / Direct AML Risk",
+      vendor: "TRM Labs / Elliptic Simulation",
+      reason: "OFAC Sanctioned Entity / High-Risk Wallet Association detected."
+    };
+  }
+  return { passed: true, riskScore: 2, vendor: "TRM Labs / Elliptic Simulation" };
+}
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-USDC-Payment-Tx");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-USDC-Payment-Tx, X-Compliance-Simulate-Risk");
   res.setHeader("Access-Control-Expose-Headers", "X-USDC-Payment-Address, X-USDC-Amount, X-USDC-Chain-Id, X-USDC-Memo");
 
   if (req.method === "OPTIONS") return res.status(200).end();
@@ -95,9 +167,36 @@ export default async function handler(req, res) {
   }
 
   const {
-    items, userWallet: reqUserWallet, customerEmail, fulfillmentMethod = "delivery",
+    items, userWallet: reqUserWallet, customerEmail, agentId, fulfillmentMethod = "delivery",
     deliveryFullName, deliveryPhone, deliveryAddressLine, deliveryCity, deliveryState, deliveryNotes
   } = req.body;
+
+
+  // 1. Compliance Screening (TRM Labs / Elliptic Simulation)
+  if (reqUserWallet) {
+    const screening = screenWalletAddress(reqUserWallet, req.headers);
+    if (!screening.passed) {
+      return res.status(403).json({
+        error: "COMPLIANCE_BLOCKED",
+        message: `Transaction rejected by compliance: ${screening.reason}`,
+        riskScore: screening.riskScore,
+        riskCategory: screening.riskCategory
+      });
+    }
+  }
+
+  // 2. ERC-8004 Identity Verification (IdentityRegistry on Arc Testnet)
+  if (agentId !== undefined && agentId !== null && agentId !== "" && reqUserWallet) {
+    console.log(`[agent-checkout] Verifying agent identity on-chain for agentId ${agentId} and wallet ${reqUserWallet}...`);
+    const identityResult = await verifyAgentIdentity(agentId, reqUserWallet);
+    if (!identityResult.valid) {
+      return res.status(400).json({
+        error: "ERC8004_IDENTITY_MISMATCH",
+        message: `Agent identity verification failed: ${identityResult.reason}`
+      });
+    }
+    console.log(`[agent-checkout] Agent identity verified successfully!`);
+  }
 
   if (!items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: "Missing or invalid items array." });

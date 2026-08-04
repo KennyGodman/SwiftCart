@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import useAllowance from "./hooks/useAllowance";
@@ -1639,28 +1640,34 @@ Transaction Hash: ${data.txHash} ${data.jobId ? `(Escrow Job #${data.jobId})` : 
     }
     // Send all tools so the agent can execute any checkout, approval, or search action
     const availableTools = AGENT_TOOLS;
-    const res = await fetch("/api/agent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        tools: availableTools,
-        messages: apiMsgs,
-        allowance,
-        wallet,
-        cart: cartRef.current,
-        wishlist: ALL_PRODUCTS.filter(p => wishlistRef.current.includes(p.id)),
-        customerEmail,
-        fulfillmentMethod: localStorage.getItem("swiftcart_fulfillment_method") || localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod,
-        pickupLocation: localStorage.getItem("swiftcart_pickup_location") || localStorage.getItem("arcwear_pickup_location") || pickupLocation,
-        deliveryFullName: localStorage.getItem("swiftcart_delivery_fullname") || localStorage.getItem("arcwear_delivery_fullname") || deliveryFullName,
-        deliveryPhone: localStorage.getItem("swiftcart_delivery_phone") || localStorage.getItem("arcwear_delivery_phone") || deliveryPhone,
-        deliveryAddressLine: localStorage.getItem("swiftcart_delivery_address_line") || localStorage.getItem("arcwear_delivery_address_line") || deliveryAddressLine,
-        deliveryCity: localStorage.getItem("swiftcart_delivery_city") || localStorage.getItem("arcwear_delivery_city") || deliveryCity,
-        deliveryState: localStorage.getItem("swiftcart_delivery_state") || localStorage.getItem("arcwear_delivery_state") || deliveryState,
-        deliveryNotes: localStorage.getItem("swiftcart_delivery_notes") || localStorage.getItem("arcwear_delivery_notes") || deliveryNotes,
-        deliveryFee: (localStorage.getItem("swiftcart_fulfillment_method") || localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod) === "delivery" ? getDeliveryFee(localStorage.getItem("swiftcart_delivery_state") || localStorage.getItem("arcwear_delivery_state") || deliveryState) : 0
-      }),
-    });
+    let res;
+    try {
+      res = await fetch("/api/agent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tools: availableTools,
+          messages: apiMsgs,
+          allowance,
+          wallet,
+          cart: cartRef.current,
+          wishlist: ALL_PRODUCTS.filter(p => wishlistRef.current.includes(p.id)),
+          customerEmail,
+          fulfillmentMethod: localStorage.getItem("swiftcart_fulfillment_method") || localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod,
+          pickupLocation: localStorage.getItem("swiftcart_pickup_location") || localStorage.getItem("arcwear_pickup_location") || pickupLocation,
+          deliveryFullName: localStorage.getItem("swiftcart_delivery_fullname") || localStorage.getItem("arcwear_delivery_fullname") || deliveryFullName,
+          deliveryPhone: localStorage.getItem("swiftcart_delivery_phone") || localStorage.getItem("arcwear_delivery_phone") || deliveryPhone,
+          deliveryAddressLine: localStorage.getItem("swiftcart_delivery_address_line") || localStorage.getItem("arcwear_delivery_address_line") || deliveryAddressLine,
+          deliveryCity: localStorage.getItem("swiftcart_delivery_city") || localStorage.getItem("arcwear_delivery_city") || deliveryCity,
+          deliveryState: localStorage.getItem("swiftcart_delivery_state") || localStorage.getItem("arcwear_delivery_state") || deliveryState,
+          deliveryNotes: localStorage.getItem("swiftcart_delivery_notes") || localStorage.getItem("arcwear_delivery_notes") || deliveryNotes,
+          deliveryFee: (localStorage.getItem("swiftcart_fulfillment_method") || localStorage.getItem("arcwear_fulfillment_method") || fulfillmentMethod) === "delivery" ? getDeliveryFee(localStorage.getItem("swiftcart_delivery_state") || localStorage.getItem("arcwear_delivery_state") || deliveryState) : 0
+        }),
+      });
+    } catch (e) {
+      setTools([]);
+      return "Network connection issue or timeout. Please try again in a moment.";
+    }
 
     let data = {};
     try {
@@ -3884,16 +3891,7 @@ export default function SwiftCart() {
                 Connect Wallet
               </button>
             )}
-            {/* Agent Gateway Sandbox */}
-            <button
-              onClick={() => setSandboxOpen(true)}
-              className="desktop-only nav-action-btn"
-              style={{ background: "rgba(37,99,235,0.08)", color: "var(--color-brand)", border: "1px solid rgba(37,99,235,0.15)" }}
-              onMouseEnter={e => { e.currentTarget.style.background = "rgba(37,99,235,0.15)"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "rgba(37,99,235,0.08)"; }}
-            >
-              🤖 Agent Gateway
-            </button>
+
 
             {/* Wishlist button */}
             <button
@@ -4006,9 +4004,28 @@ export default function SwiftCart() {
                 <div style={{ width: 6, height: 6, background: "#10b981", borderRadius: "50%", animation: "pulse 2s infinite" }} aria-hidden="true" />
                 <span style={{ fontSize: 9, color: "var(--color-brand)", fontWeight: 700, letterSpacing: 2, textTransform: "uppercase" }}>AI Agent · Live on Arc</span>
               </div>
-              <h1 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(26px,4vw,48px)", fontWeight: 700, color: "var(--color-ink)", lineHeight: 1.15, marginBottom: 10 }}>
+              <motion.h1
+                animate={{
+                  color: ["#2563eb", "#db2777", "#059669", "#7c3aed", "#2563eb"],
+                  y: [0, -6, 0, 6, 0],
+                  scale: [1, 1.02, 1, 0.98, 1]
+                }}
+                transition={{
+                  duration: 8,
+                  ease: "easeInOut",
+                  repeat: Infinity
+                }}
+                style={{
+                  fontFamily: "var(--font-serif)",
+                  fontSize: "clamp(26px,4vw,48px)",
+                  fontWeight: 700,
+                  lineHeight: 1.15,
+                  marginBottom: 10,
+                  cursor: "default"
+                }}
+              >
                 Shop with SwiftCart
-              </h1>
+              </motion.h1>
               <p style={{ fontSize: 13, color: "var(--color-ink-mid)", lineHeight: 1.65, marginBottom: 22 }}>
                 Why Shop When Agents Can? Pay with USDC on Arc
               </p>
@@ -4485,7 +4502,7 @@ export default function SwiftCart() {
           onDeleteOrder={handleDeleteOrder}
           onConfirmDelivery={handleConfirmDelivery}
         />
-      )}      {sandboxOpen && <AgentSandboxModal onClose={() => setSandboxOpen(false)} />}
+      )}
 
       <ToastContainer
         position="top-right"

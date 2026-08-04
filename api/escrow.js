@@ -290,6 +290,50 @@ async function pollForHash(txId, apiKey, maxAttempts = 30, intervalMs = 2000) {
   throw new Error(`Transaction polling timed out after ${(maxAttempts * intervalMs) / 1000}s`);
 }
 
+async function submitReputationFeedback(agentId, ratingValue, tag1, tag2, apiKey, entitySecret, walletId) {
+  const REPUTATION_REGISTRY = "0x8004B663056A597Dffe9eCcC1965A193B7388713";
+  const ciphertext = await buildCiphertext(apiKey, entitySecret);
+
+  // giveFeedback(uint256,int128,uint8,string,string,string,string)
+  const fnSignature = "giveFeedback(uint256,int128,uint8,string,string,string,string)";
+  const params = [
+    agentId.toString(),
+    ratingValue.toString(), // e.g. "1" or "-1"
+    "0", // decimals
+    tag1,
+    tag2,
+    "SwiftCart Store",
+    `https://swiftcart-shop.vercel.app/reputation/${agentId}`
+  ];
+
+  const res = await fetch(`${CIRCLE_BASE}/developer/transactions/contractExecution`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      idempotencyKey: crypto.randomUUID(),
+      entitySecretCiphertext: ciphertext,
+      walletId,
+      contractAddress: REPUTATION_REGISTRY,
+      abiFunctionSignature: fnSignature,
+      abiParameters: params,
+      feeLevel: "MEDIUM",
+    }),
+  });
+
+  const body = await res.json();
+  if (!res.ok) {
+    const msg = body.message || body.errors?.[0]?.message || `Circle API ${res.status}`;
+    throw new Error("Reputation writing failed: " + msg);
+  }
+
+  const txId = body.data?.id;
+  if (!txId) throw new Error("Circle returned no transaction ID for reputation feedback");
+  return txId;
+}
+
 // ── On-chain Read Helpers ──────────────────────────────────────────────────────
 
 /** Call a view function on Arc RPC */
@@ -565,7 +609,7 @@ export default async function handler(req, res) {
 
     // ── POST /api/escrow?action=complete — evaluator releases funds ────────
     if (action === "complete") {
-      const { jobId, reason } = req.body;
+      const { jobId, reason, agentId } = req.body;
       if (!jobId) return res.status(400).json({ error: "Required: jobId" });
 
       const reasonHex = reason
@@ -578,12 +622,26 @@ export default async function handler(req, res) {
         apiKey, entitySecret, walletId
       );
       const { txHash } = await pollForHash(txId, apiKey);
-      return res.status(200).json({ success: true, action: "complete", jobId, txHash });
+
+      let repTxHash = null;
+      if (agentId) {
+        try {
+          console.log(`[escrow] Writing positive reputation feedback for agent: ${agentId}`);
+          const repTxId = await submitReputationFeedback(agentId, 1, "Success", "DeliveryCompleted", apiKey, entitySecret, walletId);
+          const repResult = await pollForHash(repTxId, apiKey);
+          repTxHash = repResult.txHash;
+          console.log(`[escrow] Reputation feedback transaction hash: ${repTxHash}`);
+        } catch (repErr) {
+          console.error("[escrow] Failed to write reputation feedback:", repErr.message);
+        }
+      }
+
+      return res.status(200).json({ success: true, action: "complete", jobId, txHash, repTxHash });
     }
 
     // ── POST /api/escrow?action=reject — evaluator refunds buyer ──────────
     if (action === "reject") {
-      const { jobId, reason } = req.body;
+      const { jobId, reason, agentId } = req.body;
       if (!jobId) return res.status(400).json({ error: "Required: jobId" });
 
       const reasonHex = reason
@@ -596,7 +654,21 @@ export default async function handler(req, res) {
         apiKey, entitySecret, walletId
       );
       const { txHash } = await pollForHash(txId, apiKey);
-      return res.status(200).json({ success: true, action: "reject", jobId, txHash });
+
+      let repTxHash = null;
+      if (agentId) {
+        try {
+          console.log(`[escrow] Writing negative reputation feedback for agent: ${agentId}`);
+          const repTxId = await submitReputationFeedback(agentId, -1, "Failure", "RefundedDispute", apiKey, entitySecret, walletId);
+          const repResult = await pollForHash(repTxId, apiKey);
+          repTxHash = repResult.txHash;
+          console.log(`[escrow] Reputation feedback transaction hash: ${repTxHash}`);
+        } catch (repErr) {
+          console.error("[escrow] Failed to write reputation feedback:", repErr.message);
+        }
+      }
+
+      return res.status(200).json({ success: true, action: "reject", jobId, txHash, repTxHash });
     }
 
     return res.status(400).json({ error: `Unknown action: ${action}` });

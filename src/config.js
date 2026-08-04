@@ -11,7 +11,7 @@ export const MERCHANT_ADDR  = import.meta.env.VITE_MERCHANT_ADDRESS || "0xd51576
 
 // Circle Agent Wallet — receives ERC-20 approve() from users (legacy flow),
 // then calls transferFrom() server-side to execute autonomous purchases.
-export const AGENT_WALLET = "0x51894a584a1e186151b31b23ea3add16fce5ff56";
+export const AGENT_WALLET = "0x43537f71c44abc594963268c3d7c801bd50fd4fb";
 
 // Default spending cap for agent approval (in USDC)
 export const DEFAULT_AGENT_ALLOWANCE = 500;
