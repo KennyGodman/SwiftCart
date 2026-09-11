@@ -5,8 +5,9 @@ import useAllowance from "./hooks/useAllowance";
 import ApprovalModal from "./components/ApprovalModal";
 import ProductDetailPage from "./components/ProductDetailPage";
 import AgentSandboxModal from "./components/AgentSandboxModal";
+import AdvertFlashModal from "./components/AdvertFlashModal";
 import { encodeMemoUSDC } from "./utils";
-import { CATALOGUE, ALL_PRODUCTS } from "./catalogue";
+import { CATALOGUE, ALL_PRODUCTS, USDC_KITS } from "./catalogue";
 
 /* =========================================================
    SWIFTCART — Main Application
@@ -3055,6 +3056,33 @@ export default function SwiftCart() {
   const [walletDropdownOpen, setWalletDropdownOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [scrolled, setScrolled] = useState(false);
+  const [advertOpen, setAdvertOpen] = useState(false);
+  const [advertTickerDismissed, setAdvertTickerDismissed] = useState(false);
+
+  // Auto flash the advert briefly on initial store load
+  useEffect(() => {
+    try {
+      const dismissedTime = localStorage.getItem("arcwear_advert_dismissed");
+      // If not dismissed in the last 4 hours, auto open advert flash
+      if (!dismissedTime || Date.now() - Number(dismissedTime) > 4 * 60 * 60 * 1000) {
+        const timer = setTimeout(() => {
+          setAdvertOpen(true);
+        }, 1400);
+        return () => clearTimeout(timer);
+      }
+    } catch (e) {
+      console.warn("Storage access error:", e);
+    }
+  }, []);
+
+  const handleNavigateToKits = () => {
+    setSection("fashion");
+    setActiveCat("kits");
+    setTimeout(() => {
+      const el = document.getElementById("products");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
 
   const [editItem, setEditItem] = useState(null);
   const [approvalOpen, setApprovalOpen] = useState(false);
@@ -3701,6 +3729,65 @@ export default function SwiftCart() {
         </p>
       </div>
 
+      {/* ── ADVERT FLASH TICKER ── */}
+      {!advertTickerDismissed && (
+        <div
+          className="advert-flash-ticker"
+          onClick={() => setAdvertOpen(true)}
+          role="banner"
+          aria-label="Promotional Flash Advert"
+          title="Click to view USDC Kits advert"
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", gap: "10px", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ animation: "flashStrobe 0.8s infinite", fontSize: "14px" }}>⚡</span>
+              <span>
+                <strong>FLASH DROP:</strong> Official <strong>USDC by Circle Football Kits</strong> Available in Store!
+              </span>
+            </div>
+            <span style={{ fontSize: "11.5px", opacity: 0.9, display: "inline-block" }}>
+              Pay with USDC on Arc · Available via customisation options
+            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "4px" }}>
+              <span
+                style={{
+                  background: "rgba(255, 255, 255, 0.22)",
+                  border: "1px solid rgba(255, 255, 255, 0.35)",
+                  borderRadius: "20px",
+                  padding: "2px 10px",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px"
+                }}
+              >
+                View Advert Drop ↗
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setAdvertTickerDismissed(true);
+                }}
+                aria-label="Dismiss top ticker"
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#cbd5e1",
+                  fontSize: "13px",
+                  cursor: "pointer",
+                  padding: "0 4px",
+                  lineHeight: 1
+                }}
+                title="Dismiss ticker"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── NAVBAR ── */}
       <nav
         aria-label="Main navigation"
@@ -4037,6 +4124,26 @@ export default function SwiftCart() {
                 >
                   Browse ↓
                 </button>
+                <button
+                  onClick={() => setAdvertOpen(true)}
+                  style={{
+                    background: "linear-gradient(135deg, #0f172a, #1e3a8a)",
+                    color: "#38bdf8",
+                    border: "1.5px solid #38bdf8",
+                    borderRadius: 10,
+                    padding: "11px 20px",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 7,
+                    boxShadow: "0 6px 20px rgba(56,189,248,0.25)"
+                  }}
+                >
+                  <span style={{ animation: "flashStrobe 1s infinite" }}>⚡</span>
+                  Flash Advert: USDC Kits Drop
+                </button>
               </div>
 
               {/* Prominent Search Bar */}
@@ -4210,7 +4317,21 @@ export default function SwiftCart() {
           </div>
         ) : displayCats.map(([catKey, cat]) => {
           if (section === "fashion") {
-            const groups = [
+            const isKitsCat = catKey === "kits";
+            const groups = isKitsCat ? [
+              {
+                id: "men",
+                label: "Men's Official Matchday Kits",
+                emoji: "⚽",
+                items: cat.items.filter(item => item.id.startsWith("m-")),
+              },
+              {
+                id: "kids",
+                label: "Kids' & Youth Official Kit",
+                emoji: "🧸",
+                items: cat.items.filter(item => item.id.startsWith("k-")),
+              },
+            ].filter(g => g.items.length > 0) : [
               {
                 id: "men",
                 label: "Men's Collection",
@@ -4381,6 +4502,24 @@ export default function SwiftCart() {
       </nav>
 
       {/* ── OVERLAYS & PANELS ── */}
+      <AdvertFlashModal
+        isOpen={advertOpen}
+        onClose={() => setAdvertOpen(false)}
+        kits={USDC_KITS}
+        onAddToCart={(kit) => {
+          addToCart(kit);
+          addToast(`${kit.name} added to cart!`, "success");
+        }}
+        onViewDetail={(kit) => {
+          setAdvertOpen(false);
+          setDetailItem({
+            ...kit,
+            categoryLabel: "USDC Football Kits",
+            sectionLabel: "Fashion"
+          });
+        }}
+        onNavigateToKits={handleNavigateToKits}
+      />
       {detailItem && (
         <ProductDetailPage
           item={detailItem}
@@ -4493,6 +4632,30 @@ export default function SwiftCart() {
           onConfirmDelivery={handleConfirmDelivery}
         />
       )}
+
+      {/* ── FLOATING ADVERT FLASH PILL ── */}
+      <button
+        className="advert-floating-pill"
+        onClick={() => setAdvertOpen(true)}
+        aria-label="View USDC Kits Flash Advert"
+        title="View USDC Kits Flash Advert"
+      >
+        <span style={{ animation: "flashStrobe 1s infinite", fontSize: "16px" }}>⚡</span>
+        <span style={{ letterSpacing: "0.3px" }}>USDC Kits In Store</span>
+        <span
+          style={{
+            background: "#38bdf8",
+            color: "#0f172a",
+            fontSize: "10px",
+            fontWeight: 800,
+            padding: "2px 7px",
+            borderRadius: "10px",
+            marginLeft: "2px"
+          }}
+        >
+          DROP
+        </span>
+      </button>
 
       <ToastContainer
         position="top-right"

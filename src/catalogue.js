@@ -3,6 +3,56 @@ export const CATALOGUE = {
     "label": "Fashion",
     "icon": "👗",
     "categories": {
+      "kits": {
+        "label": "USDC Football Kits",
+        "emoji": "⚽",
+        "items": [
+          {
+            "id": "m-kit-blue",
+            "name": "USDC by Circle Home Kit 2026/27",
+            "price": 85,
+            "oldPrice": 110,
+            "desc": "Men · Royal Blue Matchday Edition with Official USDC by Circle Sponsor & Club Crest",
+            "img": "/kits/usdc-kit-blue.png",
+            "badge": "Official Drop",
+            "availableCustomisation": "USDC by Circle available via the customisation options",
+            "isKit": true
+          },
+          {
+            "id": "m-kit-white",
+            "name": "USDC by Circle Away Kit 2026/27",
+            "price": 85,
+            "oldPrice": 110,
+            "desc": "Men · Crisp White with Red Pinstripes & Official USDC by Circle Chest Sponsor",
+            "img": "/kits/usdc-kit-white.png",
+            "badge": "Official Drop",
+            "availableCustomisation": "USDC by Circle available via the customisation options",
+            "isKit": true
+          },
+          {
+            "id": "m-kit-black",
+            "name": "USDC by Circle Stealth Third Kit",
+            "price": 89,
+            "oldPrice": 115,
+            "desc": "Men · Stealth Black & Gold Luxury Edition featuring USDC by Circle Front Emblem",
+            "img": "/kits/usdc-kit-black.png",
+            "badge": "Limited Edition",
+            "availableCustomisation": "USDC by Circle available via the customisation options",
+            "isKit": true
+          },
+          {
+            "id": "k-kit-kids",
+            "name": "USDC by Circle Junior & Youth Kit",
+            "price": 65,
+            "oldPrice": 85,
+            "desc": "Kids · Official Matchday Youth Replica Jersey with USDC by Circle Sponsor",
+            "img": "/kits/usdc-kit-kids.png",
+            "badge": "Youth Edition",
+            "availableCustomisation": "USDC by Circle available via the customisation options",
+            "isKit": true
+          }
+        ]
+      },
       "shirts": {
         "label": "Shirts & Tops",
         "emoji": "👕",
@@ -2133,3 +2183,7 @@ for (const [sk, sec] of Object.entries(CATALOGUE)) {
     }
   }
 }
+
+// Special export for USDC Football Kits promotion
+export const USDC_KITS = CATALOGUE.fashion.categories.kits ? CATALOGUE.fashion.categories.kits.items : [];
+

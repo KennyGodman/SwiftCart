@@ -85,6 +85,9 @@ function StarRating({ rating, count }) {
 export default function ProductDetailPage({ item, allProducts, onClose, onAdd, onEdit, wishlist = [], onToggleWishlist }) {
   const [selectedSize, setSelectedSize] = useState("M");
   const [selectedColor, setSelectedColor] = useState("Default");
+  const [customName, setCustomName] = useState("");
+  const [customNumber, setCustomNumber] = useState("");
+  const [includeSponsorPatch, setIncludeSponsorPatch] = useState(true);
   const [qty, setQty] = useState(1);
   const isWishlisted = wishlist.includes(item.id);
   const [added, setAdded] = useState(false);
@@ -95,6 +98,8 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
   const { count: reviewCount, rating } = fakeReviews(item.id);
   const pct = disc(item.price, item.oldPrice);
   const savings = (item.oldPrice - item.price).toFixed(2);
+
+  const isKitItem = Boolean(item.isKit || item.category === "kits" || item.availableCustomisation || item.id?.includes("kit"));
 
   // Related products — same category, different item
   const related = allProducts
@@ -118,7 +123,15 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
   const handleAdd = () => {
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
-    onAdd({ ...item, qty, size: selectedSize, color: selectedColor });
+    onAdd({
+      ...item,
+      qty,
+      size: selectedSize,
+      color: selectedColor,
+      customName: customName.trim() || undefined,
+      customNumber: customNumber.trim() || undefined,
+      includeSponsorPatch
+    });
   };
 
   const categoryKey = item.category || "shirts";
@@ -349,6 +362,81 @@ export default function ProductDetailPage({ item, allProducts, onClose, onAdd, o
             <p style={{ fontSize: 15, color: "#475569", lineHeight: 1.7, marginBottom: 22 }}>
               {item.desc} — crafted for everyday elegance and lasting comfort. Part of our curated {item.sectionLabel} collection.
             </p>
+
+            {/* USDC Kit Customisation Callout */}
+            {isKitItem && (
+              <div style={{
+                background: "linear-gradient(135deg, rgba(37,99,235,0.06), rgba(56,189,248,0.12))",
+                border: "1.5px solid rgba(59,130,246,0.3)",
+                borderRadius: 12,
+                padding: "14px 16px",
+                marginBottom: 22,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                  <span style={{ fontSize: 20 }}>⚽</span>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#1e3a8a", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      Official Matchday Kit Edition
+                    </h4>
+                    <span style={{ fontSize: 12, color: "#2563eb", fontWeight: 600 }}>
+                      USDC by Circle available via the customisation options
+                    </span>
+                  </div>
+                </div>
+
+                {/* Customisation inputs */}
+                <div style={{ borderTop: "1px dashed rgba(59,130,246,0.25)", paddingTop: 10, marginTop: 8 }}>
+                  <span style={{ fontSize: 11.5, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: 0.5, display: "block", marginBottom: 8 }}>
+                    Jersey Customisation (Optional)
+                  </span>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 100px", gap: 8, marginBottom: 10 }}>
+                    <input
+                      type="text"
+                      placeholder="Player Name (e.g. PALMER)"
+                      value={customName}
+                      onChange={(e) => setCustomName(e.target.value.toUpperCase())}
+                      maxLength={14}
+                      style={{
+                        padding: "8px 12px",
+                        border: "1px solid #cbd5e1",
+                        borderRadius: 8,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        background: "#fff",
+                        color: "#0f172a",
+                        textTransform: "uppercase"
+                      }}
+                    />
+                    <input
+                      type="number"
+                      placeholder="No. (e.g. 10)"
+                      value={customNumber}
+                      onChange={(e) => setCustomNumber(e.target.value)}
+                      max={99}
+                      min={1}
+                      style={{
+                        padding: "8px 10px",
+                        border: "1px solid #cbd5e1",
+                        borderRadius: 8,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        background: "#fff",
+                        color: "#0f172a"
+                      }}
+                    />
+                  </div>
+                  <label style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 11.5, color: "#334155", cursor: "pointer", fontWeight: 500 }}>
+                    <input
+                      type="checkbox"
+                      checked={includeSponsorPatch}
+                      onChange={(e) => setIncludeSponsorPatch(e.target.checked)}
+                      style={{ accentColor: "#2563eb" }}
+                    />
+                    <span>Include official <strong>USDC by Circle</strong> chest emblem (Included Free)</span>
+                  </label>
+                </div>
+              </div>
+            )}
 
             {/* Size Selector */}
             {(item.section === "fashion" || item.sectionLabel === "Fashion") && (
