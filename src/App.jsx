@@ -3735,14 +3735,14 @@ export default function SwiftCart() {
           className="advert-flash-ticker"
           onClick={() => setAdvertOpen(true)}
           role="banner"
-          aria-label="Promotional Flash Advert"
-          title="Click to view USDC Kits advert"
+          aria-label="Official USDC Football Kits Drop"
+          title="Click to view USDC Kits drop"
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", gap: "10px", flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <span style={{ animation: "flashStrobe 0.8s infinite", fontSize: "14px" }}>⚡</span>
               <span>
-                <strong>FLASH DROP:</strong> Official <strong>USDC by Circle Football Kits</strong> Available in Store!
+                <strong>EXCLUSIVE DROP:</strong> Official <strong>USDC by Circle Football Kits</strong> Available in Store!
               </span>
             </div>
             <span style={{ fontSize: "11.5px", opacity: 0.9, display: "inline-block" }}>
@@ -3762,7 +3762,7 @@ export default function SwiftCart() {
                   gap: "4px"
                 }}
               >
-                View Advert Drop ↗
+                View Kit Drop ↗
               </span>
               <button
                 onClick={(e) => {
@@ -4142,7 +4142,7 @@ export default function SwiftCart() {
                   }}
                 >
                   <span style={{ animation: "flashStrobe 1s infinite" }}>⚡</span>
-                  Flash Advert: USDC Kits Drop
+                  Official USDC Kits Drop
                 </button>
               </div>
 
@@ -4637,8 +4637,8 @@ export default function SwiftCart() {
       <button
         className="advert-floating-pill"
         onClick={() => setAdvertOpen(true)}
-        aria-label="View USDC Kits Flash Advert"
-        title="View USDC Kits Flash Advert"
+        aria-label="View USDC Kits Drop"
+        title="View USDC Kits Drop"
       >
         <span style={{ animation: "flashStrobe 1s infinite", fontSize: "16px" }}>⚡</span>
         <span style={{ letterSpacing: "0.3px" }}>USDC Kits In Store</span>

@@ -148,7 +148,7 @@ export default function AdvertFlashModal({
                   color: "#93c5fd",
                 }}
               >
-                ⚡ Flash Advert · Limited Drop
+                ⚡ Limited Drop · Official Release
               </span>
             </div>
             <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 500 }}>
@@ -158,7 +158,7 @@ export default function AdvertFlashModal({
 
           <button
             onClick={handleClose}
-            aria-label="Close Flash Advert"
+            aria-label="Close modal"
             style={{
               background: "rgba(255, 255, 255, 0.08)",
               border: "1px solid rgba(255, 255, 255, 0.15)",
@@ -677,7 +677,7 @@ export default function AdvertFlashModal({
               onChange={(e) => setDontShowAgain(e.target.checked)}
               style={{ cursor: "pointer", accentColor: "#2563eb" }}
             />
-            <span>Don't show this advert again today</span>
+            <span>Don't show this again today</span>
           </label>
 
           <span style={{ color: "#38bdf8", fontWeight: 600 }}>
